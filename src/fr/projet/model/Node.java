@@ -7,12 +7,13 @@ public class Node {
     private int maxCapacity;
     private List<Agent> agents;
     private boolean blocked;
+
+    public Node(int id) {
+        this.id = id;
+    }	
 	
-	
-	
-	
-	
-	
-	//TO DO
+	public int getId(){
+        return this.id;
+    }
 
 }
