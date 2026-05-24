@@ -52,5 +52,13 @@ public class Main {
         }
 
         System.out.println();
+        
+        System.out.println("Nombre de voisins de A avant suppression : "
+                + graph.getNeighbors(A).size());
+
+        graph.removeNode(B);
+
+        System.out.println("Nombre de voisins de A après suppression : "
+                + graph.getNeighbors(A).size());
     }
 }
