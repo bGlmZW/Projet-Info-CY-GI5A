@@ -2,6 +2,8 @@ package fr.projet;
 
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
+import fr.projet.simulation.SimulationEngine;
+
 import java.util.*;
 
 public class Main {
@@ -60,5 +62,33 @@ public class Main {
 
         System.out.println("Nombre de voisins de A après suppression : "
                 + graph.getNeighbors(A).size());
+        
+        Graph graph2 = new Graph();
+
+        SimulationEngine engine = new SimulationEngine(graph2);
+        Agent agent = new Agent(
+                1,      // id
+                1.0,    // speed
+                A,      // position actuelle
+                B       // destination
+        );
+        engine.addAgent(agent);
+	
+		System.out.println("Tick actuel : " + engine.getCurrentTick());
+		System.out.println("Nombre d'agents : " + engine.getAgents().size());
+		System.out.println("Position agent : N" +
+		        agent.getCurrentPosition().getId());
+		System.out.println("Destination agent : N" +
+		        agent.getDestination().getId());
+		
+		System.out.println();
+		
+		SimulationEngine engine2 = new SimulationEngine(graph);
+
+		engine2.addAgent(agent);
+
+		engine2.tick();
+		engine2.tick();
+		engine2.tick();
     }
 }
