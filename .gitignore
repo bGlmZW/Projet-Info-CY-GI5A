@@ -1,3 +1,12 @@
 .dist/
-.vscode/
 .git/
+
+# compiled output — never commit
+bin/
+bin_test/
+out/
+
+# internal project notes — keep local only
+CLAUDE.md
+PROGRESS.md
+src/fr/projet/TestRun.java

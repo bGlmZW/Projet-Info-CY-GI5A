@@ -1,0 +1,14 @@
+{
+    // ─────────────────────────────────────────────────────────────────────────
+    // JavaFX referenced libraries.
+    // Change the path below to wherever YOU extracted the JavaFX SDK.
+    // Example paths:
+    //   Windows : "C:/Users/amazi/OneDrive/Desktop/javafx-sdk-26.0.1/lib/**/*.jar"
+    //   macOS   : "/Users/yourname/javafx-sdk-21/lib/**/*.jar"
+    // ─────────────────────────────────────────────────────────────────────────
+    "java.project.referencedLibraries": [
+        "C:/Users/amazi/OneDrive/Desktop/javafx-sdk-26.0.1/lib/**/*.jar"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.debug.settings.onBuildFailureProceed": true
+}

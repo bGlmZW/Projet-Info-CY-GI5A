@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run LifeLine",
+            "request": "launch",
+            "mainClass": "fr.projet.Main",
+            "projectName": "ProjetGenieLogiciel",
+            // ─────────────────────────────────────────────────────────────────
+            // Change the paths below to match where YOU extracted the JavaFX SDK
+            // and where VS Code outputs compiled classes.
+            // ─────────────────────────────────────────────────────────────────
+            "modulePaths": [
+                "C:/Users/amazi/OneDrive/Desktop/javafx-sdk-26.0.1/lib"
+            ],
+            "classPaths": [
+                "${workspaceFolder}/bin"
+            ],
+            "vmArgs": "--add-modules javafx.controls,javafx.graphics"
+        }
+    ]
+}
