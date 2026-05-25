@@ -105,17 +105,11 @@ public class Agent {
      */
     public double getVisualX() {
         if (currentEdge == null) return currentPosition.getX();
-        Node src = currentEdge.getSource();
-        Node dst = currentEdge.getDestination();
-        // For bidirectional edges, direction depends on which way agent is going
-        if (currentEdge.getSource() == currentPosition
-                || (!currentEdge.isOriented() && currentEdge.getDestination() == currentPosition)) {
-            Node from = currentPosition;
-            Node to   = (from == currentEdge.getSource())
-                        ? currentEdge.getDestination() : currentEdge.getSource();
-            return from.getX() + (to.getX() - from.getX()) * edgeProgress;
-        }
-        return src.getX() + (dst.getX() - src.getX()) * edgeProgress;
+        // currentPosition is the departure node; interpolate toward the other end
+        Node from = currentPosition;
+        Node to   = (from == currentEdge.getSource())
+                    ? currentEdge.getDestination() : currentEdge.getSource();
+        return from.getX() + (to.getX() - from.getX()) * edgeProgress;
     }
 
     /**
@@ -125,16 +119,11 @@ public class Agent {
      */
     public double getVisualY() {
         if (currentEdge == null) return currentPosition.getY();
-        Node src = currentEdge.getSource();
-        Node dst = currentEdge.getDestination();
-        if (currentEdge.getSource() == currentPosition
-                || (!currentEdge.isOriented() && currentEdge.getDestination() == currentPosition)) {
-            Node from = currentPosition;
-            Node to   = (from == currentEdge.getSource())
-                        ? currentEdge.getDestination() : currentEdge.getSource();
-            return from.getY() + (to.getY() - from.getY()) * edgeProgress;
-        }
-        return src.getY() + (dst.getY() - src.getY()) * edgeProgress;
+        // currentPosition is the departure node; interpolate toward the other end
+        Node from = currentPosition;
+        Node to   = (from == currentEdge.getSource())
+                    ? currentEdge.getDestination() : currentEdge.getSource();
+        return from.getY() + (to.getY() - from.getY()) * edgeProgress;
     }
 
     // -------------------------------------------------------------------------

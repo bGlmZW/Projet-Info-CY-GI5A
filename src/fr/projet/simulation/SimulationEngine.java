@@ -159,11 +159,13 @@ public class SimulationEngine {
             return;
         }
 
-        // PRIORITY agents skip the full check; YIELDING agents only enter if edge is empty
+        // PRIORITY agents can squeeze into a full edge (one extra slot).
+        // YIELDING agents only enter if the edge is completely empty.
+        // CALM agents follow normal capacity rules.
         boolean canEnter;
         switch (agent.getBehavior()) {
             case PRIORITY:
-                canEnter = !edge.isFull() || edge.getAgents().size() < edge.getCapacity() + 1;
+                canEnter = edge.getAgents().size() <= edge.getCapacity();
                 break;
             case YIELDING:
                 canEnter = edge.getAgents().isEmpty();
@@ -177,9 +179,15 @@ public class SimulationEngine {
             return;
         }
 
-        // Enter the edge
+        // Enter the edge — remove from node first, then attempt to join edge.
+        // If edge.addAgent() rejects (e.g. capacity race), roll back to node.
         current.removeAgent(agent);
-        edge.addAgent(agent);
+        if (!edge.addAgent(agent)) {
+            // Roll back: put the agent back on its node and wait next tick
+            current.addAgent(agent);
+            agent.setState(State.WAITING);
+            return;
+        }
         agent.setCurrentEdge(edge);
         agent.setEdgeProgress(0.0);
         agent.setCurrentPosition(current); // remember departure node

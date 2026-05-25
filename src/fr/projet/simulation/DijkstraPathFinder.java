@@ -29,35 +29,7 @@ public class DijkstraPathFinder implements PathFinder {
         if (source == null || destination == null) return Collections.emptyList();
         if (source == destination) return Collections.singletonList(source);
 
-        // dist[node] = best known cost from source
-        Map<Node, Double> dist = new HashMap<>();
-        // prev[node] = predecessor on the best path
-        Map<Node, Node> prev = new HashMap<>();
-
-        // Priority queue ordered by cost (node, cost)
-        PriorityQueue<double[]> pq = new PriorityQueue<>(
-                Comparator.comparingDouble(a -> a[1]));
-
-        // Initialise: all nodes at infinity
-        for (Node n : graph.getNodes()) {
-            dist.put(n, Double.MAX_VALUE);
-        }
-        dist.put(source, 0.0);
-        // Store node index for PQ: [nodeHashCode, cost] — use identity map instead
-        Map<Node, double[]> pqEntries = new HashMap<>();
-        double[] srcEntry = new double[]{System.identityHashCode(source), 0.0};
-        pqEntries.put(source, srcEntry);
-        pq.add(new double[]{System.identityHashCode(source), 0.0});
-
-        // We use a visited set to skip stale PQ entries
-        Set<Node> visited = new HashSet<>();
-        // Map identity hash → Node for PQ extraction
-        Map<Integer, Node> hashToNode = new HashMap<>();
-        for (Node n : graph.getNodes()) {
-            hashToNode.put(System.identityHashCode(n), n);
-        }
-
-        // Simpler approach: store node index in a separate list
+        // Index nodes for array-based Dijkstra (faster than Map lookups)
         List<Node> nodeList = new ArrayList<>(graph.getNodes());
         Map<Node, Integer> nodeIndex = new HashMap<>();
         for (int i = 0; i < nodeList.size(); i++) nodeIndex.put(nodeList.get(i), i);
