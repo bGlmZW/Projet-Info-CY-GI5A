@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.projet.model.*;
+import fr.projet.pathfinding.*;
+
 
 /**
  * Manages the execution of the simulation.
@@ -20,14 +22,17 @@ public class SimulationEngine {
 
     /** Current simulation tick */
     private long currentTick;
+    
+    private PathFinder pathFinder;
 
     /**
      * Creates a new simulation engine.
      *
      * @param graph graph used during the simulation
      */
-    public SimulationEngine(Graph graph) {
+    public SimulationEngine(Graph graph, PathFinder pathFinder) {
         this.graph = graph;
+        this.pathFinder = pathFinder;
         this.agents = new ArrayList<>();
         this.currentTick = 0;
     }
@@ -78,24 +83,86 @@ public class SimulationEngine {
     }
 
     /**
-     * Updates the state of a single agent.
-     * This is a temporary MVP implementation and will
-     * later contain the complete movement logic.
+     * Moves the agent along the shortest path toward its destination.
+     * The agent progresses on the current edge according to its speed.
+     * When the edge is fully traversed, the agent moves to the next node.
+     *
+     * @param agent the agent to move
+     */
+    public void moveAgent(Agent agent) {
+
+        // Already at destination
+        if (agent.getCurrentPosition().equals(agent.getDestination())) {
+            return;
+        }
+
+        List<Node> path =
+                pathFinder.findPath(
+                        agent.getCurrentPosition(),
+                        agent.getDestination());
+
+        // No path found
+        if (path == null || path.size() < 2) {
+            return;
+        }
+
+        // Next node on the shortest path
+        Node nextNode = path.get(1);
+        agent.setNextNode(nextNode);
+
+        // Find corresponding edge
+        Edge currentEdge = null;
+
+        for (Edge edge : graph.getEdges(agent.getCurrentPosition())) {
+            if (edge.getDestination().equals(nextNode)) {
+                currentEdge = edge;
+                break;
+            }
+        }
+
+        if (currentEdge == null) {
+            return;
+        }
+
+        // Progress on edge
+        agent.setProgressOnEdge(
+                agent.getProgressOnEdge()
+                        + agent.getSpeed());
+
+        // Arrived at next node
+        if (agent.getProgressOnEdge() >= currentEdge.getDistance()) {
+
+            agent.setCurrentPosition(nextNode);
+
+            agent.setProgressOnEdge(0.0);
+
+            if (nextNode.equals(agent.getDestination())) {
+                agent.setState(State.ARRIVED);
+            }
+        }
+    }
+    
+    /**
+     * Updates a single agent for one simulation tick.
      *
      * @param agent agent to update
      */
     private void updateAgent(Agent agent) {
 
         if (agent.getCurrentPosition().equals(agent.getDestination())) {
+            agent.setState(State.ARRIVED);
             return;
         }
 
-        agent.setState(State.MOVING);
+        moveAgent(agent);
+
+        if (!agent.getCurrentPosition().equals(agent.getDestination())) {
+            agent.setState(State.MOVING);
+        }
     }
 
     /**
      * Advances the simulation by one tick.
-     * Each agent is updated once per tick.
      */
     public void tick() {
 
@@ -104,15 +171,9 @@ public class SimulationEngine {
         System.out.println("Tick " + currentTick);
 
         for (Agent agent : agents) {
-
             updateAgent(agent);
-
-            System.out.println(
-                "Agent "
-                + agent.getId()
-                + " at node "
-                + agent.getCurrentPosition().getId()
-            );
+            System.out.println(agent);
         }
     }
+
 }

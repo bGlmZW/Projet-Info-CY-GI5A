@@ -6,32 +6,13 @@ import fr.projet.simulation.SimulationEngine;
 
 import java.util.List;
 
-/**
- * Demonstration class for the MVP.
- *
- * This class validates:
- * - Graph creation
- * - Node insertion
- * - Edge insertion
- * - Node removal
- * - Dijkstra shortest path computation
- * - Simulation engine creation
- * - Agent management
- * - Tick system execution
- */
 public class Main {
 
-	/**
-	 * Runs the MVP demonstration and validation tests.
-	 *
-	 * @param args command-line arguments
-	 */
-	
     public static void main(String[] args) {
 
-        System.out.println("=================================");
-        System.out.println("GRAPH CREATION TEST");
-        System.out.println("=================================");
+        // =====================================================
+        // GRAPH TEST
+        // =====================================================
 
         Graph graph = new Graph();
 
@@ -45,32 +26,20 @@ public class Main {
         graph.addNode(C);
         graph.addNode(D);
 
-        System.out.println("Nodes successfully added.");
-
-
-
-        System.out.println("\n=================================");
-        System.out.println("EDGE INSERTION TEST");
-        System.out.println("=================================");
-
         graph.addEdge(new Edge(A, B, 1));
         graph.addEdge(new Edge(B, C, 1));
         graph.addEdge(new Edge(A, C, 5));
         graph.addEdge(new Edge(C, D, 1));
 
-        System.out.println("Edges successfully added.");
-
-
-
-        System.out.println("\n=================================");
-        System.out.println("DIJKSTRA PATHFINDING TEST");
+        System.out.println("=================================");
+        System.out.println("DIJKSTRA TEST");
         System.out.println("=================================");
 
         PathFinder pathFinder = new DijkstraPathFinder(graph);
 
         List<Node> path = pathFinder.findPath(A, D);
 
-        System.out.print("Shortest path found: ");
+        System.out.print("Shortest path: ");
 
         for (int i = 0; i < path.size(); i++) {
 
@@ -83,69 +52,81 @@ public class Main {
 
         System.out.println();
 
+        // Expected:
+        // N1 -> N2 -> N3 -> N4
 
 
-        System.out.println("\n=================================");
-        System.out.println("SAFE NODE REMOVAL TEST");
+
+        // =====================================================
+        // NODE REMOVAL TEST
+        // =====================================================
+
+        System.out.println();
+        System.out.println("=================================");
+        System.out.println("NODE REMOVAL TEST");
         System.out.println("=================================");
 
-        System.out.println(
-                "Neighbors of A before removal: "
-                        + graph.getNeighbors(A).size());
+        System.out.println("Neighbors of A before removal: "
+                + graph.getNeighbors(A).size());
 
         graph.removeNode(B);
 
-        System.out.println(
-                "Neighbors of A after removal: "
-                        + graph.getNeighbors(A).size());
+        System.out.println("Neighbors of A after removal: "
+                + graph.getNeighbors(A).size());
 
 
 
-        System.out.println("\n=================================");
-        System.out.println("SIMULATION ENGINE TEST");
-        System.out.println("=================================");
+        // =====================================================
+        // AGENT MOVEMENT TEST
+        // IMPORTANT:
+        // Uses a fresh graph.
+        // =====================================================
 
-        SimulationEngine engine = new SimulationEngine(graph);
+        Graph movementGraph = new Graph();
+
+        Node A2 = new Node(1);
+        Node B2 = new Node(2);
+        Node C2 = new Node(3);
+        Node D2 = new Node(4);
+
+        movementGraph.addNode(A2);
+        movementGraph.addNode(B2);
+        movementGraph.addNode(C2);
+        movementGraph.addNode(D2);
+
+        movementGraph.addEdge(new Edge(A2, B2, 1));
+        movementGraph.addEdge(new Edge(B2, C2, 1));
+        movementGraph.addEdge(new Edge(C2, D2, 1));
+
+        PathFinder movementFinder =
+                new DijkstraPathFinder(movementGraph);
+
+        SimulationEngine engine =
+                new SimulationEngine(movementGraph, movementFinder);
 
         Agent agent = new Agent(
                 1,
                 1.0,
-                A,
-                D
+                A2,
+                D2
         );
 
         engine.addAgent(agent);
 
-        System.out.println(
-                "Current tick: "
-                        + engine.getCurrentTick());
-
-        System.out.println(
-                "Number of agents: "
-                        + engine.getAgents().size());
-
-        System.out.println(
-                "Agent position: N"
-                        + agent.getCurrentPosition().getId());
-
-        System.out.println(
-                "Agent destination: N"
-                        + agent.getDestination().getId());
-
-
-
-        System.out.println("\n=================================");
-        System.out.println("TICK SYSTEM TEST");
+        System.out.println();
+        System.out.println("=================================");
+        System.out.println("AGENT MOVEMENT TEST");
         System.out.println("=================================");
 
-        engine.tick();
-        engine.tick();
-        engine.tick();
+        for (int i = 0; i < 4; i++) {
+            engine.tick();
+        }
 
+        System.out.println();
+        System.out.println("Final position: N"
+                + agent.getCurrentPosition().getId());
 
-
-        System.out.println("\n=================================");
-        System.out.println("END OF MVP TESTS");
-        System.out.println("=================================");
+        System.out.println("Final state: "
+                + agent.getState());
     }
 }
