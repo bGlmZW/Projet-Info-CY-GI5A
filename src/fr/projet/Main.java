@@ -70,7 +70,7 @@ public class Main {
                 1,      // id
                 1.0,    // speed
                 A,      // position actuelle
-                B       // destination
+                D       // destination
         );
         engine.addAgent(agent);
 	
@@ -87,8 +87,11 @@ public class Main {
 
 		engine2.addAgent(agent);
 
-		engine2.tick();
-		engine2.tick();
-		engine2.tick();
+		engine2.tick(); // tick 1
+		engine2.tick(); // tick 2
+		engine2.tick(); // tick 3
+		engine2.tick(); // tick 4
+		engine2.tick(); // tick 5 → arrive en C
+		engine2.tick(); // tick 6 → arrive en D
     }
 }
