@@ -91,55 +91,48 @@ public class SimulationEngine {
      */
     public void moveAgent(Agent agent) {
 
-        // Already at destination
         if (agent.getCurrentPosition().equals(agent.getDestination())) {
+            agent.setState(State.ARRIVED);
             return;
         }
 
-        List<Node> path =
-                pathFinder.findPath(
-                        agent.getCurrentPosition(),
-                        agent.getDestination());
+        List<Node> path = pathFinder.findPath(
+                agent.getCurrentPosition(),
+                agent.getDestination()
+        );
 
-        // No path found
         if (path == null || path.size() < 2) {
             return;
         }
 
-        // Next node on the shortest path
         Node nextNode = path.get(1);
+
         agent.setNextNode(nextNode);
 
-        // Find corresponding edge
-        Edge currentEdge = null;
+        Edge edge = null;
 
-        for (Edge edge : graph.getEdges(agent.getCurrentPosition())) {
-            if (edge.getDestination().equals(nextNode)) {
-                currentEdge = edge;
+        for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+            if (e.getDestination().equals(nextNode)) {
+                edge = e;
                 break;
             }
         }
 
-        if (currentEdge == null) {
-            return;
-        }
+        if (edge == null) return;
 
-        // Progress on edge
-        agent.setProgressOnEdge(
-                agent.getProgressOnEdge()
-                        + agent.getSpeed());
+        // progression réelle
+        double progress = agent.getProgressOnEdge() + agent.getSpeed();
 
-        // Arrived at next node
-        if (agent.getProgressOnEdge() >= currentEdge.getDistance()) {
+        agent.setProgressOnEdge(progress);
+
+        // poids = temps nécessaire
+        if (progress >= edge.getDistance()) {
 
             agent.setCurrentPosition(nextNode);
-
             agent.setProgressOnEdge(0.0);
-
-            if (nextNode.equals(agent.getDestination())) {
-                agent.setState(State.ARRIVED);
-            }
         }
+
+        agent.setState(State.MOVING);
     }
     
     /**
