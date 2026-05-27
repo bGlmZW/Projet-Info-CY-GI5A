@@ -1,5 +1,6 @@
 package fr.projet.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,11 +23,15 @@ public class Node {
 
     /**
      * Creates a new node with a given identifier.
+     * The node is unblocked by default, with unlimited capacity and no agents.
      *
      * @param id unique identifier of the node
      */
     public Node(int id) {
         this.id = id;
+        this.maxCapacity = Integer.MAX_VALUE;
+        this.agents = new ArrayList<>();
+        this.blocked = false;
     }
 
     /**
@@ -36,5 +41,59 @@ public class Node {
      */
     public int getId() {
         return this.id;
+    }
+
+    /**
+     * Returns the maximum capacity of the node.
+     *
+     * @return maximum number of agents allowed
+     */
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    /**
+     * Sets the maximum capacity of the node.
+     *
+     * @param maxCapacity new maximum capacity
+     */
+    public void setMaxCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
+
+    /**
+     * Returns the list of agents currently on this node.
+     *
+     * @return list of agents
+     */
+    public List<Agent> getAgents() {
+        return agents;
+    }
+
+    /**
+     * Sets the list of agents currently on this node.
+     *
+     * @param agents new list of agents
+     */
+    public void setAgents(List<Agent> agents) {
+        this.agents = agents;
+    }
+
+    /**
+     * Returns whether the node is blocked.
+     *
+     * @return true if the node is not accessible
+     */
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    /**
+     * Sets whether the node is blocked.
+     *
+     * @param blocked true to block the node
+     */
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 }

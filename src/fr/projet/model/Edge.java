@@ -1,6 +1,7 @@
 package fr.projet.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Represents a directed or undirected connection between two nodes in the graph.
@@ -28,6 +29,7 @@ public class Edge {
 
     /**
      * Creates a new edge between two nodes.
+     * The edge is undirected by default, with unlimited capacity and no agents.
      *
      * @param source      starting node
      * @param destination ending node
@@ -37,6 +39,9 @@ public class Edge {
         this.source = source;
         this.destination = destination;
         this.distance = distance;
+        this.oriented = false;
+        this.capacity = Integer.MAX_VALUE;
+        this.agents = new ArrayList<>();
     }
 
     /**
@@ -49,12 +54,30 @@ public class Edge {
     }
 
     /**
-     * Returns the destionation node of the edge.
+     * Sets the source node of the edge.
+     *
+     * @param source new source node
+     */
+    public void setSource(Node source) {
+        this.source = source;
+    }
+
+    /**
+     * Returns the destination node of the edge.
      *
      * @return destination node
      */
     public Node getDestination() {
         return destination;
+    }
+
+    /**
+     * Sets the destination node of the edge.
+     *
+     * @param destination new destination node
+     */
+    public void setDestination(Node destination) {
+        this.destination = destination;
     }
 
     /**
@@ -64,5 +87,68 @@ public class Edge {
      */
     public double getDistance() {
         return distance;
+    }
+
+    /**
+     * Sets the distance of the edge.
+     *
+     * @param distance new distance value
+     */
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    /**
+     * Returns whether the edge is directed.
+     *
+     * @return true if the edge is oriented
+     */
+    public boolean isOriented() {
+        return oriented;
+    }
+
+    /**
+     * Sets whether the edge is directed.
+     *
+     * @param oriented true if the edge should be oriented
+     */
+    public void setOriented(boolean oriented) {
+        this.oriented = oriented;
+    }
+
+    /**
+     * Returns the maximum capacity of the edge.
+     *
+     * @return maximum number of agents allowed
+     */
+    public int getCapacity() {
+        return capacity;
+    }
+
+    /**
+     * Sets the maximum capacity of the edge.
+     *
+     * @param capacity new capacity value
+     */
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
+    /**
+     * Returns the list of agents currently on this edge.
+     *
+     * @return list of agents
+     */
+    public List<Agent> getAgents() {
+        return agents;
+    }
+
+    /**
+     * Sets the list of agents currently on this edge.
+     *
+     * @param agents new list of agents
+     */
+    public void setAgents(List<Agent> agents) {
+        this.agents = agents;
     }
 }
