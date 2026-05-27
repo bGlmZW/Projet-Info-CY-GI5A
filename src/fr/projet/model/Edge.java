@@ -151,4 +151,6 @@ public class Edge {
     public void setAgents(List<Agent> agents) {
         this.agents = agents;
     }
+    
+    
 }
