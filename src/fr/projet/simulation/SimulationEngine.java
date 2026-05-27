@@ -6,6 +6,7 @@ import java.util.List;
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
 
+
 /**
  * Manages the execution of the simulation.
  * The simulation engine maintains the graph, the agents,
@@ -21,14 +22,17 @@ public class SimulationEngine {
 
     /** Current simulation tick */
     private long currentTick;
+    
+    private PathFinder pathFinder;
 
     /**
      * Creates a new simulation engine.
      *
      * @param graph graph used during the simulation
      */
-    public SimulationEngine(Graph graph) {
+    public SimulationEngine(Graph graph, PathFinder pathFinder) {
         this.graph = graph;
+        this.pathFinder = pathFinder;
         this.agents = new ArrayList<>();
         this.currentTick = 0;
     }
@@ -77,7 +81,7 @@ public class SimulationEngine {
     public void removeAgent(Agent agent) {
         agents.remove(agent);
     }
-    
+
     /**
      * Moves the agent along the shortest path toward its destination.
      * The agent progresses on the current edge according to its speed.
@@ -86,67 +90,72 @@ public class SimulationEngine {
      * @param agent the agent to move
      */
     public void moveAgent(Agent agent) {
-        // Already at destination, nothing to do
+
         if (agent.getCurrentPosition().equals(agent.getDestination())) {
+            agent.setState(State.ARRIVED);
             return;
         }
 
-        PathFinder pathFinder = new DijkstraPathFinder(graph);
-        List<Node> path = pathFinder.findPath(agent.getCurrentPosition(), agent.getDestination());
+        List<Node> path = pathFinder.findPath(
+                agent.getCurrentPosition(),
+                agent.getDestination()
+        );
 
-        // No path found
         if (path == null || path.size() < 2) {
             return;
         }
 
-        // Next node to reach
         Node nextNode = path.get(1);
+
         agent.setNextNode(nextNode);
 
-        // Find the edge between current position and next node
-        Edge currentEdge = null;
-        for (Edge edge : graph.getEdges(agent.getCurrentPosition())) {
-            if (edge.getDestination().equals(nextNode)) {
-                currentEdge = edge;
+        Edge edge = null;
+
+        for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+            if (e.getDestination().equals(nextNode)) {
+                edge = e;
                 break;
             }
         }
 
-        if (currentEdge == null) {
-            return;
-        }
+        if (edge == null) return;
 
-        // Advance progress on the edge
-        agent.setProgressOnEdge(agent.getProgressOnEdge() + agent.getSpeed());
+        // progression réelle
+        double progress = agent.getProgressOnEdge() + agent.getSpeed();
 
-        // If progress reaches the edge distance, move to next node
-        if (agent.getProgressOnEdge() >= currentEdge.getDistance()) {
+        agent.setProgressOnEdge(progress);
+
+        // poids = temps nécessaire
+        if (progress >= edge.getDistance()) {
+
             agent.setCurrentPosition(nextNode);
             agent.setProgressOnEdge(0.0);
         }
+
+        agent.setState(State.MOVING);
     }
     
     /**
-     * Updates the state of a single agent.
-     * This is a temporary MVP implementation and will
-     * later contain the complete movement logic.
+     * Updates a single agent for one simulation tick.
      *
      * @param agent agent to update
      */
     private void updateAgent(Agent agent) {
 
         if (agent.getCurrentPosition().equals(agent.getDestination())) {
-        	agent.setState(State.ARRIVED);
+            agent.setState(State.ARRIVED);
             return;
         }
-   
+
         moveAgent(agent);
-        agent.setState(State.MOVING);
+
+        if (!agent.getCurrentPosition().equals(agent.getDestination())) {
+            agent.setState(State.MOVING);
+        }
     }
-    
+
     /**
      * Advances the simulation by one tick.
-     * Each agent is updated once per tick.
      */
     public void tick() {
 

@@ -4,14 +4,32 @@ import fr.projet.model.*;
 
 import java.util.*;
 
+/**
+ * Implementation of the PathFinder interface using Dijkstra's algorithm.
+ * Computes the shortest path between two nodes in a graph.
+ */
 public class DijkstraPathFinder implements PathFinder {
 
+    /** Graph used for path computation */
     private Graph graph;
 
+    /**
+     * Creates a new Dijkstra path finder operating on a graph.
+     *
+     * @param graph graph used for shortest path computation
+     */
     public DijkstraPathFinder(Graph graph) {
         this.graph = graph;
     }
 
+    /**
+     * Computes the shortest path between two nodes using Dijkstra's algorithm.
+     *
+     * @param start starting node
+     * @param destination target node
+     * @return ordered list of nodes representing the shortest path.
+     *         Returns an empty list if no path exists.
+     */
     @Override
     public List<Node> findPath(Node start, Node destination) {
 
@@ -19,17 +37,12 @@ public class DijkstraPathFinder implements PathFinder {
         Map<Node, Node> previous = new HashMap<>();
 
         PriorityQueue<Node> queue = new PriorityQueue<>(
-            Comparator.comparingDouble(n -> distances.getOrDefault(n, Double.POSITIVE_INFINITY))
+            Comparator.comparingDouble(
+                n -> distances.getOrDefault(n, Double.POSITIVE_INFINITY)
+            )
         );
 
-        // -------------------
-        // INITIALISATION
-        // -------------------
-        for (Node node : graph.getNeighbors(start)) {
-            // rien ici volontairement
-        }
-
-        // on initialise toutes les distances à +inf
+        // Initialize all distances to infinity
         for (Node node : getAllNodes()) {
             distances.put(node, Double.POSITIVE_INFINITY);
         }
@@ -37,9 +50,6 @@ public class DijkstraPathFinder implements PathFinder {
         distances.put(start, 0.0);
         queue.add(start);
 
-        // -------------------
-        // ALGO PRINCIPAL
-        // -------------------
         while (!queue.isEmpty()) {
 
             Node current = queue.poll();
@@ -52,9 +62,12 @@ public class DijkstraPathFinder implements PathFinder {
 
                 Node neighbor = edge.getDestination();
 
-                double newDist = distances.get(current) + edge.getDistance();
+                double newDist =
+                        distances.get(current) + edge.getDistance();
 
-                if (newDist < distances.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
+                if (newDist < distances.getOrDefault(
+                        neighbor,
+                        Double.POSITIVE_INFINITY)) {
 
                     distances.put(neighbor, newDist);
                     previous.put(neighbor, current);
@@ -65,15 +78,13 @@ public class DijkstraPathFinder implements PathFinder {
             }
         }
 
-        // -------------------
-        // RECONSTRUCTION CHEMIN
-        // -------------------
         List<Node> path = new ArrayList<>();
 
         Node step = destination;
 
-        if (!previous.containsKey(step) && !step.equals(start)) {
-            return path; // pas de chemin
+        if (!previous.containsKey(step)
+                && !step.equals(start)) {
+            return path;
         }
 
         while (step != null) {
@@ -86,9 +97,11 @@ public class DijkstraPathFinder implements PathFinder {
         return path;
     }
 
-    // -------------------
-    // HELPER LOCAL (MVP)
-    // -------------------
+    /**
+     * Returns all nodes contained in the graph.
+     *
+     * @return set of graph nodes
+     */
     private Set<Node> getAllNodes() {
         return graph.getAllNodes();
     }

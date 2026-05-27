@@ -4,15 +4,16 @@ import fr.projet.model.*;
 import fr.projet.pathfinding.*;
 import fr.projet.simulation.SimulationEngine;
 
-import java.util.*;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        // -------------------
-        // 1. Création graphe
-        // -------------------
+        // =====================================================
+        // GRAPH TEST
+        // =====================================================
+
         Graph graph = new Graph();
 
         Node A = new Node(1);
@@ -25,27 +26,23 @@ public class Main {
         graph.addNode(C);
         graph.addNode(D);
 
-        // -------------------
-        // 2. Ajout des arêtes
-        // -------------------
         graph.addEdge(new Edge(A, B, 1));
         graph.addEdge(new Edge(B, C, 1));
         graph.addEdge(new Edge(A, C, 5));
         graph.addEdge(new Edge(C, D, 1));
 
-        // -------------------
-        // 3. Pathfinding
-        // -------------------
+        System.out.println("=================================");
+        System.out.println("DIJKSTRA TEST");
+        System.out.println("=================================");
+
         PathFinder pathFinder = new DijkstraPathFinder(graph);
 
         List<Node> path = pathFinder.findPath(A, D);
 
-        // -------------------
-        // 4. Affichage résultat
-        // -------------------
-        System.out.print("Chemin trouvé : ");
+        System.out.print("Shortest path: ");
 
         for (int i = 0; i < path.size(); i++) {
+
             System.out.print("N" + path.get(i).getId());
 
             if (i < path.size() - 1) {
@@ -54,44 +51,82 @@ public class Main {
         }
 
         System.out.println();
-        
-        System.out.println("Nombre de voisins de A avant suppression : "
+
+        // Expected:
+        // N1 -> N2 -> N3 -> N4
+
+
+
+        // =====================================================
+        // NODE REMOVAL TEST
+        // =====================================================
+
+        System.out.println();
+        System.out.println("=================================");
+        System.out.println("NODE REMOVAL TEST");
+        System.out.println("=================================");
+
+        System.out.println("Neighbors of A before removal: "
                 + graph.getNeighbors(A).size());
 
         graph.removeNode(B);
 
-        System.out.println("Nombre de voisins de A après suppression : "
+        System.out.println("Neighbors of A after removal: "
                 + graph.getNeighbors(A).size());
-        
-        Graph graph2 = new Graph();
 
-        SimulationEngine engine = new SimulationEngine(graph2);
+
+
+        // =====================================================
+        // AGENT MOVEMENT TEST
+        // IMPORTANT:
+        // Uses a fresh graph.
+        // =====================================================
+
+        Graph movementGraph = new Graph();
+
+        Node A2 = new Node(1);
+        Node B2 = new Node(2);
+        Node C2 = new Node(3);
+        Node D2 = new Node(4);
+
+        movementGraph.addNode(A2);
+        movementGraph.addNode(B2);
+        movementGraph.addNode(C2);
+        movementGraph.addNode(D2);
+
+        movementGraph.addEdge(new Edge(A2, B2, 1));
+        movementGraph.addEdge(new Edge(B2, C2, 1));
+        movementGraph.addEdge(new Edge(C2, D2, 1));
+
+        PathFinder movementFinder =
+                new DijkstraPathFinder(movementGraph);
+
+        SimulationEngine engine =
+                new SimulationEngine(movementGraph, movementFinder);
+
         Agent agent = new Agent(
-                1,      // id
-                1.0,    // speed
-                A,      // position actuelle
-                D       // destination
+                1,
+                1.0,
+                A2,
+                D2
         );
+
         engine.addAgent(agent);
-	
-		System.out.println("Tick actuel : " + engine.getCurrentTick());
-		System.out.println("Nombre d'agents : " + engine.getAgents().size());
-		System.out.println("Position agent : N" +
-		        agent.getCurrentPosition().getId());
-		System.out.println("Destination agent : N" +
-		        agent.getDestination().getId());
-		
-		System.out.println();
-		
-		SimulationEngine engine2 = new SimulationEngine(graph);
 
-		engine2.addAgent(agent);
+        System.out.println();
+        System.out.println("=================================");
+        System.out.println("AGENT MOVEMENT TEST");
+        System.out.println("=================================");
 
-		engine2.tick(); // tick 1
-		engine2.tick(); // tick 2
-		engine2.tick(); // tick 3
-		engine2.tick(); // tick 4
-		engine2.tick(); // tick 5 → arrive en C
-		engine2.tick(); // tick 6 → arrive en D
+        for (int i = 0; i < 4; i++) {
+            engine.tick();
+        }
+
+        System.out.println();
+        System.out.println("Final position: N"
+                + agent.getCurrentPosition().getId());
+
+        System.out.println("Final state: "
+                + agent.getState());
     }
 }

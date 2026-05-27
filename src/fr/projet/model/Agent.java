@@ -26,6 +26,8 @@ public class Agent {
     /** Next node the agent is heading to */
     private Node nextNode;
 
+    
+
     /**
      * Creates a new agent.
      *
@@ -43,6 +45,7 @@ public class Agent {
         this.progressOnEdge = 0.0;
         this.nextNode = null;
     }
+   
 
     /**
      * Returns the unique identifier of the agent.
