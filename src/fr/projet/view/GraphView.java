@@ -1,4 +1,4 @@
-package fr.projet.ui;
+package fr.projet.view;
 
 import fr.projet.model.*;
 import javafx.scene.layout.Pane;

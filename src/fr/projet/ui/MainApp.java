@@ -5,7 +5,7 @@ import fr.projet.controller.SimulationController;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
-
+import fr.projet.view.GraphView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
