@@ -11,4 +11,5 @@ module ProjetGenieLogiciel {
     exports fr.projet.pathfinding;
     exports fr.projet.simulation;
     exports fr.projet.ui;
+    exports fr.projet.controller;
 }

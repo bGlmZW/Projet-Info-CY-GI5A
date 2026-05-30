@@ -1,7 +1,9 @@
 package fr.projet.ui;
 
-import fr.projet.model.*;
-import fr.projet.pathfinding.*;
+import fr.projet.controller.GraphController;
+import fr.projet.controller.SimulationController;
+import fr.projet.model.Graph;
+import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
 
 import javafx.application.Application;
@@ -20,34 +22,14 @@ public class MainApp extends Application {
         // =========================
         // GRAPH SETUP
         // =========================
-        Graph graph = new Graph();
-
-        Node A = new Node(1);
-        Node B = new Node(2);
-        Node C = new Node(3);
-        Node D = new Node(4);
-
-        graph.addNode(A);
-        graph.addNode(B);
-        graph.addNode(C);
-        graph.addNode(D);
-
-        graph.addEdge(new Edge(A, B, 1));
-        graph.addEdge(new Edge(A, D, 100));
-        graph.addEdge(new Edge(B, C, 1));
-        graph.addEdge(new Edge(C, D, 3)); // poids > 1 pour test visible
+        Graph graph = GraphController.buildGraph();
+        Node start = graph.getNodeById(1);
+        Node destination = graph.getNodeById(4);
 
         // =========================
         // ENGINE
         // =========================
-        PathFinder pathFinder = new DijkstraPathFinder(graph);
-        SimulationEngine engine = new SimulationEngine(graph, pathFinder);
-
-        Agent agent = new Agent(1, 1.0, A, D);
-        engine.addAgent(agent);
-        
-        System.out.println("Tick 0");
-        System.out.println(agent);
+        SimulationEngine engine = SimulationController.buildEngine(graph, start, destination);
 
         // =========================
         // VIEW
@@ -62,15 +44,11 @@ public class MainApp extends Application {
         // UI
         // =========================
         Label tickLabel = new Label("Tick: 0");
-
         Button nextTickBtn = new Button("Next Tick");
 
         nextTickBtn.setOnAction(e -> {
-
             engine.tick();
-
             view.renderAgents(engine.getAgents());
-
             tickLabel.setText("Tick: " + engine.getCurrentTick());
         });
 
@@ -78,13 +56,11 @@ public class MainApp extends Application {
         // LAYOUT
         // =========================
         HBox controls = new HBox(10, nextTickBtn, tickLabel);
-
         BorderPane root = new BorderPane();
         root.setCenter(view);
         root.setBottom(controls);
 
         Scene scene = new Scene(root, 900, 600);
-
         stage.setTitle("Graph Simulation Demo");
         stage.setScene(scene);
         stage.show();

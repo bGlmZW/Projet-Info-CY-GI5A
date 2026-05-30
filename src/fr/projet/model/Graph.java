@@ -108,4 +108,13 @@ public class Graph {
 
         return neighbors;
     }
+    
+    public Node getNodeById(int id) {
+        for (Node node : getAllNodes()) {
+            if (node.getId() == id) {
+                return node;
+            }
+        }
+        return null;
+    }
 }
