@@ -1,8 +1,7 @@
 package fr.projet.controller;
 
 import fr.projet.model.*;
-import fr.projet.pathfinding.DijkstraPathFinder;
-import fr.projet.pathfinding.PathFinder;
+import fr.projet.pathfinding.*;
 import fr.projet.simulation.SimulationEngine;
 
 /**
@@ -23,14 +22,17 @@ public class SimulationController {
      */
     public static SimulationEngine buildEngine(Graph graph, Node start, Node destination) {
 
-        PathFinder pathFinder = new DijkstraPathFinder(graph);
+    	PathFinder pathFinder = PathFinderFactory.create(
+    	        PathFinderType.DIJKSTRA,
+    	        graph
+    	);
         SimulationEngine engine = new SimulationEngine(graph, pathFinder);
 
-        Agent agent = new Agent(1, 1.0, start, destination);
-        engine.addAgent(agent);
+        Agent fast = new FastAgent(2, start, destination);
+        engine.addAgent(fast);
 
         System.out.println("Tick 0");
-        System.out.println(agent);
+        System.out.println(fast);
 
         return engine;
     }
