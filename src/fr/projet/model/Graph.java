@@ -55,25 +55,33 @@ public class Graph {
 
     /**
      * Adds an edge to the graph.
-     * Both source and destination nodes must already exist.
+     * If the edge is not oriented, the reverse edge is also stored so the graph
+     * can be traversed in both directions.
      *
      * @param edge edge to add
-     * @throws IllegalArgumentException if one of the nodes
-     *                                  does not belong to the graph
+     * @throws IllegalArgumentException if one of the nodes does not belong to the graph
      */
     public void addEdge(Edge edge) {
 
         Node source = edge.getSource();
         Node destination = edge.getDestination();
 
-        if (!adjacencyList.containsKey(source)
-                || !adjacencyList.containsKey(destination)) {
+        if (!adjacencyList.containsKey(source) || !adjacencyList.containsKey(destination)) {
+            throw new IllegalArgumentException("Source or destination node does not exist");
+        }
 
-            throw new IllegalArgumentException(
-                    "Source or destination node does not exist");
+        if (hasConnection(source, destination)) {
+            return;
         }
 
         adjacencyList.get(source).add(edge);
+
+        // Store the reverse edge too when the connection is considered undirected.
+        if (!edge.isOriented()) {
+            Edge reverse = new Edge(destination, source, edge.getDistance());
+            reverse.setOriented(false);
+            adjacencyList.get(destination).add(reverse);
+        }
     }
 
     /**

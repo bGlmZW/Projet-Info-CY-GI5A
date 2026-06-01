@@ -61,7 +61,7 @@ public class GraphController {
     graph.addNode(D);
 
     graph.addEdge(new Edge(A, B, 1));
-    graph.addEdge(new Edge(A, D, 100));
+    graph.addEdge(new Edge(A, D, 9));
     graph.addEdge(new Edge(B, C, 1));
     graph.addEdge(new Edge(C, D, 3));
     
@@ -160,6 +160,13 @@ public class GraphController {
             return;
         }
 
+        // Reset selection so UI does not stay "stuck" on a node
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+        }
+
         int newId = generateNodeId();
         Node node = new Node(newId);
         node.setX(clickPosition.getX());
@@ -250,15 +257,19 @@ public class GraphController {
 
         // ID generation
         int newId = engine.getAgents().stream()
-                .mapToInt(Agent::getId)
-                .max()
-                .orElse(0) + 1;
+            .mapToInt(Agent::getId)
+            .max()
+            .orElse(0) + 1;
 
         Agent agent = new Agent(newId, speed, selectedNode, destination);
 
         engine.addAgent(agent);
 
+        // Clear the selection after creating the agent so the UI goes back to a neutral state
+        selectedNode = null;
+
         if (view != null) {
+            view.clearSelection();
             view.renderAgents(engine.getAgents());
         }
     }

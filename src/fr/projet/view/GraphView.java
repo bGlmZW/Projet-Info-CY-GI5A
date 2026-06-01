@@ -29,6 +29,9 @@ public class GraphView extends Pane {
     /** Agents currently displayed on the graph*/
     private List<Agent> currentAgents = Collections.emptyList();
 
+    /** Graph currently rendered by the view */
+    private Graph graph;
+
     /**
      * Creates the view and prepares background click handling.
      */
@@ -58,6 +61,7 @@ public class GraphView extends Pane {
      * @param graph the graph to render
      */
     public void renderGraph(Graph graph) {
+        this.graph = graph;
 
         getChildren().clear();
         nodeViews.clear();
@@ -72,6 +76,7 @@ public class GraphView extends Pane {
         // =========================
         // NODES
         // =========================
+        Map<Node, Text> labels = new HashMap<>();
         for (int i = 0; i < n; i++) {
 
             Node node = nodes.get(i);
@@ -97,7 +102,10 @@ public class GraphView extends Pane {
             Circle circle = new Circle(20);
             circle.setCenterX(x);
             circle.setCenterY(y);
-            circle.setOnMouseClicked(e -> nodeClickHandler.accept(node));
+            circle.setOnMouseClicked(e -> {
+                nodeClickHandler.accept(node);
+                e.consume();
+            });
 
             nodeViews.put(node, circle);
 
@@ -112,14 +120,18 @@ public class GraphView extends Pane {
             }
 
             Text label = new Text(String.valueOf(node.getId()));
+            label.setMouseTransparent(true);
             label.setX(x - 5);
             label.setY(y + 5);
             label.setFill(Color.BLACK);
 
-            getChildren().addAll(circle, label);
+            // Store nodes first, draw them after edges so they stay clickable
+            nodeViews.put(node, circle);
+
+            // Keep the label for later drawing
+            labels.put(node, label);
 
         }
-        redrawAgents();
 
         // =========================
         // EDGES
@@ -142,8 +154,8 @@ public class GraphView extends Pane {
                 if (src == null || dst == null) continue;
 
                 Line line = new Line(
-                        src.getCenterX(), src.getCenterY(),
-                        dst.getCenterX(), dst.getCenterY()
+                    src.getCenterX(), src.getCenterY(),
+                    dst.getCenterX(), dst.getCenterY()
                 );
 
                 Text weight = new Text(String.valueOf(edge.getDistance()));
@@ -158,6 +170,21 @@ public class GraphView extends Pane {
                 getChildren().addAll(line, weight);
             }
         }
+
+        for (Node node : nodes) {
+            Circle circle = nodeViews.get(node);
+            Text label = labels.get(node);
+
+            if (circle != null) {
+                getChildren().add(circle);
+            }
+
+            if (label != null) {
+                getChildren().add(label);
+            }
+        }
+
+        redrawAgents();
     }
 
     /**
@@ -219,9 +246,9 @@ public class GraphView extends Pane {
             }
         }
     }
-
+    
     /**
-     * Redraws agents using the current graph node positions.
+     * Redraws agents using their current progress on edges.
      */
     private void redrawAgents() {
 
@@ -229,16 +256,58 @@ public class GraphView extends Pane {
         agentViews.clear();
 
         for (Agent agent : currentAgents) {
-            Circle nodeCircle = nodeViews.get(agent.getCurrentPosition());
-            if (nodeCircle == null) {
-                continue;
-            }
 
             Circle agentCircle = new Circle(10);
             agentCircle.setFill(Color.RED);
             agentCircle.setStroke(Color.BLACK);
-            agentCircle.setCenterX(nodeCircle.getCenterX());
-            agentCircle.setCenterY(nodeCircle.getCenterY());
+            agentCircle.setMouseTransparent(true);
+
+            double x;
+            double y;
+
+            Circle currentNodeCircle = nodeViews.get(agent.getCurrentPosition());
+
+            if (currentNodeCircle == null) {
+                continue;
+            }
+
+            if (graph != null && agent.getNextNode() != null && !agent.getCurrentPosition().equals(agent.getNextNode())) {
+
+                Edge currentEdge = null;
+
+                for (Edge edge : graph.getEdges(agent.getCurrentPosition())) {
+                    if (edge.getDestination().equals(agent.getNextNode())) {
+                        currentEdge = edge;
+                        break;
+                    }
+                }
+
+                if (currentEdge != null) {
+                    Circle nextNodeCircle = nodeViews.get(agent.getNextNode());
+
+                    if (nextNodeCircle != null) {
+                        double ratio = agent.getProgressOnEdge() / currentEdge.getDistance();
+                        ratio = Math.max(0.0, Math.min(ratio, 1.0));
+
+                        x = currentNodeCircle.getCenterX() + (nextNodeCircle.getCenterX() - currentNodeCircle.getCenterX()) * ratio;
+
+                        y = currentNodeCircle.getCenterY() + (nextNodeCircle.getCenterY() - currentNodeCircle.getCenterY()) * ratio;
+                    } else {
+                        x = currentNodeCircle.getCenterX();
+                        y = currentNodeCircle.getCenterY();
+                    }
+                } else {
+                    x = currentNodeCircle.getCenterX();
+                    y = currentNodeCircle.getCenterY();
+                }
+
+            } else {
+                x = currentNodeCircle.getCenterX();
+                y = currentNodeCircle.getCenterY();
+            }
+
+            agentCircle.setCenterX(x);
+            agentCircle.setCenterY(y);
 
             agentViews.put(agent, agentCircle);
             getChildren().add(agentCircle);

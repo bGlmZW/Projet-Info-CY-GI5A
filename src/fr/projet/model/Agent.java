@@ -26,6 +26,14 @@ public class Agent {
     /** Next node the agent is heading to */
     private Node nextNode;
 
+    /** Initial position of the agent when it was created */
+    private Node initialPosition;
+
+    /** Current computed path followed by the agent */
+    private java.util.List<Node> currentPath;
+
+    /** Index of the next node to reach in the current path */
+    private int pathIndex = 0;
 
     /**
      * Creates a new agent.
@@ -38,11 +46,14 @@ public class Agent {
     public Agent(int id, double speed, Node currentPosition, Node destination) {
         this.id = id;
         this.speed = speed;
+        this.initialPosition = currentPosition;
         this.currentPosition = currentPosition;
         this.destination = destination;
         this.state = State.WAITING;
         this.progressOnEdge = 0.0;
         this.nextNode = null;
+        this.currentPath = null;
+        this.pathIndex = 0;
     }
    
 
@@ -143,6 +154,49 @@ public class Agent {
      * @param nextNode next target node
      */
     public void setNextNode(Node nextNode) { this.nextNode = nextNode; }
+
+    /**
+     * Returns the initial position of the agent.
+     *
+     * @return initial node
+     */
+    public Node getInitialPosition() { return initialPosition; }
+
+    /**
+     * Returns the current path followed by the agent.
+     *
+     * @return list of nodes representing the path
+     */
+    public java.util.List<Node> getCurrentPath() {
+        return currentPath;
+    }
+
+    /**
+     * Sets the current path followed by the agent.
+     *
+     * @param currentPath computed path from source to destination
+     */
+    public void setCurrentPath(java.util.List<Node> currentPath) {
+        this.currentPath = currentPath;
+    }
+
+    /**
+     * Returns the current index in the path.
+     *
+     * @return index of next node to reach
+     */
+    public int getPathIndex() {
+        return pathIndex;
+    }
+
+    /**
+     * Updates the index in the current path.
+     *
+     * @param pathIndex new index in the path
+     */
+    public void setPathIndex(int pathIndex) {
+        this.pathIndex = pathIndex;
+    }
     
     /**
      * Returns a string representation of the agent.

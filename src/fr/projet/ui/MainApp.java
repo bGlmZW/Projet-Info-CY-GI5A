@@ -13,6 +13,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 public class MainApp extends Application {
 
@@ -46,10 +50,27 @@ public class MainApp extends Application {
         // =========================
         // UI
         // =========================
-        ToolBox toolBox = new ToolBox();
-
         Label tickLabel = new Label("Tick: 0");
         Button nextTickBtn = new Button("Next Tick");
+
+        ToolBox toolBox = new ToolBox();
+
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            engine.tick();
+            view.renderAgents(engine.getAgents());
+            tickLabel.setText("Tick: " + engine.getCurrentTick());
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+
+        toolBox.startBtn.setOnAction(e -> timeline.play());
+        toolBox.pauseBtn.setOnAction(e -> timeline.pause());
+        toolBox.resetBtn.setOnAction(e -> {
+            timeline.pause();
+            engine.reset();
+            view.renderGraph(graph);
+            view.renderAgents(engine.getAgents());
+            tickLabel.setText("Tick: 0");
+        });
 
         nextTickBtn.setOnAction(e -> {
             engine.tick();
