@@ -6,14 +6,57 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
+import javafx.geometry.Point2D;
+import javafx.scene.input.MouseEvent;
+import java.util.function.Consumer;
 
 import java.util.*;
 
 public class GraphView extends Pane {
 
+    /** Currently selected node for visual highlighting */
+    private Node selectedNode;
+
+    /** Callback invoked when a node is clicked */
+    private Consumer<Node> nodeClickHandler = node -> {};
+
     private final Map<Node, Circle> nodeViews = new HashMap<>();
     private final Map<Agent, Circle> agentViews = new HashMap<>();
 
+    /** Coordinates of the user's click on a point in the interface */
+    private Consumer<Point2D> backgroundClickHandler = point -> {};
+
+    /** Agents currently displayed on the graph*/
+    private List<Agent> currentAgents = Collections.emptyList();
+
+    /**
+     * Creates the view and prepares background click handling.
+     */
+    public GraphView() {
+        setPrefSize(800, 600);
+        setPickOnBounds(true);
+
+        addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
+            if (e.getTarget() == this) {
+                backgroundClickHandler.accept(new Point2D(e.getX(), e.getY()));
+            }
+        });
+    }
+
+    /**
+     * Sets the handler used when the user clicks on empty space.
+     *
+     * @param handler background click handler
+     */
+    public void setBackgroundClickHandler(Consumer<Point2D> handler) {
+        this.backgroundClickHandler = (handler != null) ? handler : point -> {};
+    }
+
+    /**
+     * Renders the graph by drawing nodes, edges, and labels.
+     *
+     * @param graph the graph to render
+     */
     public void renderGraph(Graph graph) {
 
         getChildren().clear();
@@ -33,18 +76,40 @@ public class GraphView extends Pane {
 
             Node node = nodes.get(i);
 
-            double angle = 2 * Math.PI * i / n;
+            double x;
+            double y;
 
-            double x = centerX + radius * Math.cos(angle);
-            double y = centerY + radius * Math.sin(angle);
+            // If the node has coordinates (created by user click),
+            // we use them. Otherwise, generate an initial position and store it.
+            if (node.getX() != null && node.getY() != null) {
+                x = node.getX();
+                y = node.getY();
+            } else {
+                double angle = 2 * Math.PI * i / n;
+
+                x = centerX + radius * Math.cos(angle);
+                y = centerY + radius * Math.sin(angle);
+
+                node.setX(x);
+                node.setY(y);
+            }
 
             Circle circle = new Circle(20);
             circle.setCenterX(x);
             circle.setCenterY(y);
-            circle.setFill(Color.LIGHTGRAY);
-            circle.setStroke(Color.BLACK);
+            circle.setOnMouseClicked(e -> nodeClickHandler.accept(node));
 
             nodeViews.put(node, circle);
+
+            if (node.equals(selectedNode)) {
+                circle.setFill(Color.GOLD);
+                circle.setStroke(Color.DODGERBLUE);
+                circle.setStrokeWidth(3);
+            } else {
+                circle.setFill(Color.LIGHTGRAY);
+                circle.setStroke(Color.BLACK);
+                circle.setStrokeWidth(1);
+            }
 
             Text label = new Text(String.valueOf(node.getId()));
             label.setX(x - 5);
@@ -52,7 +117,9 @@ public class GraphView extends Pane {
             label.setFill(Color.BLACK);
 
             getChildren().addAll(circle, label);
+
         }
+        redrawAgents();
 
         // =========================
         // EDGES
@@ -93,25 +160,88 @@ public class GraphView extends Pane {
         }
     }
 
+    /**
+     * 
+     * @param agents
+     */
     public void renderAgents(List<Agent> agents) {
+        currentAgents = (agents != null) ? new ArrayList<>(agents) : Collections.emptyList();
+        redrawAgents();
+    }
+
+    // =====================================================
+    // EDITING THE GRAPH ON THE INTERFACE
+    // =====================================================
+
+    /**
+     * Sets the callback called when a node is clicked.
+     *
+     * @param handler click handler
+     */
+    public void setNodeClickHandler(Consumer<Node> handler) {
+        this.nodeClickHandler = (handler != null) ? handler : node -> {};
+    }
+
+    /**
+     * Updates the selected node and refreshes the visual highlight.
+     *
+     * @param node selected node
+     */
+    public void setSelectedNode(Node node) {
+        this.selectedNode = node;
+        refreshSelection();
+    }
+
+    /**
+     * Clears the current node selection.
+     */
+    public void clearSelection() {
+        this.selectedNode = null;
+        refreshSelection();
+    }
+
+    /**
+     * Refreshes the appearance of all nodes according to the current selection.
+     */
+    private void refreshSelection() {
+        for (Map.Entry<Node, Circle> entry : nodeViews.entrySet()) {
+            Node node = entry.getKey();
+            Circle circle = entry.getValue();
+
+            if (node.equals(selectedNode)) {
+                circle.setFill(Color.GOLD);
+                circle.setStroke(Color.DODGERBLUE);
+                circle.setStrokeWidth(3);
+            } else {
+                circle.setFill(Color.LIGHTGRAY);
+                circle.setStroke(Color.BLACK);
+                circle.setStrokeWidth(1);
+            }
+        }
+    }
+
+    /**
+     * Redraws agents using the current graph node positions.
+     */
+    private void redrawAgents() {
 
         agentViews.values().forEach(getChildren()::remove);
         agentViews.clear();
 
-        for (Agent agent : agents) {
+        for (Agent agent : currentAgents) {
+            Circle nodeCircle = nodeViews.get(agent.getCurrentPosition());
+            if (nodeCircle == null) {
+                continue;
+            }
 
-            Circle node = nodeViews.get(agent.getCurrentPosition());
-            if (node == null) continue;
+            Circle agentCircle = new Circle(10);
+            agentCircle.setFill(Color.RED);
+            agentCircle.setStroke(Color.BLACK);
+            agentCircle.setCenterX(nodeCircle.getCenterX());
+            agentCircle.setCenterY(nodeCircle.getCenterY());
 
-            Circle a = new Circle(10);
-            a.setFill(Color.RED);
-            a.setStroke(Color.BLACK);
-
-            a.setCenterX(node.getCenterX());
-            a.setCenterY(node.getCenterY());
-
-            agentViews.put(agent, a);
-            getChildren().add(a);
+            agentViews.put(agent, agentCircle);
+            getChildren().add(agentCircle);
         }
     }
 }

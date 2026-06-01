@@ -23,6 +23,7 @@ public class SimulationEngine {
     /** Current simulation tick */
     private long currentTick;
     
+    /**  */
     private PathFinder pathFinder;
 
     /**

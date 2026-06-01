@@ -26,7 +26,6 @@ public class Agent {
     /** Next node the agent is heading to */
     private Node nextNode;
 
-    
 
     /**
      * Creates a new agent.
@@ -178,6 +177,4 @@ public class Agent {
     public int hashCode() {
         return Integer.hashCode(id);
     }
-    
-    
 }

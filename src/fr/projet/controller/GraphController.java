@@ -1,15 +1,45 @@
 package fr.projet.controller;
 
+import fr.projet.view.GraphView;
+
+import javafx.geometry.Point2D;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextInputDialog;
+
+import java.util.Optional;
+
 import fr.projet.model.Edge;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
+import fr.projet.model.Agent;
+
+import fr.projet.simulation.SimulationEngine;
+
 
 /**
  * Controller responsible for building and configuring the graph.
  * Separates graph construction logic from the UI layer.
  */
 public class GraphController {
-	
+
+    /** Graph currently managed by the controller */
+	private final Graph graph;
+
+    /** View used to refresh the selection and the graph display */
+    private GraphView view;
+
+    /** Currently selected node, used to create an edge with a second click */
+    private Node selectedNode;
+
+    /**
+     * Creates a controller bound to a graph instance.
+     *
+     * @param graph graph managed by this controller
+     */
+    public GraphController(Graph graph) {
+        this.graph = graph;
+    }
+
 	/**
      * Builds and returns a configured graph with nodes and edges.
      * The graph contains 4 nodes (1 to 4) connected by weighted edges.
@@ -37,5 +67,199 @@ public class GraphController {
     
     return graph;
 	}
-}
 
+    // =====================================================
+    // EDITING THE GRAPH ON THE INTERFACE
+    // =====================================================
+
+    /**
+     * Handles a node click.
+     * The first click selects a node, the second click on another node creates an edge.
+     * Clicking the same node twice cancels the selection.
+     *
+     * @param clickedNode node clicked by the user
+     */
+    public void handleNodeClicked(Node clickedNode) {
+
+        if (clickedNode == null) {
+            return;
+        }
+
+        if (selectedNode == null) {
+            selectedNode = clickedNode;
+
+            if (view != null) {
+                view.setSelectedNode(clickedNode);
+            }
+            return;
+        }
+
+        if (selectedNode.equals(clickedNode)) {
+            selectedNode = null;
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+
+        // Let the user choose the weight of the edge
+        TextInputDialog dialog = new TextInputDialog("1");
+        dialog.setTitle("Edge weight");
+        dialog.setHeaderText("Enter edge weight");
+        dialog.setContentText("Weight:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        double weight = 1.0;
+
+        if (result.isPresent()) {
+            try {
+                weight = Double.parseDouble(result.get());
+            } catch (NumberFormatException e) {
+                weight = 1.0; // fallback if user enters invalid value
+            }
+        }
+
+        // Create edge only if it does not already exist
+        if (!graph.hasConnection(selectedNode, clickedNode)) {
+            graph.addEdge(new Edge(selectedNode, clickedNode, weight));
+        }
+
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.renderGraph(graph);
+        }
+    }
+
+    /**
+     * Generates a new node identifier not already used in the graph.
+     *
+     * @return next available node id
+     */
+    private int generateNodeId() {
+        int max = 0;
+
+        for (Node node : graph.getAllNodes()) {
+            max = Math.max(max, node.getId());
+        }
+
+        return max + 1;
+    }
+
+    /**
+     * Handles a click on the empty drawing area and creates a new node.
+     *
+     * @param clickPosition click position in the view
+     */
+    public void handleBackgroundClick(Point2D clickPosition) {
+
+        if (clickPosition == null) {
+            return;
+        }
+
+        int newId = generateNodeId();
+        Node node = new Node(newId);
+        node.setX(clickPosition.getX());
+        node.setY(clickPosition.getY());
+
+        graph.addNode(node);
+
+        if (view != null) {
+            view.renderGraph(graph);
+        }
+    }
+
+    /**
+     * Attaches the view to the controller.
+     * The controller also listens to background clicks to create new nodes.
+     *
+     * @param view graph view instance
+     */
+    public void attachView(GraphView view) {
+        this.view = view;
+        this.view.setBackgroundClickHandler(this::handleBackgroundClick);
+    }
+
+    /**
+     * Creates an agent on the currently selected node and assigns a destination and speed.
+     *
+     * @param engine simulation engine used to store the new agent
+     */
+    public void createAgentAtSelectedNode(SimulationEngine engine) {
+
+        if (engine == null) {
+            return;
+        }
+
+        if (selectedNode == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Create Agent");
+            alert.setHeaderText("No node selected");
+            alert.setContentText("Please select a node before creating an agent.");
+            alert.showAndWait();
+            return;
+        }
+
+        // Destination input
+        TextInputDialog destDialog = new TextInputDialog();
+        destDialog.setTitle("Create Agent");
+        destDialog.setHeaderText("Enter destination node id");
+        destDialog.setContentText("Destination:");
+
+        Optional<String> destResult = destDialog.showAndWait();
+        if (destResult.isEmpty()) {
+            return;
+        }
+
+        int destinationId;
+
+        try {
+            destinationId = Integer.parseInt(destResult.get().trim());
+        } catch (NumberFormatException e) {
+            return;
+        }
+
+        Node destination = graph.getNodeById(destinationId);
+
+        if (destination == null || destination.equals(selectedNode)) {
+            return;
+        }
+
+        // Speed input
+        TextInputDialog speedDialog = new TextInputDialog("1.0");
+        speedDialog.setTitle("Create Agent");
+        speedDialog.setHeaderText("Enter agent speed");
+        speedDialog.setContentText("Speed:");
+
+        Optional<String> speedResult = speedDialog.showAndWait();
+
+        if (speedResult.isEmpty()) {
+            return;
+        }
+
+        double speed;
+
+        try {
+            speed = Double.parseDouble(speedResult.get().trim());
+        } catch (NumberFormatException e) {
+            speed = 1.0;
+        }
+
+        // ID generation
+        int newId = engine.getAgents().stream()
+                .mapToInt(Agent::getId)
+                .max()
+                .orElse(0) + 1;
+
+        Agent agent = new Agent(newId, speed, selectedNode, destination);
+
+        engine.addAgent(agent);
+
+        if (view != null) {
+            view.renderAgents(engine.getAgents());
+        }
+    }
+}

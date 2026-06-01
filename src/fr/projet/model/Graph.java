@@ -109,6 +109,12 @@ public class Graph {
         return neighbors;
     }
     
+    /**
+     * 
+     * 
+     * @param id
+     * @return
+     */
     public Node getNodeById(int id) {
         for (Node node : getAllNodes()) {
             if (node.getId() == id) {
@@ -116,5 +122,39 @@ public class Graph {
             }
         }
         return null;
+    }
+
+    /**
+     * Checks whether a directed edge already exists from source to destination.
+     *
+     * @param source source node
+     * @param destination destination node
+     * @return true if an edge already exists from source to destination
+     */
+    public boolean hasEdge(Node source, Node destination) {
+        List<Edge> edges = adjacencyList.get(source);
+
+        if (edges == null) {
+            return false;
+        }
+
+        for (Edge edge : edges) {
+            if (edge.getDestination().equals(destination)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether two nodes are already connected in either direction.
+     *
+     * @param a first node
+     * @param b second node
+     * @return true if a connection already exists between the two nodes
+     */
+    public boolean hasConnection(Node a, Node b) {
+        return hasEdge(a, b) || hasEdge(b, a);
     }
 }

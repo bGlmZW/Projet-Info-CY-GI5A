@@ -34,15 +34,20 @@ public class MainApp extends Application {
         // =========================
         // VIEW
         // =========================
-        GraphView view = new GraphView();
-        view.renderGraph(graph);
+        GraphController graphController = new GraphController(graph);
 
-        // IMPORTANT : affichage initial (fix tick 0 invisible)
+        GraphView view = new GraphView();
+        graphController.attachView(view);
+        view.setNodeClickHandler(graphController::handleNodeClicked);
+
+        view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
 
         // =========================
         // UI
         // =========================
+        ToolBox toolBox = new ToolBox();
+
         Label tickLabel = new Label("Tick: 0");
         Button nextTickBtn = new Button("Next Tick");
 
@@ -52,11 +57,17 @@ public class MainApp extends Application {
             tickLabel.setText("Tick: " + engine.getCurrentTick());
         });
 
+        toolBox.addAgentBtn.setOnAction(e ->
+                graphController.createAgentAtSelectedNode(engine)
+        );
+
         // =========================
         // LAYOUT
         // =========================
         HBox controls = new HBox(10, nextTickBtn, tickLabel);
+
         BorderPane root = new BorderPane();
+        root.setTop(toolBox);
         root.setCenter(view);
         root.setBottom(controls);
 
