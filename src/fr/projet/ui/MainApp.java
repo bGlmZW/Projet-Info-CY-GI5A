@@ -1,9 +1,11 @@
 package fr.projet.ui;
 
-import fr.projet.model.*;
-import fr.projet.pathfinding.*;
+import fr.projet.controller.GraphController;
+import fr.projet.controller.SimulationController;
+import fr.projet.model.Graph;
+import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
-
+import fr.projet.view.GraphView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -11,6 +13,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 public class MainApp extends Application {
 
@@ -20,59 +26,61 @@ public class MainApp extends Application {
         // =========================
         // GRAPH SETUP
         // =========================
-        Graph graph = new Graph();
-
-        Node A = new Node(1);
-        Node B = new Node(2);
-        Node C = new Node(3);
-        Node D = new Node(4);
-
-        graph.addNode(A);
-        graph.addNode(B);
-        graph.addNode(C);
-        graph.addNode(D);
-
-        graph.addEdge(new Edge(A, B, 1));
-        graph.addEdge(new Edge(A, D, 100));
-        graph.addEdge(new Edge(B, C, 1));
-        graph.addEdge(new Edge(C, D, 3)); // poids > 1 pour test visible
+        Graph graph = GraphController.buildGraph();
+        Node start = graph.getNodeById(1);
+        Node destination = graph.getNodeById(4);
 
         // =========================
         // ENGINE
         // =========================
-        PathFinder pathFinder = new DijkstraPathFinder(graph);
-        SimulationEngine engine = new SimulationEngine(graph, pathFinder);
-
-        Agent agent = new Agent(1, 1.0, A, D);
-        engine.addAgent(agent);
-        
-        System.out.println("Tick 0");
-        System.out.println(agent);
+        SimulationEngine engine = SimulationController.buildEngine(graph, start, destination);
 
         // =========================
         // VIEW
         // =========================
-        GraphView view = new GraphView();
-        view.renderGraph(graph);
+        GraphController graphController = new GraphController(graph);
 
-        // IMPORTANT : affichage initial (fix tick 0 invisible)
+        GraphView view = new GraphView();
+        graphController.attachView(view);
+        view.setNodeClickHandler(graphController::handleNodeClicked);
+
+        view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
 
         // =========================
         // UI
         // =========================
         Label tickLabel = new Label("Tick: 0");
-
         Button nextTickBtn = new Button("Next Tick");
 
-        nextTickBtn.setOnAction(e -> {
+        ToolBox toolBox = new ToolBox();
 
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
             engine.tick();
-
             view.renderAgents(engine.getAgents());
+            tickLabel.setText("Tick: " + engine.getCurrentTick());
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
 
+        toolBox.startBtn.setOnAction(e -> timeline.play());
+        toolBox.pauseBtn.setOnAction(e -> timeline.pause());
+        toolBox.resetBtn.setOnAction(e -> {
+            timeline.pause();
+            engine.reset();
+            view.renderGraph(graph);
+            view.renderAgents(engine.getAgents());
+            tickLabel.setText("Tick: 0");
+        });
+
+        nextTickBtn.setOnAction(e -> {
+            engine.tick();
+            view.renderAgents(engine.getAgents());
             tickLabel.setText("Tick: " + engine.getCurrentTick());
         });
+
+        toolBox.addAgentBtn.setOnAction(e ->
+                graphController.createAgentAtSelectedNode(engine)
+        );
 
         // =========================
         // LAYOUT
@@ -80,11 +88,11 @@ public class MainApp extends Application {
         HBox controls = new HBox(10, nextTickBtn, tickLabel);
 
         BorderPane root = new BorderPane();
+        root.setTop(toolBox);
         root.setCenter(view);
         root.setBottom(controls);
 
         Scene scene = new Scene(root, 900, 600);
-
         stage.setTitle("Graph Simulation Demo");
         stage.setScene(scene);
         stage.show();

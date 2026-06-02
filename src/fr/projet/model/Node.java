@@ -21,6 +21,12 @@ public class Node {
     /** Indicates whether the node is blocked (not accessible) */
     private boolean blocked;
 
+    /** X coordinate used for rendering the node */
+    private Double x;
+
+    /** Y coordinate used for rendering the node */
+    private Double y;
+
     /**
      * Creates a new node with a given identifier.
      * The node is unblocked by default, with unlimited capacity and no agents.
@@ -95,5 +101,54 @@ public class Node {
      */
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
+    }
+
+    /**
+     * Returns the X coordinate of the node.
+     *
+     * @return x coordinate
+     */
+    public Double getX() {
+        return x;
+    }
+
+    /**
+     * Sets the X coordinate of the node.
+     *
+     * @param x x coordinate
+     */
+    public void setX(Double x) {
+        this.x = x;
+    }
+
+    /**
+     * Returns the Y coordinate of the node.
+     *
+     * @return y coordinate
+     */
+    public Double getY() {
+        return y;
+    }
+
+    /**
+     * Sets the Y coordinate of the node.
+     *
+     * @param y y coordinate
+     */
+    public void setY(Double y) {
+        this.y = y;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Node)) return false;
+        Node node = (Node) o;
+        return id == node.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 }

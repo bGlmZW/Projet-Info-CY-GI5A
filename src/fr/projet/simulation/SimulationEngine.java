@@ -23,6 +23,7 @@ public class SimulationEngine {
     /** Current simulation tick */
     private long currentTick;
     
+    /**  */
     private PathFinder pathFinder;
 
     /**
@@ -54,6 +55,10 @@ public class SimulationEngine {
     public Graph getGraph() {
         return graph;
     }
+
+    // =========================
+    // AGENTS MOVEMENTS
+    // =========================
 
     /**
      * Returns all agents currently managed by the simulation.
@@ -169,4 +174,19 @@ public class SimulationEngine {
         }
     }
 
+    /**
+     * Resets the simulation to its initial state.
+     */
+    public void reset() {
+        currentTick = 0;
+
+        for (Agent agent : agents) {
+            agent.setCurrentPosition(agent.getInitialPosition());
+            agent.setProgressOnEdge(0.0);
+            agent.setNextNode(null);
+            agent.setCurrentPath(null);
+            agent.setPathIndex(0);
+            agent.setState(State.WAITING);
+        }
+    }
 }
