@@ -12,9 +12,7 @@ public class ToolBox extends HBox {
     public final Button addNodeBtn = new Button("Add Node");
     public final Button addEdgeBtn = new Button("Add Edge");
     public final Button addAgentBtn = new Button("Add Agent");
-    public final Button startBtn = new Button("Start");
-    public final Button pauseBtn = new Button("Pause");
-    public final Button resetBtn = new Button("Reset");
+    public final Button deleteBtn = new Button("Delete");
     public final Button helpBtn = new Button("Help");
 
     /**
@@ -30,9 +28,7 @@ public class ToolBox extends HBox {
                 addNodeBtn,
                 addEdgeBtn,
                 addAgentBtn,
-                startBtn,
-                pauseBtn,
-                resetBtn,
+                deleteBtn,
                 helpBtn
         );
     }

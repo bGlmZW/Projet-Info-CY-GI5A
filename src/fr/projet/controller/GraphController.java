@@ -36,6 +36,9 @@ public class GraphController {
 
     /** Indicates whether the controller is waiting for two nodes to create an edge */
     private boolean edgeCreationMode;
+    
+    /** Indicates whether the controller is waiting for a deletion click */
+    private boolean deleteMode;
 
     /**
      * Creates a controller bound to a graph instance.
@@ -88,6 +91,18 @@ public class GraphController {
     public void handleNodeClicked(Node clickedNode) {
 
         if (clickedNode == null) {
+            return;
+        }
+
+        if (deleteMode) {
+            graph.removeNode(clickedNode);
+            selectedNode = null;
+            disableDeleteMode();
+
+            if (view != null) {
+                view.clearSelection();
+                view.renderGraph(graph);
+            }
             return;
         }
 
@@ -167,6 +182,25 @@ public class GraphController {
     }
 
     /**
+     * Handles a click on an edge and removes it when deletion mode is active.
+     *
+     * @param clickedEdge edge clicked by the user
+     */
+    public void handleEdgeClicked(Edge clickedEdge) {
+        if (!deleteMode || clickedEdge == null) {
+            return;
+        }
+
+        graph.removeEdge(clickedEdge.getSource(), clickedEdge.getDestination());
+        disableDeleteMode();
+
+        if (view != null) {
+            view.clearSelection();
+            view.renderGraph(graph);
+        }
+    }
+
+    /**
      * Generates a new node identifier not already used in the graph.
      *
      * @return next available node id
@@ -189,6 +223,16 @@ public class GraphController {
     public void handleBackgroundClick(Point2D clickPosition) {
 
         if (clickPosition == null) {
+            return;
+        }
+
+        // Disable delete mode if clicking in an empty area
+        if (deleteMode) {
+            disableDeleteMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
             return;
         }
 
@@ -377,6 +421,39 @@ public class GraphController {
 
         if (view != null) {
             view.setEdgeCreationMode(false);
+        }
+    }
+
+    // =====================================================
+    // DELETE MODE
+    // =====================================================
+
+    /**
+     * Enables deletion mode.
+     * The next click on a node or an edge will remove it.
+     */
+    public void enableDeleteMode() {
+        deleteMode = true;
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.setDeleteMode(true);
+        }
+
+        // Deletion takes priority over creation modes.
+        disableNodeCreationMode();
+        disableEdgeCreationMode();
+    }
+
+    /**
+     * Disables deletion mode and restores the normal cursor.
+     */
+    public void disableDeleteMode() {
+        deleteMode = false;
+
+        if (view != null) {
+            view.setDeleteMode(false);
         }
     }
 }

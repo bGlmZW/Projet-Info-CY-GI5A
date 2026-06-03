@@ -36,6 +36,9 @@ public class GraphView extends Pane {
     /** Stores how many agents are displayed at the same visual position */
     private final Map<String, Integer> positionCounts = new HashMap<>();
 
+    /** Callback invoked when an edge is clicked */
+    private Consumer<Edge> edgeClickHandler = edge -> {};
+
     /**
      * Creates the view and prepares background click handling.
      */
@@ -103,7 +106,7 @@ public class GraphView extends Pane {
                 node.setY(y);
             }
 
-            Circle circle = new Circle(20);
+            Circle circle = new Circle(25);
             circle.setCenterX(x);
             circle.setCenterY(y);
             circle.setOnMouseClicked(e -> {
@@ -162,9 +165,21 @@ public class GraphView extends Pane {
                     dst.getCenterX(), dst.getCenterY()
                 );
 
+                line.setStrokeWidth(2);
+                line.setOnMouseClicked(e -> {
+                    edgeClickHandler.accept(edge);
+                    e.consume();
+                });
+
+                // Edge hover effect
+                line.setOnMouseEntered(e -> line.setStroke(Color.RED));
+                line.setOnMouseExited(e -> line.setStroke(Color.BLACK));
+
                 Text weight = new Text(String.valueOf(edge.getDistance()));
                 weight.setFill(Color.BLUE);
-
+                weight.setFont(javafx.scene.text.Font.font(22));
+                weight.setMouseTransparent(true);
+                
                 double midX = (src.getCenterX() + dst.getCenterX()) / 2;
                 double midY = (src.getCenterY() + dst.getCenterY()) / 2;
 
@@ -207,10 +222,19 @@ public class GraphView extends Pane {
     /**
      * Sets the callback called when a node is clicked.
      *
-     * @param handler click handler
+     * @param handler node click handler
      */
     public void setNodeClickHandler(Consumer<Node> handler) {
         this.nodeClickHandler = (handler != null) ? handler : node -> {};
+    }
+
+    /**
+     * Sets the callback called when an edge is clicked.
+     *
+     * @param handler edge click handler
+     */
+    public void setEdgeClickHandler(Consumer<Edge> handler) {
+        this.edgeClickHandler = (handler != null) ? handler : edge -> {};
     }
 
     /**
@@ -242,7 +266,7 @@ public class GraphView extends Pane {
             if (node.equals(selectedNode)) {
                 circle.setFill(Color.GOLD);
                 circle.setStroke(Color.DODGERBLUE);
-                circle.setStrokeWidth(3);
+                circle.setStrokeWidth(1);
             } else {
                 circle.setFill(Color.LIGHTGRAY);
                 circle.setStroke(Color.BLACK);
@@ -356,6 +380,15 @@ public class GraphView extends Pane {
      * @param active true to display the crosshair cursor, false to restore the default cursor
      */
     public void setEdgeCreationMode(boolean active) {
+        setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
+    }
+
+    /**
+     * Sets the cursor used while deletion mode is active.
+     *
+     * @param active true to display the crosshair cursor, false to restore the default cursor
+     */
+    public void setDeleteMode(boolean active) {
         setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
     }
 }

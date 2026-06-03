@@ -1,6 +1,8 @@
 module:ProjetGenieLogiciel
 fr.projet
+fr.projet.controller
 fr.projet.model
 fr.projet.pathfinding
 fr.projet.simulation
 fr.projet.ui
+fr.projet.view
