@@ -32,6 +32,9 @@ public class GraphView extends Pane {
     /** Graph currently rendered by the view */
     private Graph graph;
 
+    /** Stores how many agents are displayed at the same visual position */
+    private final Map<String, Integer> positionCounts = new HashMap<>();
+
     /**
      * Creates the view and prepares background click handling.
      */
@@ -251,6 +254,7 @@ public class GraphView extends Pane {
      * Redraws agents using their current progress on edges.
      */
     private void redrawAgents() {
+        positionCounts.clear();
 
         agentViews.values().forEach(getChildren()::remove);
         agentViews.clear();
@@ -258,7 +262,7 @@ public class GraphView extends Pane {
         for (Agent agent : currentAgents) {
 
             Circle agentCircle = new Circle(10);
-            agentCircle.setFill(Color.RED);
+            agentCircle.setFill(getAgentColor(agent));
             agentCircle.setStroke(Color.BLACK);
             agentCircle.setMouseTransparent(true);
 
@@ -306,11 +310,37 @@ public class GraphView extends Pane {
                 y = currentNodeCircle.getCenterY();
             }
 
+            String key = Math.round(x) + ":" + Math.round(y);
+            int index = positionCounts.getOrDefault(key, 0);
+            positionCounts.put(key, index + 1);
+
+            // Offset is the visual spacing applied to elements when they would otherwise be displayed in the same location
+            double offset = 8.0;
+            double angle = index * (Math.PI / 3);
+
+            x += Math.cos(angle) * offset;
+            y += Math.sin(angle) * offset;
+
             agentCircle.setCenterX(x);
             agentCircle.setCenterY(y);
 
             agentViews.put(agent, agentCircle);
             getChildren().add(agentCircle);
         }
+    }
+
+    // =====================================================
+    // EDITING THE GRAPH ON THE INTERFACE
+    // =====================================================
+
+    /**
+     * Returns a stable color for an agent based on its id.
+     * Each color is different
+     *
+     * @param agent agent to color
+     * @return display color
+     */
+    private Color getAgentColor(Agent agent) {
+        return Color.hsb((agent.getId() * 47) % 360, 0.85, 0.95);
     }
 }
