@@ -9,8 +9,9 @@ import javafx.scene.layout.HBox;
  */
 public class ToolBox extends HBox {
 
+    public final Button addNodeBtn = new Button("Add Node");
+    public final Button addEdgeBtn = new Button("Add Edge");
     public final Button addAgentBtn = new Button("Add Agent");
-
     public final Button startBtn = new Button("Start");
     public final Button pauseBtn = new Button("Pause");
     public final Button resetBtn = new Button("Reset");
@@ -23,6 +24,8 @@ public class ToolBox extends HBox {
         setSpacing(10);
 
         getChildren().addAll(
+                addNodeBtn,
+                addEdgeBtn,
                 addAgentBtn,
                 startBtn,
                 pauseBtn,

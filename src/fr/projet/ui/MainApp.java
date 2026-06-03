@@ -62,6 +62,10 @@ public class MainApp extends Application {
         }));
         timeline.setCycleCount(Animation.INDEFINITE);
 
+        toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
+        toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
+        toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
+
         toolBox.startBtn.setOnAction(e -> timeline.play());
         toolBox.pauseBtn.setOnAction(e -> timeline.pause());
         toolBox.resetBtn.setOnAction(e -> {
@@ -77,10 +81,6 @@ public class MainApp extends Application {
             view.renderAgents(engine.getAgents());
             tickLabel.setText("Tick: " + engine.getCurrentTick());
         });
-
-        toolBox.addAgentBtn.setOnAction(e ->
-                graphController.createAgentAtSelectedNode(engine)
-        );
 
         // =========================
         // LAYOUT

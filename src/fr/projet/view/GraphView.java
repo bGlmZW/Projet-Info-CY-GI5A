@@ -6,8 +6,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+import javafx.geometry.Point2D;
 import java.util.function.Consumer;
 
 import java.util.*;
@@ -329,10 +330,6 @@ public class GraphView extends Pane {
         }
     }
 
-    // =====================================================
-    // EDITING THE GRAPH ON THE INTERFACE
-    // =====================================================
-
     /**
      * Returns a stable color for an agent based on its id.
      * Each color is different
@@ -342,5 +339,23 @@ public class GraphView extends Pane {
      */
     private Color getAgentColor(Agent agent) {
         return Color.hsb((agent.getId() * 47) % 360, 0.85, 0.95);
+    }
+
+    /**
+     * Sets the cursor used while the node creation mode is active.
+     *
+     * @param active true to display the crosshair cursor, false to restore the default cursor
+     */
+    public void setNodeCreationMode(boolean active) {
+        setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
+    }
+
+    /**
+     * Sets the cursor used while an editing mode is active.
+     *
+     * @param active true to display the crosshair cursor, false to restore the default cursor
+     */
+    public void setEdgeCreationMode(boolean active) {
+        setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
     }
 }

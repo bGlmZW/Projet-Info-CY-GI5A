@@ -31,6 +31,12 @@ public class GraphController {
     /** Currently selected node, used to create an edge with a second click */
     private Node selectedNode;
 
+    /** Indicates whether the controller is waiting for a click to create a node */
+    private boolean nodeCreationMode;
+
+    /** Indicates whether the controller is waiting for two nodes to create an edge */
+    private boolean edgeCreationMode;
+
     /**
      * Creates a controller bound to a graph instance.
      *
@@ -81,10 +87,21 @@ public class GraphController {
      */
     public void handleNodeClicked(Node clickedNode) {
 
-        if (clickedNode == null) {
+        if (clickedNode == null || nodeCreationMode) {
             return;
         }
 
+        // Normal selection outside edge mode
+        if (!edgeCreationMode) {
+            selectedNode = clickedNode;
+
+            if (view != null) {
+                view.setSelectedNode(clickedNode);
+            }
+            return;
+        }
+
+        // First click in edge mode: select the source node
         if (selectedNode == null) {
             selectedNode = clickedNode;
 
@@ -94,11 +111,10 @@ public class GraphController {
             return;
         }
 
+        // Clicking the same node does not create an edge
         if (selectedNode.equals(clickedNode)) {
-            selectedNode = null;
-
             if (view != null) {
-                view.clearSelection();
+                view.setSelectedNode(clickedNode);
             }
             return;
         }
@@ -127,6 +143,7 @@ public class GraphController {
         }
 
         selectedNode = null;
+        disableEdgeCreationMode();
 
         if (view != null) {
             view.clearSelection();
@@ -160,6 +177,21 @@ public class GraphController {
             return;
         }
 
+        // Clicking on empty space cancels edge creation mode.
+        if (edgeCreationMode) {
+            selectedNode = null;
+            disableEdgeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+
+        if (!nodeCreationMode) {
+            return;
+        }
+
         // Reset selection so UI does not stay "stuck" on a node
         selectedNode = null;
 
@@ -173,6 +205,7 @@ public class GraphController {
         node.setY(clickPosition.getY());
 
         graph.addNode(node);
+        disableNodeCreationMode();
 
         if (view != null) {
             view.renderGraph(graph);
@@ -271,6 +304,64 @@ public class GraphController {
         if (view != null) {
             view.clearSelection();
             view.renderAgents(engine.getAgents());
+        }
+    }
+
+    // =====================================================
+    // NODE CREATION
+    // =====================================================
+
+    /**
+     * Enables node creation mode.
+     * The next click on the graph background will create a new node.
+     */
+    public void enableNodeCreationMode() {
+        nodeCreationMode = true;
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.setNodeCreationMode(true); // Used to change the cursor
+        }
+    }
+
+    /**
+     * Disables node creation mode and restores the normal cursor.
+     */
+    public void disableNodeCreationMode() {
+        nodeCreationMode = false;
+
+        if (view != null) {
+            view.setNodeCreationMode(false);
+        }
+    }
+
+    // =====================================================
+    // EDGE CREATION
+    // =====================================================
+
+    /**
+     * Enables edge creation mode.
+     * The next two node clicks will be used to create an edge.
+     */
+    public void enableEdgeCreationMode() {
+        edgeCreationMode = true;
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.setEdgeCreationMode(true);
+        }
+    }
+
+    /**
+     * Disables edge creation mode and restores the normal cursor.
+     */
+    public void disableEdgeCreationMode() {
+        edgeCreationMode = false;
+
+        if (view != null) {
+            view.setEdgeCreationMode(false);
         }
     }
 }
