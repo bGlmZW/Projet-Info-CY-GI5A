@@ -79,12 +79,35 @@ public class SimulationEngine {
     }
 
     /**
-     * Removes an agent from the simulation.
+     * Removes an agent from the simulation entirely.
+     * This method removes the agent from the simulation's managed list and 
+     * clears its physical presence from the graph's nodes and edges.
      *
      * @param agent agent to remove
      */
     public void removeAgent(Agent agent) {
-        agents.remove(agent);
+        if (agent == null) return;
+
+        // 1. Remove the agent from the simulation engine's global list
+        this.agents.remove(agent);
+
+        // 2. Remove the agent from its current node (WAITING or ARRIVED state)
+        if (agent.getCurrentPosition() != null) {
+            agent.getCurrentPosition().getAgents().remove(agent);
+        }
+
+        // 3. Remove the agent from the edge it is currently traversing (MOVING state)
+        if (agent.getState() == State.MOVING && agent.getNextNode() != null) {
+            List<Edge> edges = graph.getEdges(agent.getCurrentPosition());
+            if (edges != null) {
+                for (Edge edge : edges) {
+                    if (edge.getDestination().equals(agent.getNextNode())) {
+                        edge.getAgents().remove(agent);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**
