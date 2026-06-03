@@ -1,5 +1,7 @@
 package fr.projet.ui;
 
+// import fr.projet.ui.HelpDialog;
+
 import fr.projet.controller.GraphController;
 import fr.projet.controller.SimulationController;
 import fr.projet.model.Graph;
@@ -81,6 +83,8 @@ public class MainApp extends Application {
             view.renderAgents(engine.getAgents());
             tickLabel.setText("Tick: " + engine.getCurrentTick());
         });
+
+        toolBox.helpBtn.setOnAction(e -> HelpDialog.show());
 
         // =========================
         // LAYOUT

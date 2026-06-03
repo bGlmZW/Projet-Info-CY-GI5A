@@ -87,12 +87,25 @@ public class GraphController {
      */
     public void handleNodeClicked(Node clickedNode) {
 
-        if (clickedNode == null || nodeCreationMode) {
+        if (clickedNode == null) {
+            return;
+        }
+
+        if (nodeCreationMode) {
             return;
         }
 
         // Normal selection outside edge mode
         if (!edgeCreationMode) {
+            if (selectedNode != null && selectedNode.equals(clickedNode)) {
+                selectedNode = null;
+
+                if (view != null) {
+                    view.clearSelection();
+                }
+                return;
+            }
+
             selectedNode = clickedNode;
 
             if (view != null) {
@@ -113,6 +126,8 @@ public class GraphController {
 
         // Clicking the same node does not create an edge
         if (selectedNode.equals(clickedNode)) {
+            selectedNode = null;
+
             if (view != null) {
                 view.setSelectedNode(clickedNode);
             }

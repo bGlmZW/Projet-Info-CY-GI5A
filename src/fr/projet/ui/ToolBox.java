@@ -15,6 +15,7 @@ public class ToolBox extends HBox {
     public final Button startBtn = new Button("Start");
     public final Button pauseBtn = new Button("Pause");
     public final Button resetBtn = new Button("Reset");
+    public final Button helpBtn = new Button("Help");
 
     /**
      * Creates the toolbar with all simulation and editing buttons.
@@ -23,13 +24,16 @@ public class ToolBox extends HBox {
 
         setSpacing(10);
 
+        helpBtn.setStyle("-fx-font-weight: bold;");
+
         getChildren().addAll(
                 addNodeBtn,
                 addEdgeBtn,
                 addAgentBtn,
                 startBtn,
                 pauseBtn,
-                resetBtn
+                resetBtn,
+                helpBtn
         );
     }
 }
