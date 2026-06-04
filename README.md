@@ -18,24 +18,38 @@ Application JavaFX permettant de visualiser le déplacement d'agents dans un gra
 ### Avec Eclipse
 
 1. Cloner le dépôt :
-   ```bash
-   git clone <url-du-repo>
-   ```
+```bash
+   git clone <url-du-repo> ProjetGenieLogiciel
+```
 
-2. Dans Eclipse : **File → Import → Existing Projects into Workspace**, sélectionner le dossier cloné.
+2. Dans Eclipse : **File → New → Java Project**
+   - Décocher **"Use default location"**
+   - Dans Location, pointer vers le dossier cloné
+   - Cliquer **Next** puis **Finish**
 
-3. Configurer JavaFX dans le projet :
+3. Configurer JavaFX dans le Build Path :
    - Clic droit sur le projet → **Build Path → Configure Build Path**
-   - Onglet **Libraries → Add External JARs**
+   - Onglet **Libraries → Modulepath → Add External JARs**
    - Sélectionner tous les `.jar` dans le dossier `lib/` du SDK JavaFX téléchargé
+   - **Apply and Close**
 
-4. Ajouter les VM arguments pour JavaFX :
-   - Clic droit sur le projet → **Run As → Run Configurations**
-   - Onglet **Arguments → VM arguments** :
-     ```
-     --module-path /chemin/vers/javafx-sdk-21/lib --add-modules javafx.controls,javafx.graphics
-     ```
-   - Remplacer `/chemin/vers/javafx-sdk-21` par le chemin réel sur votre machine
+4. Mettre à jour le fichier `src/module-info.java` — Eclipse en génère un vide
+   au moment de la création du projet, remplacer son contenu par :
+```java
+   module <nom_du_projet> {
+       requires transitive javafx.controls;
+       requires transitive javafx.graphics;
+
+       exports fr.projet;
+       exports fr.projet.model;
+       exports fr.projet.pathfinding;
+       exports fr.projet.simulation;
+       exports fr.projet.ui;
+       exports fr.projet.controller;
+       exports fr.projet.view;
+   }
+```
+   En remplaçant `<nom_du_projet>` par le nom généré par Eclipse (visible en haut du fichier).
 
 5. Lancer `MainApp.java` (dans `src/fr/projet/ui/`) via **Run As → Java Application**
 
