@@ -78,7 +78,7 @@ public class Graph {
 
         // Store the reverse edge too when the connection is considered undirected.
         if (!edge.isOriented()) {
-            Edge reverse = new Edge(destination, source, edge.getDistance());
+            Edge reverse = new Edge(destination, source, edge.getDistance(), edge.getCapacity());
             reverse.setOriented(false);
             adjacencyList.get(destination).add(reverse);
         }
@@ -92,6 +92,26 @@ public class Graph {
      */
     public List<Edge> getEdges(Node node) {
         return adjacencyList.getOrDefault(node, new ArrayList<>());
+    }
+    
+    /**
+     * Returns the edge between two nodes identified by their ids.
+     *
+     * @param idNodeSource      id of the source node
+     * @param idNodeDestination id of the destination node
+     * @return the matching edge, or null if not found
+     */
+    public Edge getEdgeById(int idNodeSource, int idNodeDestination) {
+        for (Map.Entry<Node, List<Edge>> entry : adjacencyList.entrySet()) {
+            if (entry.getKey().getId() == idNodeSource) {
+                for (Edge edge : entry.getValue()) {
+                    if (edge.getDestination().getId() == idNodeDestination) {
+                        return edge;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**

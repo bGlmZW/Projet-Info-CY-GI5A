@@ -2,6 +2,7 @@ package fr.projet.model;
 
 import java.util.List;
 import java.util.ArrayList;
+import fr.projet.model.*;
 
 /**
  * Represents a directed or undirected connection between two nodes in the graph.
@@ -35,14 +36,20 @@ public class Edge {
      * @param destination ending node
      * @param distance    cost or distance of the edge
      */
-    public Edge(Node source, Node destination, double distance) {
+    public Edge(Node source, Node destination, double distance, int capacity) {
         this.source = source;
         this.destination = destination;
         this.distance = distance;
         this.oriented = false;
-        this.capacity = Integer.MAX_VALUE;
+        this.capacity = capacity;
         this.agents = new ArrayList<>();
     }
+    
+    
+    public Edge(Node source, Node destination, double distance) {
+        this(source, destination, distance, Integer.MAX_VALUE);
+    }
+    
 
     /**
      * Returns the source node of the edge.
@@ -150,5 +157,40 @@ public class Edge {
      */
     public void setAgents(List<Agent> agents) {
         this.agents = agents;
+    }
+    
+    /**
+     * Checks whether the given agent is currently on this edge.
+     *
+     * @param agent the agent to check
+     * @return true if the agent is present on this edge, false otherwise
+     */
+    public boolean containsAgent(Agent agent) {
+        return agents.contains(agent);
+    }
+
+    /**
+     * Adds an agent to this edge if it is not already present.
+     *
+     * @param agent the agent to add
+     */
+    public void addAgent(Agent agent) {
+        if (!agents.contains(agent)) {
+            agents.add(agent);
+        }
+    }
+
+    /**
+     * Removes an agent from this edge.
+     *
+     * @param agent the agent to remove
+     */
+    public void removeAgent(Agent agent) {
+        agents.remove(agent);
+    }
+    
+    @Override
+    public String toString() {
+        return "Edge [" + source.getId() + " ," + destination.getId() + "] -> {Capacity = " + capacity + " ;" +  "Agents = " + agents;
     }
 }

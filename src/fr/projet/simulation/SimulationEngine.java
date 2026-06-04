@@ -115,31 +115,45 @@ public class SimulationEngine {
      * Moves the agent along the shortest path toward its destination.
      * The agent progresses on the current edge according to its speed.
      * When the edge is fully traversed, the agent moves to the next node.
+     * If the edge is at full capacity, the agent waits until a spot is available.
      *
      * @param agent the agent to move
      */
     public void moveAgent(Agent agent) {
-
+    	
+    	// Agent already arrived, nothing to do
+        if (agent.getState() == State.ARRIVED) {
+            return;
+        }
+        
+        // Agent has reached its destination
         if (agent.getCurrentPosition().equals(agent.getDestination())) {
             agent.setState(State.ARRIVED);
             return;
         }
 
+        // Edge was full last tick, retry this tick
+        if (agent.getState() == State.WAITING) {
+            agent.setState(State.MOVING); // reset pour réessayer normalement
+        }
+
+        // Compute the shortest path from current position to destination
         List<Node> path = pathFinder.findPath(
                 agent.getCurrentPosition(),
                 agent.getDestination()
         );
 
+        // No valid path found
         if (path == null || path.size() < 2) {
             return;
         }
 
+        // The next node to reach is the second node in the path
         Node nextNode = path.get(1);
-
         agent.setNextNode(nextNode);
 
+        // Find the edge leading to the next node
         Edge edge = null;
-
         for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
             if (e.getDestination().equals(nextNode)) {
                 edge = e;
@@ -147,18 +161,30 @@ public class SimulationEngine {
             }
         }
 
+        // No edge found toward the next node
         if (edge == null) return;
 
-        // progression réelle
-        double progress = agent.getProgressOnEdge() + agent.getSpeed();
+        // If the agent is not yet on the edge, check capacity before entering
+        if (!edge.containsAgent(agent)) {
+            if (edge.getAgents().size() >= edge.getCapacity()) {
+                // Edge is full, agent must wait
+                agent.setState(State.WAITING);
+                return;
+            }
+            // Agent enters the edge
+            edge.addAgent(agent);
+        }
 
+        // Update agent progress along the edge
+        double progress = agent.getProgressOnEdge() + agent.getSpeed();
         agent.setProgressOnEdge(progress);
 
-        // poids = temps nécessaire
+        // Agent has fully traversed the edge
         if (progress >= edge.getDistance()) {
-
+            edge.removeAgent(agent);
             agent.setCurrentPosition(nextNode);
             agent.setProgressOnEdge(0.0);
+            return;
         }
 
         agent.setState(State.MOVING);
@@ -196,6 +222,7 @@ public class SimulationEngine {
             updateAgent(agent);
             System.out.println(agent);
         }
+        System.out.println((Object) graph.getEdgeById(3, 4));
     }
 
     /**
