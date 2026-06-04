@@ -1,6 +1,10 @@
 package fr.projet.controller;
 
 import fr.projet.view.GraphView;
+import javafx.scene.control.ChoiceDialog;
+import fr.projet.pathfinding.PathFinder;
+import fr.projet.pathfinding.PathFinderFactory;
+import fr.projet.pathfinding.PathFinderType;
 
 import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
@@ -346,6 +350,24 @@ public class GraphController {
         } catch (NumberFormatException e) {
             speed = 1.0;
         }
+        
+     // Algorithm selection
+        ChoiceDialog<PathFinderType> algoDialog = new ChoiceDialog<>(
+                PathFinderType.DIJKSTRA,
+                java.util.Arrays.asList(PathFinderType.values())
+        );
+        algoDialog.setTitle("Create Agent");
+        algoDialog.setHeaderText("Choose pathfinding algorithm");
+        algoDialog.setContentText("Algorithm:");
+
+        Optional<PathFinderType> algoResult = algoDialog.showAndWait();
+        if (algoResult.isEmpty()) {
+            return;
+        }
+
+        PathFinderType algoType = algoResult.get();
+        PathFinder agentPathFinder = PathFinderFactory.create(algoType, graph);
+
 
         // ID generation
         int newId = engine.getAgents().stream()
@@ -354,7 +376,7 @@ public class GraphController {
             .orElse(0) + 1;
 
         Agent agent = new Agent(newId, speed, selectedNode, destination);
-
+        agent.setPathFinder(agentPathFinder); // ligne à ajouter
         engine.addAgent(agent);
 
         // Clear the selection after creating the agent so the UI goes back to a neutral state

@@ -125,43 +125,58 @@ public class SimulationEngine {
             return;
         }
 
-        List<Node> path = pathFinder.findPath(
-                agent.getCurrentPosition(),
-                agent.getDestination()
-        );
+        double remainingSpeed = agent.getSpeed();
 
-        if (path == null || path.size() < 2) {
-            return;
-        }
+        while (remainingSpeed > 0) {
 
-        Node nextNode = path.get(1);
-
-        agent.setNextNode(nextNode);
-
-        Edge edge = null;
-
-        for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
-            if (e.getDestination().equals(nextNode)) {
-                edge = e;
+            if (agent.getCurrentPosition().equals(agent.getDestination())) {
+                agent.setState(State.ARRIVED);
                 break;
+            }
+
+            PathFinder agentPathFinder = agent.getPathFinder() != null
+                    ? agent.getPathFinder()
+                    : pathFinder; // fallback sur le pathfinder global de l'engine
+            List<Node> path = agentPathFinder.findPath(
+                    agent.getCurrentPosition(),
+                    agent.getDestination()
+            );
+
+            if (path == null || path.size() < 2) break;
+
+            Node nextNode = path.get(1);
+            agent.setNextNode(nextNode);
+
+            Edge edge = null;
+            for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+                if (e.getDestination().equals(nextNode)) {
+                    edge = e;
+                    break;
+                }
+            }
+
+            if (edge == null) break;
+
+            double progress = agent.getProgressOnEdge() + remainingSpeed;
+
+            if (progress >= edge.getDistance()) {
+                // L'agent traverse entièrement l'arête
+                double surplus = progress - edge.getDistance();
+                agent.setCurrentPosition(nextNode);
+                agent.setProgressOnEdge(0.0);
+                remainingSpeed = surplus; // on continue avec le surplus
+            } else {
+                // L'agent s'arrête en cours d'arête
+                agent.setProgressOnEdge(progress);
+                remainingSpeed = 0;
             }
         }
 
-        if (edge == null) return;
-
-        // progression réelle
-        double progress = agent.getProgressOnEdge() + agent.getSpeed();
-
-        agent.setProgressOnEdge(progress);
-
-        // poids = temps nécessaire
-        if (progress >= edge.getDistance()) {
-
-            agent.setCurrentPosition(nextNode);
-            agent.setProgressOnEdge(0.0);
-        }
-
-        agent.setState(State.MOVING);
+        agent.setState(
+            agent.getCurrentPosition().equals(agent.getDestination())
+                ? State.ARRIVED
+                : State.MOVING
+        );
     }
     
     /**

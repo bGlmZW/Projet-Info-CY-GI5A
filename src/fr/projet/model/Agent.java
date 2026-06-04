@@ -1,5 +1,7 @@
 package fr.projet.model;
 
+import fr.projet.pathfinding.PathFinder;
+
 /**
  * Represents an agent moving through the graph.
  */
@@ -34,6 +36,8 @@ public class Agent {
 
     /** Index of the next node to reach in the current path */
     private int pathIndex = 0;
+    
+    private PathFinder pathFinder ;
 
     /**
      * Creates a new agent.
@@ -126,6 +130,16 @@ public class Agent {
      * @param state new state
      */
     public void setState(State state) { this.state = state; }
+    
+    
+
+    public void setPathFinder(PathFinder pathFinder) {
+        this.pathFinder = pathFinder;
+    }
+    
+    public PathFinder getPathFinder() {
+        return pathFinder;
+    }
 
     /**
      * Returns the progress of the agent on the current edge.
