@@ -1,5 +1,7 @@
 package fr.projet.model;
 
+import fr.projet.pathfinding.PathFinder;
+
 /**
  * Represents an agent moving through the graph.
  */
@@ -35,6 +37,8 @@ public class Agent {
     /** Index of the next node to reach in the current path */
     private int pathIndex = 0;
 
+    private PathFinder pathFinder;
+
     /**
      * Creates a new agent.
      *
@@ -69,98 +73,142 @@ public class Agent {
      *
      * @param id new identifier
      */
-    public void setId(int id) { this.id = id; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
     /**
      * Returns the maximum movement speed of the agent.
      *
      * @return speed
      */
-    public double getSpeed() { return speed; }
+    public double getSpeed() {
+        return speed;
+    }
 
     /**
      * Sets the maximum movement speed of the agent.
      *
      * @param speed new speed value
      */
-    public void setSpeed(double speed) { this.speed = speed; }
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
 
     /**
      * Returns the current position node of the agent.
      *
      * @return current node
      */
-    public Node getCurrentPosition() { return currentPosition; }
+    public Node getCurrentPosition() {
+        return currentPosition;
+    }
 
     /**
      * Sets the current position node of the agent.
      *
      * @param currentPosition new current node
      */
-    public void setCurrentPosition(Node currentPosition) { this.currentPosition = currentPosition; }
+    public void setCurrentPosition(Node currentPosition) {
+        this.currentPosition = currentPosition;
+    }
 
     /**
      * Returns the destination node of the agent.
      *
      * @return destination node
      */
-    public Node getDestination() { return destination; }
+    public Node getDestination() {
+        return destination;
+    }
 
     /**
      * Sets the destination node of the agent.
      *
      * @param destination new destination node
      */
-    public void setDestination(Node destination) { this.destination = destination; }
+    public void setDestination(Node destination) {
+        this.destination = destination;
+    }
 
     /**
      * Returns the current state of the agent.
      *
      * @return current state
      */
-    public State getState() { return state; }
+    public State getState() {
+        return state;
+    }
 
     /**
      * Sets the current state of the agent.
      *
      * @param state new state
      */
-    public void setState(State state) { this.state = state; }
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    /**
+     * 
+     * @param pathFinder
+     */
+    public void setPathFinder(PathFinder pathFinder) {
+        this.pathFinder = pathFinder;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public PathFinder getPathFinder() {
+        return pathFinder;
+    }
 
     /**
      * Returns the progress of the agent on the current edge.
      *
      * @return distance already traveled on the current edge
      */
-    public double getProgressOnEdge() { return progressOnEdge; }
+    public double getProgressOnEdge() {
+        return progressOnEdge;
+    }
 
     /**
      * Sets the progress of the agent on the current edge.
      *
      * @param progressOnEdge distance already traveled
      */
-    public void setProgressOnEdge(double progressOnEdge) { this.progressOnEdge = progressOnEdge; }
+    public void setProgressOnEdge(double progressOnEdge) {
+        this.progressOnEdge = progressOnEdge;
+    }
 
     /**
      * Returns the next node the agent is heading to.
      *
      * @return next node
      */
-    public Node getNextNode() { return nextNode; }
+    public Node getNextNode() {
+        return nextNode;
+    }
 
     /**
      * Sets the next node the agent is heading to.
      *
      * @param nextNode next target node
      */
-    public void setNextNode(Node nextNode) { this.nextNode = nextNode; }
+    public void setNextNode(Node nextNode) {
+        this.nextNode = nextNode;
+    }
 
     /**
      * Returns the initial position of the agent.
      *
      * @return initial node
      */
-    public Node getInitialPosition() { return initialPosition; }
+    public Node getInitialPosition() {
+        return initialPosition;
+    }
 
     /**
      * Returns the current path followed by the agent.

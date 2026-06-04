@@ -4,6 +4,7 @@ import fr.projet.view.GraphView;
 
 import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
 
 import java.util.Optional;
@@ -11,8 +12,12 @@ import java.util.Optional;
 import fr.projet.model.Edge;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
+import fr.projet.pathfinding.PathFinder;
+import fr.projet.pathfinding.PathFinderFactory;
+import fr.projet.pathfinding.PathFinderType;
 import fr.projet.model.Agent;
-
+import fr.projet.model.AgentFactory;
+import fr.projet.model.AgentType;
 import fr.projet.simulation.SimulationEngine;
 
 
@@ -30,6 +35,15 @@ public class GraphController {
 
     /** Currently selected node, used to create an edge with a second click */
     private Node selectedNode;
+
+    /** Indicates whether the controller is waiting for a click to create a node */
+    private boolean nodeCreationMode;
+
+    /** Indicates whether the controller is waiting for two nodes to create an edge */
+    private boolean edgeCreationMode;
+    
+    /** Indicates whether the controller is waiting for a deletion click */
+    private boolean deleteMode;
 
     /**
      * Creates a controller bound to a graph instance.
@@ -85,6 +99,42 @@ public class GraphController {
             return;
         }
 
+        if (deleteMode) {
+            graph.removeNode(clickedNode);
+            selectedNode = null;
+            disableDeleteMode();
+
+            if (view != null) {
+                view.clearSelection();
+                view.renderGraph(graph);
+            }
+            return;
+        }
+
+        if (nodeCreationMode) {
+            return;
+        }
+
+        // Normal selection outside edge mode
+        if (!edgeCreationMode) {
+            if (selectedNode != null && selectedNode.equals(clickedNode)) {
+                selectedNode = null;
+
+                if (view != null) {
+                    view.clearSelection();
+                }
+                return;
+            }
+
+            selectedNode = clickedNode;
+
+            if (view != null) {
+                view.setSelectedNode(clickedNode);
+            }
+            return;
+        }
+
+        // First click in edge mode: select the source node
         if (selectedNode == null) {
             selectedNode = clickedNode;
 
@@ -94,11 +144,12 @@ public class GraphController {
             return;
         }
 
+        // Clicking the same node does not create an edge
         if (selectedNode.equals(clickedNode)) {
             selectedNode = null;
 
             if (view != null) {
-                view.clearSelection();
+                view.setSelectedNode(clickedNode);
             }
             return;
         }
@@ -127,6 +178,26 @@ public class GraphController {
         }
 
         selectedNode = null;
+        disableEdgeCreationMode();
+
+        if (view != null) {
+            view.clearSelection();
+            view.renderGraph(graph);
+        }
+    }
+
+    /**
+     * Handles a click on an edge and removes it when deletion mode is active.
+     *
+     * @param clickedEdge edge clicked by the user
+     */
+    public void handleEdgeClicked(Edge clickedEdge) {
+        if (!deleteMode || clickedEdge == null) {
+            return;
+        }
+
+        graph.removeEdge(clickedEdge.getSource(), clickedEdge.getDestination());
+        disableDeleteMode();
 
         if (view != null) {
             view.clearSelection();
@@ -160,6 +231,31 @@ public class GraphController {
             return;
         }
 
+        // Disable delete mode if clicking in an empty area
+        if (deleteMode) {
+            disableDeleteMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+
+        // Clicking on empty space cancels edge creation mode.
+        if (edgeCreationMode) {
+            selectedNode = null;
+            disableEdgeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+
+        if (!nodeCreationMode) {
+            return;
+        }
+
         // Reset selection so UI does not stay "stuck" on a node
         selectedNode = null;
 
@@ -173,6 +269,7 @@ public class GraphController {
         node.setY(clickPosition.getY());
 
         graph.addNode(node);
+        disableNodeCreationMode();
 
         if (view != null) {
             view.renderGraph(graph);
@@ -191,7 +288,7 @@ public class GraphController {
     }
 
     /**
-     * Creates an agent on the currently selected node and assigns a destination and speed.
+     * Creates an agent on the currently selected node and assigns a destination, speed and pathfinding algorithm.
      *
      * @param engine simulation engine used to store the new agent
      */
@@ -222,7 +319,6 @@ public class GraphController {
         }
 
         int destinationId;
-
         try {
             destinationId = Integer.parseInt(destResult.get().trim());
         } catch (NumberFormatException e) {
@@ -230,39 +326,97 @@ public class GraphController {
         }
 
         Node destination = graph.getNodeById(destinationId);
-
         if (destination == null || destination.equals(selectedNode)) {
             return;
         }
 
-        // Speed input
-        TextInputDialog speedDialog = new TextInputDialog("1.0");
-        speedDialog.setTitle("Create Agent");
-        speedDialog.setHeaderText("Enter agent speed");
-        speedDialog.setContentText("Speed:");
+        // Agent type selection
+        ChoiceDialog<AgentType> typeDialog = new ChoiceDialog<>(
+                AgentType.NORMAL,
+                java.util.Arrays.asList(AgentType.values())
+        );
+        typeDialog.setTitle("Create Agent");
+        typeDialog.setHeaderText("Choose agent type");
+        typeDialog.setContentText("Type:");
 
-        Optional<String> speedResult = speedDialog.showAndWait();
-
-        if (speedResult.isEmpty()) {
+        Optional<AgentType> typeResult = typeDialog.showAndWait();
+        if (typeResult.isEmpty()) {
             return;
         }
 
-        double speed;
+        AgentType agentType = typeResult.get();
 
-        try {
-            speed = Double.parseDouble(speedResult.get().trim());
-        } catch (NumberFormatException e) {
-            speed = 1.0;
+        // Custom speed input only for CUSTOM SPEED choice
+        double customSpeed = 1.0;
+        boolean useCustomSpeed = false;
+
+        // If you want a custom speed option, keep this small extra dialog
+        ChoiceDialog<String> speedModeDialog = new ChoiceDialog<>(
+                "DEFAULT",
+                "DEFAULT",
+                "CUSTOM SPEED"
+        );
+        speedModeDialog.setTitle("Create Agent");
+        speedModeDialog.setHeaderText("Speed mode");
+        speedModeDialog.setContentText("Speed:");
+
+        Optional<String> speedModeResult = speedModeDialog.showAndWait();
+        if (speedModeResult.isEmpty()) {
+            return;
         }
+
+        if ("CUSTOM SPEED".equals(speedModeResult.get())) {
+            TextInputDialog speedDialog = new TextInputDialog("1.0");
+            speedDialog.setTitle("Create Agent");
+            speedDialog.setHeaderText("Enter agent speed");
+            speedDialog.setContentText("Speed:");
+
+            Optional<String> speedResult = speedDialog.showAndWait();
+            if (speedResult.isEmpty()) {
+                return;
+            }
+
+            try {
+                customSpeed = Double.parseDouble(speedResult.get().trim());
+                useCustomSpeed = true;
+            } catch (NumberFormatException e) {
+                customSpeed = 1.0;
+                useCustomSpeed = true;
+            }
+        }
+
+        // Algorithm selection
+        ChoiceDialog<PathFinderType> algoDialog = new ChoiceDialog<>(
+                PathFinderType.DIJKSTRA,
+                java.util.Arrays.asList(PathFinderType.values())
+        );
+        algoDialog.setTitle("Create Agent");
+        algoDialog.setHeaderText("Choose pathfinding algorithm");
+        algoDialog.setContentText("Algorithm:");
+
+        Optional<PathFinderType> algoResult = algoDialog.showAndWait();
+        if (algoResult.isEmpty()) {
+            return;
+        }
+
+        PathFinderType algoType = algoResult.get();
+        PathFinder agentPathFinder = PathFinderFactory.create(algoType, graph);
 
         // ID generation
         int newId = engine.getAgents().stream()
-            .mapToInt(Agent::getId)
-            .max()
-            .orElse(0) + 1;
+                .mapToInt(Agent::getId)
+                .max()
+                .orElse(0) + 1;
 
-        Agent agent = new Agent(newId, speed, selectedNode, destination);
+        Agent agent;
 
+        if (useCustomSpeed) {
+            agent = new Agent(newId, customSpeed, selectedNode, destination);
+        } else {
+            agent = AgentFactory.create(agentType, newId, selectedNode, destination);
+        }
+
+        agent.setPathFinder(agentPathFinder);
         engine.addAgent(agent);
 
         // Clear the selection after creating the agent so the UI goes back to a neutral state
@@ -271,6 +425,97 @@ public class GraphController {
         if (view != null) {
             view.clearSelection();
             view.renderAgents(engine.getAgents());
+        }
+    }
+
+    // =====================================================
+    // NODE CREATION
+    // =====================================================
+
+    /**
+     * Enables node creation mode.
+     * The next click on the graph background will create a new node.
+     */
+    public void enableNodeCreationMode() {
+        nodeCreationMode = true;
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.setNodeCreationMode(true); // Used to change the cursor
+        }
+    }
+
+    /**
+     * Disables node creation mode and restores the normal cursor.
+     */
+    public void disableNodeCreationMode() {
+        nodeCreationMode = false;
+
+        if (view != null) {
+            view.setNodeCreationMode(false);
+        }
+    }
+
+    // =====================================================
+    // EDGE CREATION
+    // =====================================================
+
+    /**
+     * Enables edge creation mode.
+     * The next two node clicks will be used to create an edge.
+     */
+    public void enableEdgeCreationMode() {
+        edgeCreationMode = true;
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.setEdgeCreationMode(true);
+        }
+    }
+
+    /**
+     * Disables edge creation mode and restores the normal cursor.
+     */
+    public void disableEdgeCreationMode() {
+        edgeCreationMode = false;
+
+        if (view != null) {
+            view.setEdgeCreationMode(false);
+        }
+    }
+
+    // =====================================================
+    // DELETE MODE
+    // =====================================================
+
+    /**
+     * Enables deletion mode.
+     * The next click on a node or an edge will remove it.
+     */
+    public void enableDeleteMode() {
+        deleteMode = true;
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.setDeleteMode(true);
+        }
+
+        // Deletion takes priority over creation modes.
+        disableNodeCreationMode();
+        disableEdgeCreationMode();
+    }
+
+    /**
+     * Disables deletion mode and restores the normal cursor.
+     */
+    public void disableDeleteMode() {
+        deleteMode = false;
+
+        if (view != null) {
+            view.setDeleteMode(false);
         }
     }
 }

@@ -52,11 +52,6 @@ public class Main {
 
         System.out.println();
 
-        // Expected:
-        // N1 -> N2 -> N3 -> N4
-
-
-
         // =====================================================
         // NODE REMOVAL TEST
         // =====================================================
@@ -66,14 +61,11 @@ public class Main {
         System.out.println("NODE REMOVAL TEST");
         System.out.println("=================================");
 
-        System.out.println("Neighbors of A before removal: "
-                + graph.getNeighbors(A).size());
+        System.out.println("Neighbors of A before removal: " + graph.getNeighbors(A).size());
 
         graph.removeNode(B);
 
-        System.out.println("Neighbors of A after removal: "
-                + graph.getNeighbors(A).size());
-
+        System.out.println("Neighbors of A after removal: " + graph.getNeighbors(A).size());
 
 
         // =====================================================
@@ -98,18 +90,11 @@ public class Main {
         movementGraph.addEdge(new Edge(B2, C2, 1));
         movementGraph.addEdge(new Edge(C2, D2, 1));
 
-        PathFinder movementFinder =
-                new DijkstraPathFinder(movementGraph);
+        PathFinder movementFinder = new DijkstraPathFinder(movementGraph);
 
-        SimulationEngine engine =
-                new SimulationEngine(movementGraph, movementFinder);
+        SimulationEngine engine = new SimulationEngine(movementGraph, movementFinder);
 
-        Agent agent = new Agent(
-                1,
-                1.0,
-                A2,
-                D2
-        );
+        Agent agent = new Agent(1, 1.0, A2, D2);
 
         engine.addAgent(agent);
 
@@ -123,10 +108,7 @@ public class Main {
         }
 
         System.out.println();
-        System.out.println("Final position: N"
-                + agent.getCurrentPosition().getId());
-
-        System.out.println("Final state: "
-                + agent.getState());
+        System.out.println("Final position: N" + agent.getCurrentPosition().getId());
+        System.out.println("Final state: " + agent.getState());
     }
 }

@@ -1,5 +1,7 @@
 package fr.projet.ui;
 
+// import fr.projet.ui.HelpDialog;
+
 import fr.projet.controller.GraphController;
 import fr.projet.controller.SimulationController;
 import fr.projet.model.Graph;
@@ -8,8 +10,6 @@ import fr.projet.simulation.SimulationEngine;
 import fr.projet.view.GraphView;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -42,6 +42,7 @@ public class MainApp extends Application {
 
         GraphView view = new GraphView();
         graphController.attachView(view);
+        view.setEdgeClickHandler(graphController::handleEdgeClicked);
         view.setNodeClickHandler(graphController::handleNodeClicked);
 
         view.renderGraph(graph);
@@ -50,47 +51,48 @@ public class MainApp extends Application {
         // =========================
         // UI
         // =========================
-        Label tickLabel = new Label("Tick: 0");
-        Button nextTickBtn = new Button("Next Tick");
-
         ToolBox toolBox = new ToolBox();
+        SimulationBar simulationBar = new SimulationBar();
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
             engine.tick();
             view.renderAgents(engine.getAgents());
-            tickLabel.setText("Tick: " + engine.getCurrentTick());
+            simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
         }));
         timeline.setCycleCount(Animation.INDEFINITE);
 
-        toolBox.startBtn.setOnAction(e -> timeline.play());
-        toolBox.pauseBtn.setOnAction(e -> timeline.pause());
-        toolBox.resetBtn.setOnAction(e -> {
+        toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
+        toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
+        toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
+        toolBox.deleteBtn.setOnAction(e -> graphController.enableDeleteMode());
+
+        simulationBar.startBtn.setOnAction(e -> timeline.play());
+        simulationBar.pauseBtn.setOnAction(e -> timeline.pause());
+        simulationBar.resetBtn.setOnAction(e -> {
             timeline.pause();
             engine.reset();
             view.renderGraph(graph);
             view.renderAgents(engine.getAgents());
-            tickLabel.setText("Tick: 0");
+            simulationBar.tickLabel.setText("Tick: 0");
         });
 
-        nextTickBtn.setOnAction(e -> {
+        simulationBar.nextTickBtn.setOnAction(e -> {
             engine.tick();
             view.renderAgents(engine.getAgents());
-            tickLabel.setText("Tick: " + engine.getCurrentTick());
+            simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
         });
 
-        toolBox.addAgentBtn.setOnAction(e ->
-                graphController.createAgentAtSelectedNode(engine)
-        );
+        toolBox.helpBtn.setOnAction(e -> HelpDialog.show());
 
         // =========================
         // LAYOUT
         // =========================
-        HBox controls = new HBox(10, nextTickBtn, tickLabel);
+        HBox bottomBar = simulationBar;
 
         BorderPane root = new BorderPane();
         root.setTop(toolBox);
         root.setCenter(view);
-        root.setBottom(controls);
+        root.setBottom(bottomBar);
 
         Scene scene = new Scene(root, 900, 600);
         stage.setTitle("Graph Simulation Demo");

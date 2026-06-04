@@ -6,8 +6,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+import javafx.geometry.Point2D;
 import java.util.function.Consumer;
 
 import java.util.*;
@@ -31,6 +32,12 @@ public class GraphView extends Pane {
 
     /** Graph currently rendered by the view */
     private Graph graph;
+
+    /** Stores how many agents are displayed at the same visual position */
+    private final Map<String, Integer> positionCounts = new HashMap<>();
+
+    /** Callback invoked when an edge is clicked */
+    private Consumer<Edge> edgeClickHandler = edge -> {};
 
     /**
      * Creates the view and prepares background click handling.
@@ -99,7 +106,7 @@ public class GraphView extends Pane {
                 node.setY(y);
             }
 
-            Circle circle = new Circle(20);
+            Circle circle = new Circle(25);
             circle.setCenterX(x);
             circle.setCenterY(y);
             circle.setOnMouseClicked(e -> {
@@ -158,9 +165,21 @@ public class GraphView extends Pane {
                     dst.getCenterX(), dst.getCenterY()
                 );
 
+                line.setStrokeWidth(2);
+                line.setOnMouseClicked(e -> {
+                    edgeClickHandler.accept(edge);
+                    e.consume();
+                });
+
+                // Edge hover effect
+                line.setOnMouseEntered(e -> line.setStroke(Color.RED));
+                line.setOnMouseExited(e -> line.setStroke(Color.BLACK));
+
                 Text weight = new Text(String.valueOf(edge.getDistance()));
                 weight.setFill(Color.BLUE);
-
+                weight.setFont(javafx.scene.text.Font.font(22));
+                weight.setMouseTransparent(true);
+                
                 double midX = (src.getCenterX() + dst.getCenterX()) / 2;
                 double midY = (src.getCenterY() + dst.getCenterY()) / 2;
 
@@ -203,10 +222,19 @@ public class GraphView extends Pane {
     /**
      * Sets the callback called when a node is clicked.
      *
-     * @param handler click handler
+     * @param handler node click handler
      */
     public void setNodeClickHandler(Consumer<Node> handler) {
         this.nodeClickHandler = (handler != null) ? handler : node -> {};
+    }
+
+    /**
+     * Sets the callback called when an edge is clicked.
+     *
+     * @param handler edge click handler
+     */
+    public void setEdgeClickHandler(Consumer<Edge> handler) {
+        this.edgeClickHandler = (handler != null) ? handler : edge -> {};
     }
 
     /**
@@ -238,7 +266,7 @@ public class GraphView extends Pane {
             if (node.equals(selectedNode)) {
                 circle.setFill(Color.GOLD);
                 circle.setStroke(Color.DODGERBLUE);
-                circle.setStrokeWidth(3);
+                circle.setStrokeWidth(1);
             } else {
                 circle.setFill(Color.LIGHTGRAY);
                 circle.setStroke(Color.BLACK);
@@ -251,6 +279,7 @@ public class GraphView extends Pane {
      * Redraws agents using their current progress on edges.
      */
     private void redrawAgents() {
+        positionCounts.clear();
 
         agentViews.values().forEach(getChildren()::remove);
         agentViews.clear();
@@ -258,7 +287,7 @@ public class GraphView extends Pane {
         for (Agent agent : currentAgents) {
 
             Circle agentCircle = new Circle(10);
-            agentCircle.setFill(Color.RED);
+            agentCircle.setFill(getAgentColor(agent));
             agentCircle.setStroke(Color.BLACK);
             agentCircle.setMouseTransparent(true);
 
@@ -306,11 +335,60 @@ public class GraphView extends Pane {
                 y = currentNodeCircle.getCenterY();
             }
 
+            String key = Math.round(x) + ":" + Math.round(y);
+            int index = positionCounts.getOrDefault(key, 0);
+            positionCounts.put(key, index + 1);
+
+            // Offset is the visual spacing applied to elements when they would otherwise be displayed in the same location
+            double offset = 8.0;
+            double angle = index * (Math.PI / 3);
+
+            x += Math.cos(angle) * offset;
+            y += Math.sin(angle) * offset;
+
             agentCircle.setCenterX(x);
             agentCircle.setCenterY(y);
 
             agentViews.put(agent, agentCircle);
             getChildren().add(agentCircle);
         }
+    }
+
+    /**
+     * Returns a stable color for an agent based on its id.
+     * Each color is different
+     *
+     * @param agent agent to color
+     * @return display color
+     */
+    private Color getAgentColor(Agent agent) {
+        return Color.hsb((agent.getId() * 47) % 360, 0.85, 0.95);
+    }
+
+    /**
+     * Sets the cursor used while the node creation mode is active.
+     *
+     * @param active true to display the crosshair cursor, false to restore the default cursor
+     */
+    public void setNodeCreationMode(boolean active) {
+        setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
+    }
+
+    /**
+     * Sets the cursor used while an editing mode is active.
+     *
+     * @param active true to display the crosshair cursor, false to restore the default cursor
+     */
+    public void setEdgeCreationMode(boolean active) {
+        setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
+    }
+
+    /**
+     * Sets the cursor used while deletion mode is active.
+     *
+     * @param active true to display the crosshair cursor, false to restore the default cursor
+     */
+    public void setDeleteMode(boolean active) {
+        setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
     }
 }
