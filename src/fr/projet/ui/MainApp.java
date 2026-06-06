@@ -42,7 +42,6 @@ public class MainApp extends Application {
 
         GraphView view = new GraphView();
         graphController.attachView(view);
-        view.setEdgeClickHandler(graphController::handleEdgeClicked);
         view.setNodeClickHandler(graphController::handleNodeClicked);
 
         view.renderGraph(graph);
@@ -64,7 +63,7 @@ public class MainApp extends Application {
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
         toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
-        toolBox.deleteBtn.setOnAction(e -> graphController.enableDeleteMode());
+        toolBox.deleteBtn.setOnAction(e -> graphController.deleteSelectedNode());
 
         simulationBar.startBtn.setOnAction(e -> timeline.play());
         simulationBar.pauseBtn.setOnAction(e -> timeline.pause());

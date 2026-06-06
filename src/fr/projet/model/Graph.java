@@ -78,7 +78,7 @@ public class Graph {
 
         // Store the reverse edge too when the connection is considered undirected.
         if (!edge.isOriented()) {
-            Edge reverse = new Edge(destination, source, edge.getDistance());
+            Edge reverse = new Edge(destination, source, edge.getDistance(), EdgeType.ROAD);
             reverse.setOriented(false);
             adjacencyList.get(destination).add(reverse);
         }

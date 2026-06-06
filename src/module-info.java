@@ -1,8 +1,5 @@
-/**
- * Main module of the graph-based agent simulation project.
- */
-module ProjetGenieLogiciel {
-	
+
+module ntm {
 	requires transitive javafx.controls;
     requires transitive javafx.graphics;
 

@@ -27,6 +27,8 @@ public class Edge {
     /** List of agents currently on this edge */
     private List<Agent> agents;
     
+    private EdgeType type;
+    
     /**
      * Creates a new edge between two nodes.
      * The edge is undirected by default, with unlimited capacity and no agents.
@@ -52,17 +54,17 @@ public class Edge {
      * @param destination ending node
      * @param distance    cost or distance of the edge
      */
-    public Edge(Node source, Node destination, double distance) {
+    public Edge(Node source, Node destination, double distance, EdgeType type) {
         this.source = source;
         this.destination = destination;
         this.distance = distance;
         this.oriented = false;
         this.capacity = Integer.MAX_VALUE;
         this.agents = new ArrayList<>();
+        this.type = type;
     }
     
     
-
     /**
      * Returns the source node of the edge.
      *
@@ -152,7 +154,16 @@ public class Edge {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
-
+    
+    /**
+     * Returns the type of the edge.
+     *
+     * @return source node
+     */
+    public EdgeType getType() {
+        return type;
+    }
+    
     /**
      * Returns the list of agents currently on this edge.
      *

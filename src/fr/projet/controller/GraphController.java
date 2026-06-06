@@ -12,6 +12,7 @@ import java.util.Optional;
 import fr.projet.model.Edge;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
+import fr.projet.model.EdgeType;
 import fr.projet.pathfinding.IPathFinder;
 import fr.projet.pathfinding.PathFinderFactory;
 import fr.projet.pathfinding.PathFinderType;
@@ -41,9 +42,6 @@ public class GraphController {
 
     /** Indicates whether the controller is waiting for two nodes to create an edge */
     private boolean edgeCreationMode;
-    
-    /** Indicates whether the controller is waiting for a deletion click */
-    private boolean deleteMode;
 
     /**
      * Creates a controller bound to a graph instance.
@@ -74,10 +72,10 @@ public class GraphController {
     graph.addNode(C);
     graph.addNode(D);
 
-    graph.addEdge(new Edge(A, B, 1));
-    graph.addEdge(new Edge(A, D, 9));
-    graph.addEdge(new Edge(B, C, 1));
-    graph.addEdge(new Edge(C, D, 3));
+    graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD));
+    graph.addEdge(new Edge(A, D, 9, EdgeType.ROAD));
+    graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD));
+    graph.addEdge(new Edge(C, D, 3, EdgeType.ROAD));
     
     return graph;
 	}
@@ -96,18 +94,6 @@ public class GraphController {
     public void handleNodeClicked(Node clickedNode) {
 
         if (clickedNode == null) {
-            return;
-        }
-
-        if (deleteMode) {
-            graph.removeNode(clickedNode);
-            selectedNode = null;
-            disableDeleteMode();
-
-            if (view != null) {
-                view.clearSelection();
-                view.renderGraph(graph);
-            }
             return;
         }
 
@@ -172,50 +158,26 @@ public class GraphController {
             }
         }
 
-        // Create edge only if it does not already exist
-     // Capacity input
-        TextInputDialog capacityDialog = new TextInputDialog("1");
-        capacityDialog.setTitle("Edge capacity");
-        capacityDialog.setHeaderText("Enter edge capacity");
-        capacityDialog.setContentText("Capacity:");
+        // Edge type input
+        ChoiceDialog<EdgeType> typeDialog = new ChoiceDialog<>(EdgeType.ROAD, java.util.Arrays.asList(EdgeType.values()));
+        typeDialog.setTitle("Edge type");
+        typeDialog.setHeaderText("Choose edge type");
+        typeDialog.setContentText("Type:");
 
-        Optional<String> capacityResult = capacityDialog.showAndWait();
-
-        int capacity = 1;
-        if (capacityResult.isPresent()) {
-            try {
-                capacity = Integer.parseInt(capacityResult.get());
-            } catch (NumberFormatException e) {
-                capacity = 1; // fallback
-            }
+        Optional<EdgeType> typeResult = typeDialog.showAndWait();
+        if (typeResult.isEmpty()) {
+            return;
         }
+
+        EdgeType type = typeResult.get();
 
         // Create edge only if it does not already exist
         if (!graph.hasConnection(selectedNode, clickedNode)) {
-            graph.addEdge(new Edge(selectedNode, clickedNode, weight, capacity));
+            graph.addEdge(new Edge(selectedNode, clickedNode, weight, type));
         }
 
         selectedNode = null;
         disableEdgeCreationMode();
-
-        if (view != null) {
-            view.clearSelection();
-            view.renderGraph(graph);
-        }
-    }
-
-    /**
-     * Handles a click on an edge and removes it when deletion mode is active.
-     *
-     * @param clickedEdge edge clicked by the user
-     */
-    public void handleEdgeClicked(Edge clickedEdge) {
-        if (!deleteMode || clickedEdge == null) {
-            return;
-        }
-
-        graph.removeEdge(clickedEdge.getSource(), clickedEdge.getDestination());
-        disableDeleteMode();
 
         if (view != null) {
             view.clearSelection();
@@ -246,16 +208,6 @@ public class GraphController {
     public void handleBackgroundClick(Point2D clickPosition) {
 
         if (clickPosition == null) {
-            return;
-        }
-
-        // Disable delete mode if clicking in an empty area
-        if (deleteMode) {
-            disableDeleteMode();
-
-            if (view != null) {
-                view.clearSelection();
-            }
             return;
         }
 
@@ -509,31 +461,25 @@ public class GraphController {
     // =====================================================
 
     /**
-     * Enables deletion mode.
-     * The next click on a node or an edge will remove it.
+     * Deletes the currently selected node.
      */
-    public void enableDeleteMode() {
-        deleteMode = true;
+    public void deleteSelectedNode() {
+
+        if (selectedNode == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Delete Node");
+            alert.setHeaderText("No node selected");
+            alert.setContentText("Please select a node before deleting it.");
+            alert.showAndWait();
+            return;
+        }
+
+        graph.removeNode(selectedNode);
         selectedNode = null;
 
         if (view != null) {
             view.clearSelection();
-            view.setDeleteMode(true);
-        }
-
-        // Deletion takes priority over creation modes.
-        disableNodeCreationMode();
-        disableEdgeCreationMode();
-    }
-
-    /**
-     * Disables deletion mode and restores the normal cursor.
-     */
-    public void disableDeleteMode() {
-        deleteMode = false;
-
-        if (view != null) {
-            view.setDeleteMode(false);
+            view.renderGraph(graph);
         }
     }
 }
