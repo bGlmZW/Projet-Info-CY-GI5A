@@ -35,7 +35,7 @@ public class Main {
         System.out.println("DIJKSTRA TEST");
         System.out.println("=================================");
 
-        PathFinder pathFinder = new DijkstraPathFinder(graph);
+        IPathFinder pathFinder = new DijkstraPathFinder(graph);
 
         List<Node> path = pathFinder.findPath(A, D);
 
@@ -90,7 +90,7 @@ public class Main {
         movementGraph.addEdge(new Edge(B2, C2, 1));
         movementGraph.addEdge(new Edge(C2, D2, 1));
 
-        PathFinder movementFinder = new DijkstraPathFinder(movementGraph);
+        IPathFinder movementFinder = new DijkstraPathFinder(movementGraph);
 
         SimulationEngine engine = new SimulationEngine(movementGraph, movementFinder);
 

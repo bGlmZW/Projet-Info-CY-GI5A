@@ -7,7 +7,7 @@ import java.util.List;
  * Defines a pathfinding strategy capable of computing
  * a path between two nodes.
  */
-public interface PathFinder {
+public interface IPathFinder {
 
     /**
      * Computes a path between two nodes.

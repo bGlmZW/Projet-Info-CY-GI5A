@@ -12,7 +12,7 @@ import java.util.Optional;
 import fr.projet.model.Edge;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
-import fr.projet.pathfinding.PathFinder;
+import fr.projet.pathfinding.IPathFinder;
 import fr.projet.pathfinding.PathFinderFactory;
 import fr.projet.pathfinding.PathFinderType;
 import fr.projet.model.Agent;
@@ -173,8 +173,26 @@ public class GraphController {
         }
 
         // Create edge only if it does not already exist
+     // Capacity input
+        TextInputDialog capacityDialog = new TextInputDialog("1");
+        capacityDialog.setTitle("Edge capacity");
+        capacityDialog.setHeaderText("Enter edge capacity");
+        capacityDialog.setContentText("Capacity:");
+
+        Optional<String> capacityResult = capacityDialog.showAndWait();
+
+        int capacity = 1;
+        if (capacityResult.isPresent()) {
+            try {
+                capacity = Integer.parseInt(capacityResult.get());
+            } catch (NumberFormatException e) {
+                capacity = 1; // fallback
+            }
+        }
+
+        // Create edge only if it does not already exist
         if (!graph.hasConnection(selectedNode, clickedNode)) {
-            graph.addEdge(new Edge(selectedNode, clickedNode, weight));
+            graph.addEdge(new Edge(selectedNode, clickedNode, weight, capacity));
         }
 
         selectedNode = null;
@@ -400,7 +418,7 @@ public class GraphController {
         }
 
         PathFinderType algoType = algoResult.get();
-        PathFinder agentPathFinder = PathFinderFactory.create(algoType, graph);
+        IPathFinder agentPathFinder = PathFinderFactory.create(algoType, graph);
 
         // ID generation
         int newId = engine.getAgents().stream()

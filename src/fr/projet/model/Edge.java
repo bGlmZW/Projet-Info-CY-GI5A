@@ -26,6 +26,23 @@ public class Edge {
 
     /** List of agents currently on this edge */
     private List<Agent> agents;
+    
+    /**
+     * Creates a new edge between two nodes.
+     * The edge is undirected by default, with unlimited capacity and no agents.
+     *
+     * @param source      starting node
+     * @param destination ending node
+     * @param distance    cost or distance of the edge
+     */
+    public Edge(Node source, Node destination, double distance, int capacity) {
+        this.source = source;
+        this.destination = destination;
+        this.distance = distance;
+        this.oriented = false;
+        this.capacity = capacity;
+        this.agents = new ArrayList<>();
+    }
 
     /**
      * Creates a new edge between two nodes.
@@ -43,6 +60,8 @@ public class Edge {
         this.capacity = Integer.MAX_VALUE;
         this.agents = new ArrayList<>();
     }
+    
+    
 
     /**
      * Returns the source node of the edge.
@@ -150,5 +169,40 @@ public class Edge {
      */
     public void setAgents(List<Agent> agents) {
         this.agents = agents;
+    }
+    
+    /**
+     * Checks whether the given agent is currently on this edge.
+     *
+     * @param agent the agent to check
+     * @return true if the agent is present on this edge, false otherwise
+     */
+    public boolean containsAgent(Agent agent) {
+        return agents.contains(agent);
+    }
+
+    /**
+     * Adds an agent to this edge if it is not already present.
+     *
+     * @param agent the agent to add
+     */
+    public void addAgent(Agent agent) {
+        if (!agents.contains(agent)) {
+            agents.add(agent);
+        }
+    }
+
+    /**
+     * Removes an agent from this edge.
+     *
+     * @param agent the agent to remove
+     */
+    public void removeAgent(Agent agent) {
+        agents.remove(agent);
+    }
+    
+    @Override
+    public String toString() {
+        return "Edge [" + source.getId() + " ," + destination.getId() + "] -> {Capacity = " + capacity + " ;" +  "Agents = " + agents;
     }
 }

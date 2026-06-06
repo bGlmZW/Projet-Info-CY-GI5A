@@ -7,7 +7,7 @@ import fr.projet.model.Graph;
  */
 public class PathFinderFactory {
 
-    public static PathFinder create(PathFinderType type, Graph graph) {
+    public static IPathFinder create(PathFinderType type, Graph graph) {
 
         switch (type) {
 

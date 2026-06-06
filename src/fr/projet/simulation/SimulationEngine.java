@@ -24,14 +24,14 @@ public class SimulationEngine {
     private long currentTick;
     
     /**  */
-    private PathFinder pathFinder;
+    private IPathFinder pathFinder;
 
     /**
      * Creates a new simulation engine.
      *
      * @param graph graph used during the simulation
      */
-    public SimulationEngine(Graph graph, PathFinder pathFinder) {
+    public SimulationEngine(Graph graph, IPathFinder pathFinder) {
         this.graph = graph;
         this.pathFinder = pathFinder;
         this.agents = new ArrayList<>();
@@ -113,16 +113,27 @@ public class SimulationEngine {
     
     /**
      * Moves the agent along the shortest path toward its destination.
-     * The agent progresses on the current edge according to its speed.
-     * When the edge is fully traversed, the agent moves to the next node.
+     * Handles speed surplus (multiple edges per tick) and edge capacity.
+     * If the next edge is at full capacity, the agent waits until a spot is available.
      *
      * @param agent the agent to move
      */
     public void moveAgent(Agent agent) {
 
+        // Agent already arrived, nothing to do
+        if (agent.getState() == State.ARRIVED) {
+            return;
+        }
+
+        // Agent has reached its destination
         if (agent.getCurrentPosition().equals(agent.getDestination())) {
             agent.setState(State.ARRIVED);
             return;
+        }
+
+        // Edge was full last tick, reset state to retry
+        if (agent.getState() == State.WAITING) {
+            agent.setState(State.MOVING);
         }
 
         double remainingSpeed = agent.getSpeed();
@@ -134,9 +145,11 @@ public class SimulationEngine {
                 break;
             }
 
-            PathFinder agentPathFinder = agent.getPathFinder() != null
+            // Use the agent's own pathfinder, fallback to engine's global one
+            IPathFinder agentPathFinder = agent.getPathFinder() != null
                     ? agent.getPathFinder()
-                    : pathFinder; // Fallback to the engine's global Pathfinder
+                    : pathFinder;
+
             List<Node> path = agentPathFinder.findPath(
                     agent.getCurrentPosition(),
                     agent.getDestination()
@@ -147,6 +160,7 @@ public class SimulationEngine {
             Node nextNode = path.get(1);
             agent.setNextNode(nextNode);
 
+            // Find the edge leading to the next node
             Edge edge = null;
             for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
                 if (e.getDestination().equals(nextNode)) {
@@ -157,26 +171,40 @@ public class SimulationEngine {
 
             if (edge == null) break;
 
+            // If agent is not yet on this edge, check capacity before entering
+            if (!edge.containsAgent(agent)) {
+                if (edge.getAgents().size() >= edge.getCapacity()) {
+                    // Edge is full, agent must wait
+                    agent.setState(State.WAITING);
+                    return;
+                }
+                // Agent enters the edge
+                edge.addAgent(agent);
+            }
+
             double progress = agent.getProgressOnEdge() + remainingSpeed;
 
             if (progress >= edge.getDistance()) {
-                // The agent crosses the edge completely
+                // Agent fully traverses the edge
                 double surplus = progress - edge.getDistance();
+                edge.removeAgent(agent);
                 agent.setCurrentPosition(nextNode);
                 agent.setProgressOnEdge(0.0);
-                remainingSpeed = surplus; // We continue with the surplus
+                remainingSpeed = surplus; // continue with surplus
             } else {
-                // The agent stops mid-edge
+                // Agent stops mid-edge
                 agent.setProgressOnEdge(progress);
                 remainingSpeed = 0;
             }
         }
 
-        agent.setState(
-            agent.getCurrentPosition().equals(agent.getDestination())
-                ? State.ARRIVED
-                : State.MOVING
-        );
+        if (agent.getState() != State.WAITING) {
+            agent.setState(
+                agent.getCurrentPosition().equals(agent.getDestination())
+                    ? State.ARRIVED
+                    : State.MOVING
+            );
+        }
     }
     
     /**
@@ -193,10 +221,10 @@ public class SimulationEngine {
 
         moveAgent(agent);
 
-        if (!agent.getCurrentPosition().equals(agent.getDestination())) {
+        if (!agent.getCurrentPosition().equals(agent.getDestination())
+                && agent.getState() != State.WAITING) {
             agent.setState(State.MOVING);
-        }
-    }
+        }    }
 
     /**
      * Advances the simulation by one tick.
