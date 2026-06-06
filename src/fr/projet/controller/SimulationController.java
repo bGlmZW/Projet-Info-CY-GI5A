@@ -22,7 +22,7 @@ public class SimulationController {
      */
     public static SimulationEngine buildEngine(Graph graph, Node start, Node destination) {
 
-    	PathFinder pathFinder = PathFinderFactory.create(
+    	IPathFinder pathFinder = PathFinderFactory.create(
     	        PathFinderType.DIJKSTRA,
     	        graph
     	);
