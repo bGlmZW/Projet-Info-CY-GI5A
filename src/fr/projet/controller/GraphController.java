@@ -4,6 +4,7 @@ import fr.projet.view.GraphView;
 
 import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
 
 import java.util.Optional;
@@ -11,8 +12,12 @@ import java.util.Optional;
 import fr.projet.model.Edge;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
+import fr.projet.pathfinding.PathFinder;
+import fr.projet.pathfinding.PathFinderFactory;
+import fr.projet.pathfinding.PathFinderType;
 import fr.projet.model.Agent;
-
+import fr.projet.model.AgentFactory;
+import fr.projet.model.AgentType;
 import fr.projet.simulation.SimulationEngine;
 
 
@@ -283,7 +288,7 @@ public class GraphController {
     }
 
     /**
-     * Creates an agent on the currently selected node and assigns a destination and speed.
+     * Creates an agent on the currently selected node and assigns a destination, speed and pathfinding algorithm.
      *
      * @param engine simulation engine used to store the new agent
      */
@@ -314,7 +319,6 @@ public class GraphController {
         }
 
         int destinationId;
-
         try {
             destinationId = Integer.parseInt(destResult.get().trim());
         } catch (NumberFormatException e) {
@@ -322,39 +326,97 @@ public class GraphController {
         }
 
         Node destination = graph.getNodeById(destinationId);
-
         if (destination == null || destination.equals(selectedNode)) {
             return;
         }
 
-        // Speed input
-        TextInputDialog speedDialog = new TextInputDialog("1.0");
-        speedDialog.setTitle("Create Agent");
-        speedDialog.setHeaderText("Enter agent speed");
-        speedDialog.setContentText("Speed:");
+        // Agent type selection
+        ChoiceDialog<AgentType> typeDialog = new ChoiceDialog<>(
+                AgentType.NORMAL,
+                java.util.Arrays.asList(AgentType.values())
+        );
+        typeDialog.setTitle("Create Agent");
+        typeDialog.setHeaderText("Choose agent type");
+        typeDialog.setContentText("Type:");
 
-        Optional<String> speedResult = speedDialog.showAndWait();
-
-        if (speedResult.isEmpty()) {
+        Optional<AgentType> typeResult = typeDialog.showAndWait();
+        if (typeResult.isEmpty()) {
             return;
         }
 
-        double speed;
+        AgentType agentType = typeResult.get();
 
-        try {
-            speed = Double.parseDouble(speedResult.get().trim());
-        } catch (NumberFormatException e) {
-            speed = 1.0;
+        // Custom speed input only for CUSTOM SPEED choice
+        double customSpeed = 1.0;
+        boolean useCustomSpeed = false;
+
+        // If you want a custom speed option, keep this small extra dialog
+        ChoiceDialog<String> speedModeDialog = new ChoiceDialog<>(
+                "DEFAULT",
+                "DEFAULT",
+                "CUSTOM SPEED"
+        );
+        speedModeDialog.setTitle("Create Agent");
+        speedModeDialog.setHeaderText("Speed mode");
+        speedModeDialog.setContentText("Speed:");
+
+        Optional<String> speedModeResult = speedModeDialog.showAndWait();
+        if (speedModeResult.isEmpty()) {
+            return;
         }
+
+        if ("CUSTOM SPEED".equals(speedModeResult.get())) {
+            TextInputDialog speedDialog = new TextInputDialog("1.0");
+            speedDialog.setTitle("Create Agent");
+            speedDialog.setHeaderText("Enter agent speed");
+            speedDialog.setContentText("Speed:");
+
+            Optional<String> speedResult = speedDialog.showAndWait();
+            if (speedResult.isEmpty()) {
+                return;
+            }
+
+            try {
+                customSpeed = Double.parseDouble(speedResult.get().trim());
+                useCustomSpeed = true;
+            } catch (NumberFormatException e) {
+                customSpeed = 1.0;
+                useCustomSpeed = true;
+            }
+        }
+
+        // Algorithm selection
+        ChoiceDialog<PathFinderType> algoDialog = new ChoiceDialog<>(
+                PathFinderType.DIJKSTRA,
+                java.util.Arrays.asList(PathFinderType.values())
+        );
+        algoDialog.setTitle("Create Agent");
+        algoDialog.setHeaderText("Choose pathfinding algorithm");
+        algoDialog.setContentText("Algorithm:");
+
+        Optional<PathFinderType> algoResult = algoDialog.showAndWait();
+        if (algoResult.isEmpty()) {
+            return;
+        }
+
+        PathFinderType algoType = algoResult.get();
+        PathFinder agentPathFinder = PathFinderFactory.create(algoType, graph);
 
         // ID generation
         int newId = engine.getAgents().stream()
-            .mapToInt(Agent::getId)
-            .max()
-            .orElse(0) + 1;
+                .mapToInt(Agent::getId)
+                .max()
+                .orElse(0) + 1;
 
-        Agent agent = new Agent(newId, speed, selectedNode, destination);
+        Agent agent;
 
+        if (useCustomSpeed) {
+            agent = new Agent(newId, customSpeed, selectedNode, destination);
+        } else {
+            agent = AgentFactory.create(agentType, newId, selectedNode, destination);
+        }
+
+        agent.setPathFinder(agentPathFinder);
         engine.addAgent(agent);
 
         // Clear the selection after creating the agent so the UI goes back to a neutral state
