@@ -297,6 +297,8 @@ public class GraphView extends Pane {
         this.selectedNode = null;
         this.selectedEdge = null;
         refreshSelection();
+        redrawAgents();
+
     }
 
     /**

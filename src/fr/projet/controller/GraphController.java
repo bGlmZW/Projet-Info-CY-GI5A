@@ -319,8 +319,15 @@ public class GraphController {
     public void handleEdgeClicked(Edge clickedEdge) {
         if (clickedEdge == null) return;
 
+        if (clickedEdge.equals(selectedEdge)) {
+            selectedEdge = null;
+            if (view != null) view.clearSelection();
+            return;
+        }
+
         selectedEdge = clickedEdge;
         selectedNode = null;
+        selectedAgent = null;
 
         if (view != null) {
             view.clearSelection();
@@ -330,6 +337,12 @@ public class GraphController {
     
     public void handleAgentClicked(Agent agent) {
         if (agent == null) return;
+
+        if (agent.equals(selectedAgent)) {
+            selectedAgent = null;
+            if (view != null) view.clearSelection();
+            return;
+        }
 
         selectedAgent = agent;
         selectedNode = null;
@@ -737,49 +750,100 @@ public class GraphController {
     public void editSelected() {
 
         // Modification d'un agent sélectionné
-        if (selectedAgent != null) {
+    	if (selectedAgent != null) {
 
-            TextInputDialog speedDialog = new TextInputDialog(String.valueOf(selectedAgent.getSpeed()));
-            speedDialog.setTitle("Edit Agent");
-            speedDialog.setHeaderText("Edit agent speed");
-            speedDialog.setContentText("Speed:");
+    	    // Type selection
+    	    ChoiceDialog<AgentType> typeDialog = new ChoiceDialog<>(
+    	            AgentType.NORMAL,
+    	            java.util.Arrays.asList(AgentType.values())
+    	    );
+    	    typeDialog.setTitle("Edit Agent");
+    	    typeDialog.setHeaderText("Edit agent type");
+    	    typeDialog.setContentText("Type:");
 
-            Optional<String> speedResult = speedDialog.showAndWait();
-            if (speedResult.isEmpty()) return;
+    	    Optional<AgentType> typeResult = typeDialog.showAndWait();
+    	    if (typeResult.isEmpty()) return;
 
-            try {
-                double newSpeed = Double.parseDouble(speedResult.get().trim());
-                selectedAgent.setSpeed(newSpeed);
-            } catch (NumberFormatException e) {
-                // keep current speed
-            }
+    	    AgentType newType = typeResult.get();
+    	    Agent updatedAgent = AgentFactory.create(newType, selectedAgent.getId(),
+    	            selectedAgent.getCurrentPosition(), selectedAgent.getDestination());
+    	    selectedAgent.setSpeed(updatedAgent.getSpeed());
 
-            TextInputDialog destDialog = new TextInputDialog(
-                    String.valueOf(selectedAgent.getDestination().getId())
-            );
-            destDialog.setTitle("Edit Agent");
-            destDialog.setHeaderText("Edit agent destination");
-            destDialog.setContentText("Destination node id:");
+    	    // Algorithm selection
+    	    ChoiceDialog<PathFinderType> algoDialog = new ChoiceDialog<>(
+    	            PathFinderType.DIJKSTRA,
+    	            java.util.Arrays.asList(PathFinderType.values())
+    	    );
+    	    algoDialog.setTitle("Edit Agent");
+    	    algoDialog.setHeaderText("Edit pathfinding algorithm");
+    	    algoDialog.setContentText("Algorithm:");
 
-            Optional<String> destResult = destDialog.showAndWait();
-            if (destResult.isEmpty()) return;
+    	    Optional<PathFinderType> algoResult = algoDialog.showAndWait();
+    	    if (algoResult.isEmpty()) return;
 
-            try {
-                int destId = Integer.parseInt(destResult.get().trim());
-                Node newDest = graph.getNodeById(destId);
-                if (newDest != null && !newDest.equals(selectedAgent.getCurrentPosition())) {
-                    selectedAgent.setDestination(newDest);
-                    selectedAgent.setProgressOnEdge(0.0);
-                    selectedAgent.setNextNode(null);
-                    selectedAgent.setState(State.WAITING);
-                }
-            } catch (NumberFormatException e) {
-                // keep current destination
-            }
+    	    selectedAgent.setPathFinder(PathFinderFactory.create(algoResult.get(), graph));
 
-            if (view != null) view.renderAgents(engine.getAgents());
-            return;
-        }
+    	    // Custom speed override
+    	    ChoiceDialog<String> speedModeDialog = new ChoiceDialog<>(
+    	            "DEFAULT",
+    	            "DEFAULT",
+    	            "CUSTOM SPEED"
+    	    );
+    	    speedModeDialog.setTitle("Edit Agent");
+    	    speedModeDialog.setHeaderText("Speed mode");
+    	    speedModeDialog.setContentText("Speed:");
+
+    	    Optional<String> speedModeResult = speedModeDialog.showAndWait();
+    	    if (speedModeResult.isEmpty()) return;
+
+    	    if ("CUSTOM SPEED".equals(speedModeResult.get())) {
+    	        TextInputDialog speedDialog = new TextInputDialog(
+    	                String.valueOf(selectedAgent.getSpeed())
+    	        );
+    	        speedDialog.setTitle("Edit Agent");
+    	        speedDialog.setHeaderText("Enter agent speed");
+    	        speedDialog.setContentText("Speed:");
+
+    	        Optional<String> speedResult = speedDialog.showAndWait();
+    	        if (speedResult.isEmpty()) return;
+
+    	        try {
+    	            selectedAgent.setSpeed(Double.parseDouble(speedResult.get().trim()));
+    	        } catch (NumberFormatException e) {
+    	            // keep current speed
+    	        }
+    	    }
+
+    	    // Destination
+    	    TextInputDialog destDialog = new TextInputDialog(
+    	            String.valueOf(selectedAgent.getDestination().getId())
+    	    );
+    	    destDialog.setTitle("Edit Agent");
+    	    destDialog.setHeaderText("Edit agent destination");
+    	    destDialog.setContentText("Destination node id:");
+
+    	    Optional<String> destResult = destDialog.showAndWait();
+    	    if (destResult.isEmpty()) return;
+
+    	    try {
+    	        int destId = Integer.parseInt(destResult.get().trim());
+    	        Node newDest = graph.getNodeById(destId);
+    	        if (newDest != null && !newDest.equals(selectedAgent.getCurrentPosition())) {
+    	            selectedAgent.setDestination(newDest);
+    	            // Ne pas réinitialiser la progression si l'agent est en mouvement
+    	            if (selectedAgent.getState() != State.MOVING) {
+    	                selectedAgent.setProgressOnEdge(0.0);
+    	                selectedAgent.setNextNode(null);
+    	                selectedAgent.setState(State.WAITING);
+    	            }
+    	        }
+    	    } catch (NumberFormatException e) {
+    	        // keep current destination
+    	    }
+
+    	    if (view != null) view.renderAgents(engine.getAgents());
+    	    return;
+    	}
 
         // Modification d'une arête sélectionnée
         if (selectedEdge != null) {
