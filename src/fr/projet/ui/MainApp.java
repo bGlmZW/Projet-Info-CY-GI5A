@@ -68,6 +68,7 @@ public class MainApp extends Application {
         toolBox.deleteBtn.setOnAction(e -> graphController.deleteSelected());
         toolBox.editBtn.setOnAction(e -> graphController.editSelected());
         toolBox.addRandomBtn.setOnAction(e -> graphController.addRandomNodes(engine));
+        toolBox.addRandomAgentsBtn.setOnAction(e -> graphController.addRandomAgents(engine));
 
         simulationBar.startBtn.setOnAction(e -> timeline.play());
         simulationBar.pauseBtn.setOnAction(e -> timeline.pause());

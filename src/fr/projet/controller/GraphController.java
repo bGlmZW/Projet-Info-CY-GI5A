@@ -162,6 +162,157 @@ public class GraphController {
 	        if (engine != null) view.renderAgents(engine.getAgents());
 	    }
 	}
+	
+	public void addRandomAgents(SimulationEngine engine) {
+
+	    if (engine == null) return;
+
+	    List<Node> nodes = new ArrayList<>(graph.getAllNodes());
+	    if (nodes.size() < 2) {
+	        Alert alert = new Alert(Alert.AlertType.WARNING);
+	        alert.setTitle("Add Random Agents");
+	        alert.setHeaderText("Not enough nodes");
+	        alert.setContentText("You need at least 2 nodes to add agents.");
+	        alert.showAndWait();
+	        return;
+	    }
+
+	    // Nombre d'agents
+	    TextInputDialog countDialog = new TextInputDialog("5");
+	    countDialog.setTitle("Add Random Agents");
+	    countDialog.setHeaderText("How many agents to add?");
+	    countDialog.setContentText("Number of agents:");
+
+	    Optional<String> countResult = countDialog.showAndWait();
+	    if (countResult.isEmpty()) return;
+
+	    int count;
+	    try {
+	        count = Integer.parseInt(countResult.get().trim());
+	        if (count <= 0) return;
+	    } catch (NumberFormatException e) {
+	        return;
+	    }
+
+	    // Plage de vitesse min
+	    TextInputDialog minSpeedDialog = new TextInputDialog("0.5");
+	    minSpeedDialog.setTitle("Add Random Agents");
+	    minSpeedDialog.setHeaderText("Speed range");
+	    minSpeedDialog.setContentText("Min speed:");
+
+	    Optional<String> minSpeedResult = minSpeedDialog.showAndWait();
+	    if (minSpeedResult.isEmpty()) return;
+
+	    double minSpeed;
+	    try {
+	        minSpeed = Double.parseDouble(minSpeedResult.get().trim());
+	    } catch (NumberFormatException e) {
+	        minSpeed = 0.5;
+	    }
+
+	    // Plage de vitesse max
+	    TextInputDialog maxSpeedDialog = new TextInputDialog("3.0");
+	    maxSpeedDialog.setTitle("Add Random Agents");
+	    maxSpeedDialog.setHeaderText("Speed range");
+	    maxSpeedDialog.setContentText("Max speed:");
+
+	    Optional<String> maxSpeedResult = maxSpeedDialog.showAndWait();
+	    if (maxSpeedResult.isEmpty()) return;
+
+	    double maxSpeed;
+	    try {
+	        maxSpeed = Double.parseDouble(maxSpeedResult.get().trim());
+	    } catch (NumberFormatException e) {
+	        maxSpeed = 3.0;
+	    }
+
+	    if (maxSpeed < minSpeed) {
+	        double temp = minSpeed;
+	        minSpeed = maxSpeed;
+	        maxSpeed = temp;
+	    }
+
+	    // Type d'agent
+	    List<String> typeOptions = new ArrayList<>();
+	    typeOptions.add("RANDOM");
+	    for (AgentType t : AgentType.values()) {
+	        typeOptions.add(t.name());
+	    }
+
+	    ChoiceDialog<String> typeDialog = new ChoiceDialog<>("RANDOM", typeOptions);
+	    typeDialog.setTitle("Add Random Agents");
+	    typeDialog.setHeaderText("Agent type");
+	    typeDialog.setContentText("Type:");
+
+	    Optional<String> typeResult = typeDialog.showAndWait();
+	    if (typeResult.isEmpty()) return;
+
+	    String chosenType = typeResult.get();
+
+	    // Algorithme
+	    List<String> algoOptions = new ArrayList<>();
+	    algoOptions.add("RANDOM");
+	    for (PathFinderType t : PathFinderType.values()) {
+	        algoOptions.add(t.name());
+	    }
+
+	    ChoiceDialog<String> algoDialog = new ChoiceDialog<>("RANDOM", algoOptions);
+	    algoDialog.setTitle("Add Random Agents");
+	    algoDialog.setHeaderText("Pathfinding algorithm");
+	    algoDialog.setContentText("Algorithm:");
+
+	    Optional<String> algoResult = algoDialog.showAndWait();
+	    if (algoResult.isEmpty()) return;
+
+	    String chosenAlgo = algoResult.get();
+
+	    // Génération des agents
+	    Random random = new Random();
+	    PathFinderType[] algoValues = PathFinderType.values();
+	    AgentType[] typeValues = AgentType.values();
+
+	    for (int i = 0; i < count; i++) {
+
+	        // Nœud source et destination aléatoires différents
+	        Node source = nodes.get(random.nextInt(nodes.size()));
+	        Node destination;
+	        do {
+	            destination = nodes.get(random.nextInt(nodes.size()));
+	        } while (destination.equals(source));
+
+	        // Vitesse aléatoire dans la plage
+	        double speed = minSpeed + random.nextDouble() * (maxSpeed - minSpeed);
+
+	        // ID
+	        int newId = engine.getAgents().stream()
+	                .mapToInt(Agent::getId)
+	                .max()
+	                .orElse(0) + 1;
+
+	        // Créer l'agent
+	        Agent agent;
+	        if ("RANDOM".equals(chosenType)) {
+	            AgentType randomType = typeValues[random.nextInt(typeValues.length)];
+	            agent = AgentFactory.create(randomType, newId, source, destination);
+	            agent.setSpeed(speed); // override avec la plage choisie
+	        } else {
+	            agent = new Agent(newId, speed, source, destination);
+	        }
+
+	        // Algorithme
+	        PathFinderType algoType;
+	        if ("RANDOM".equals(chosenAlgo)) {
+	            algoType = algoValues[random.nextInt(algoValues.length)];
+	        } else {
+	            algoType = PathFinderType.valueOf(chosenAlgo);
+	        }
+	        agent.setPathFinder(PathFinderFactory.create(algoType, graph));
+
+	        engine.addAgent(agent);
+	    }
+
+	    if (view != null) view.renderAgents(engine.getAgents());
+	}
 
     // =====================================================
     // EDITING THE GRAPH ON THE INTERFACE
