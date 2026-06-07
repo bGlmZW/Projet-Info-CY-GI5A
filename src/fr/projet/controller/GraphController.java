@@ -2,6 +2,7 @@ package fr.projet.controller;
 
 import fr.projet.view.GraphView;
 
+
 import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceDialog;
@@ -19,7 +20,7 @@ import fr.projet.model.Agent;
 import fr.projet.model.AgentFactory;
 import fr.projet.model.AgentType;
 import fr.projet.simulation.SimulationEngine;
-
+import fr.projet.model.EdgeType;
 
 /**
  * Controller responsible for building and configuring the graph.
@@ -172,8 +173,23 @@ public class GraphController {
             }
         }
 
-        // Create edge only if it does not already exist
-     // Capacity input
+     // Edge type input
+        ChoiceDialog<EdgeType> typeDialog = new ChoiceDialog<>(
+                EdgeType.ROAD,
+                java.util.Arrays.asList(EdgeType.values())
+        );
+        typeDialog.setTitle("Edge type");
+        typeDialog.setHeaderText("Choose edge type");
+        typeDialog.setContentText("Type:");
+
+        Optional<EdgeType> typeResult = typeDialog.showAndWait();
+        if (typeResult.isEmpty()) {
+            return;
+        }
+
+        EdgeType edgeType = typeResult.get();
+
+        // Capacity input
         TextInputDialog capacityDialog = new TextInputDialog("1");
         capacityDialog.setTitle("Edge capacity");
         capacityDialog.setHeaderText("Enter edge capacity");
@@ -181,18 +197,20 @@ public class GraphController {
 
         Optional<String> capacityResult = capacityDialog.showAndWait();
 
-        int capacity = 1;
+        int capacity = Integer.MAX_VALUE;
         if (capacityResult.isPresent()) {
             try {
                 capacity = Integer.parseInt(capacityResult.get());
             } catch (NumberFormatException e) {
-                capacity = 1; // fallback
+                capacity = Integer.MAX_VALUE;
             }
         }
 
         // Create edge only if it does not already exist
         if (!graph.hasConnection(selectedNode, clickedNode)) {
-            graph.addEdge(new Edge(selectedNode, clickedNode, weight, capacity));
+            Edge newEdge = new Edge(selectedNode, clickedNode, weight, edgeType);
+            newEdge.setCapacity(capacity);
+            graph.addEdge(newEdge);
         }
 
         selectedNode = null;
@@ -534,6 +552,25 @@ public class GraphController {
 
         if (view != null) {
             view.setDeleteMode(false);
+        }
+    }
+    
+    public void deleteSelectedNode() {
+        if (selectedNode == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Delete Node");
+            alert.setHeaderText("No node selected");
+            alert.setContentText("Please select a node before deleting it.");
+            alert.showAndWait();
+            return;
+        }
+
+        graph.removeNode(selectedNode);
+        selectedNode = null;
+
+        if (view != null) {
+            view.clearSelection();
+            view.renderGraph(graph);
         }
     }
 }
