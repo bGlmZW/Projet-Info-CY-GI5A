@@ -23,6 +23,9 @@ import fr.projet.model.AgentFactory;
 import fr.projet.model.AgentType;
 import fr.projet.simulation.SimulationEngine;
 import fr.projet.model.EdgeType;
+import fr.projet.model.State;
+
+import fr.projet.view.*;
 
 /**
  * Controller responsible for building and configuring the graph.
@@ -49,6 +52,8 @@ public class GraphController {
     private boolean deleteMode;
     
     private SimulationEngine engine;
+    
+    private Edge selectedEdge;
 
     /**
      * Creates a controller bound to a graph instance.
@@ -106,6 +111,11 @@ public class GraphController {
 
         if (clickedNode == null) {
             return;
+        }
+        
+        selectedEdge = null;
+        if (view != null) {
+            view.clearSelection();
         }
 
         if (deleteMode) {
@@ -236,16 +246,14 @@ public class GraphController {
      * @param clickedEdge edge clicked by the user
      */
     public void handleEdgeClicked(Edge clickedEdge) {
-        if (!deleteMode || clickedEdge == null) {
-            return;
-        }
+        if (clickedEdge == null) return;
 
-        graph.removeEdge(clickedEdge.getSource(), clickedEdge.getDestination());
-        disableDeleteMode();
+        selectedEdge = clickedEdge;
+        selectedNode = null;
 
         if (view != null) {
             view.clearSelection();
-            view.renderGraph(graph);
+            view.setSelectedEdge(clickedEdge);
         }
     }
 
@@ -563,18 +571,48 @@ public class GraphController {
         }
     }
     
-    public void deleteSelectedNode() {
+    public void deleteSelected() {
 
+        // Suppression d'une arête sélectionnée
+        if (selectedEdge != null) {
+
+            if (engine != null) {
+                for (Agent agent : new ArrayList<>(engine.getAgents())) {
+                    if (agent.getState() == State.MOVING
+                            && agent.getNextNode() != null
+                            && agent.getCurrentPosition().equals(selectedEdge.getSource())
+                            && agent.getNextNode().equals(selectedEdge.getDestination())) {
+                        // L'agent est sur cette arête, on le replace sur le nœud source
+                        agent.setCurrentPosition(selectedEdge.getSource());
+                        agent.setProgressOnEdge(0.0);
+                        agent.setNextNode(null);
+                        agent.setState(State.WAITING);
+                        selectedEdge.removeAgent(agent);
+                    }
+                }
+            }
+
+            graph.removeEdge(selectedEdge.getSource(), selectedEdge.getDestination());
+            selectedEdge = null;
+
+            if (view != null) {
+                view.clearSelection();
+                view.renderGraph(graph);
+                if (engine != null) view.renderAgents(engine.getAgents());
+            }
+            return;
+        }
+
+        // Suppression d'un nœud sélectionné
         if (selectedNode == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Delete Node");
-            alert.setHeaderText("No node selected");
-            alert.setContentText("Please select a node before deleting it.");
+            alert.setTitle("Delete");
+            alert.setHeaderText("Nothing selected");
+            alert.setContentText("Please select a node or an edge before deleting.");
             alert.showAndWait();
             return;
         }
 
-        // Repositionner les agents présents sur le nœud supprimé
         if (engine != null) {
             List<Node> neighbors = graph.getNeighbors(selectedNode);
 
@@ -595,9 +633,7 @@ public class GraphController {
         if (view != null) {
             view.clearSelection();
             view.renderGraph(graph);
-            if (engine != null) {
-                view.renderAgents(engine.getAgents());
-            }
+            if (engine != null) view.renderAgents(engine.getAgents());
         }
     }
 }

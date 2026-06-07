@@ -18,11 +18,15 @@ public class GraphView extends Pane {
     /** Currently selected node for visual highlighting */
     private Node selectedNode;
 
+    /** Currently selected edge for visual highlighting */
+    private Edge selectedEdge;
+
     /** Callback invoked when a node is clicked */
     private Consumer<Node> nodeClickHandler = node -> {};
 
     private final Map<Node, Circle> nodeViews = new HashMap<>();
     private final Map<Agent, Circle> agentViews = new HashMap<>();
+    private final Map<Edge, Line> edgeViews = new HashMap<>();
 
     /** Coordinates of the user's click on a point in the interface */
     private Consumer<Point2D> backgroundClickHandler = point -> {};
@@ -72,6 +76,7 @@ public class GraphView extends Pane {
 
         getChildren().clear();
         nodeViews.clear();
+        edgeViews.clear();
 
         List<Node> nodes = new ArrayList<>(graph.getAllNodes());
         int n = nodes.size();
@@ -91,8 +96,6 @@ public class GraphView extends Pane {
             double x;
             double y;
 
-            // If the node has coordinates (created by user click),
-            // we use them. Otherwise, generate an initial position and store it.
             if (node.getX() != null && node.getY() != null) {
                 x = node.getX();
                 y = node.getY();
@@ -132,12 +135,8 @@ public class GraphView extends Pane {
             label.setY(y + 5);
             label.setFill(Color.BLACK);
 
-            // Store nodes first, draw them after edges so they stay clickable
             nodeViews.put(node, circle);
-
-            // Keep the label for later drawing
             labels.put(node, label);
-
         }
 
         // =========================
@@ -166,26 +165,47 @@ public class GraphView extends Pane {
                 );
 
                 line.setStrokeWidth(2);
+
+                // Highlight selected edge
+                if (edge.equals(selectedEdge)) {
+                    line.setStroke(Color.ORANGE);
+                    line.setStrokeWidth(4);
+                } else {
+                    line.setStroke(Color.BLACK);
+                }
+
+                final Edge currentEdge = edge;
                 line.setOnMouseClicked(e -> {
-                    edgeClickHandler.accept(edge);
+                    edgeClickHandler.accept(currentEdge);
                     e.consume();
                 });
 
                 // Edge hover effect
-                line.setOnMouseEntered(e -> line.setStroke(Color.RED));
-                line.setOnMouseExited(e -> line.setStroke(Color.BLACK));
+                line.setOnMouseEntered(e -> {
+                    if (!currentEdge.equals(selectedEdge)) {
+                        line.setStroke(Color.RED);
+                    }
+                });
+                line.setOnMouseExited(e -> {
+                    if (currentEdge.equals(selectedEdge)) {
+                        line.setStroke(Color.ORANGE);
+                    } else {
+                        line.setStroke(Color.BLACK);
+                    }
+                });
 
                 Text weight = new Text(String.valueOf(edge.getDistance()));
                 weight.setFill(Color.BLUE);
                 weight.setFont(javafx.scene.text.Font.font(22));
                 weight.setMouseTransparent(true);
-                
+
                 double midX = (src.getCenterX() + dst.getCenterX()) / 2;
                 double midY = (src.getCenterY() + dst.getCenterY()) / 2;
 
                 weight.setX(midX);
                 weight.setY(midY);
 
+                edgeViews.put(edge, line);
                 getChildren().addAll(line, weight);
             }
         }
@@ -194,20 +214,14 @@ public class GraphView extends Pane {
             Circle circle = nodeViews.get(node);
             Text label = labels.get(node);
 
-            if (circle != null) {
-                getChildren().add(circle);
-            }
-
-            if (label != null) {
-                getChildren().add(label);
-            }
+            if (circle != null) getChildren().add(circle);
+            if (label != null) getChildren().add(label);
         }
 
         redrawAgents();
     }
 
     /**
-     * 
      * @param agents
      */
     public void renderAgents(List<Agent> agents) {
@@ -244,19 +258,32 @@ public class GraphView extends Pane {
      */
     public void setSelectedNode(Node node) {
         this.selectedNode = node;
+        this.selectedEdge = null;
         refreshSelection();
     }
 
     /**
-     * Clears the current node selection.
+     * Updates the selected edge and refreshes the visual highlight.
+     *
+     * @param edge selected edge
      */
-    public void clearSelection() {
+    public void setSelectedEdge(Edge edge) {
+        this.selectedEdge = edge;
         this.selectedNode = null;
         refreshSelection();
     }
 
     /**
-     * Refreshes the appearance of all nodes according to the current selection.
+     * Clears the current selection (node or edge).
+     */
+    public void clearSelection() {
+        this.selectedNode = null;
+        this.selectedEdge = null;
+        refreshSelection();
+    }
+
+    /**
+     * Refreshes the appearance of all nodes and edges according to the current selection.
      */
     private void refreshSelection() {
         for (Map.Entry<Node, Circle> entry : nodeViews.entrySet()) {
@@ -266,15 +293,28 @@ public class GraphView extends Pane {
             if (node.equals(selectedNode)) {
                 circle.setFill(Color.GOLD);
                 circle.setStroke(Color.DODGERBLUE);
-                circle.setStrokeWidth(1);
+                circle.setStrokeWidth(3);
             } else {
                 circle.setFill(Color.LIGHTGRAY);
                 circle.setStroke(Color.BLACK);
                 circle.setStrokeWidth(1);
             }
         }
+
+        for (Map.Entry<Edge, Line> entry : edgeViews.entrySet()) {
+            Edge edge = entry.getKey();
+            Line line = entry.getValue();
+
+            if (edge.equals(selectedEdge)) {
+                line.setStroke(Color.ORANGE);
+                line.setStrokeWidth(4);
+            } else {
+                line.setStroke(Color.BLACK);
+                line.setStrokeWidth(2);
+            }
+        }
     }
-    
+
     /**
      * Redraws agents using their current progress on edges.
      */
@@ -319,7 +359,6 @@ public class GraphView extends Pane {
                         ratio = Math.max(0.0, Math.min(ratio, 1.0));
 
                         x = currentNodeCircle.getCenterX() + (nextNodeCircle.getCenterX() - currentNodeCircle.getCenterX()) * ratio;
-
                         y = currentNodeCircle.getCenterY() + (nextNodeCircle.getCenterY() - currentNodeCircle.getCenterY()) * ratio;
                     } else {
                         x = currentNodeCircle.getCenterX();
@@ -339,7 +378,6 @@ public class GraphView extends Pane {
             int index = positionCounts.getOrDefault(key, 0);
             positionCounts.put(key, index + 1);
 
-            // Offset is the visual spacing applied to elements when they would otherwise be displayed in the same location
             double offset = 8.0;
             double angle = index * (Math.PI / 3);
 
@@ -356,7 +394,6 @@ public class GraphView extends Pane {
 
     /**
      * Returns a stable color for an agent based on its id.
-     * Each color is different
      *
      * @param agent agent to color
      * @return display color
