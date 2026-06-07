@@ -42,8 +42,8 @@ public class MainApp extends Application {
 
         GraphView view = new GraphView();
         graphController.attachView(view);
+        graphController.setEngine(engine);
         view.setNodeClickHandler(graphController::handleNodeClicked);
-
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
 

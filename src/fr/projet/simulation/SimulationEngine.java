@@ -120,29 +120,21 @@ public class SimulationEngine {
      */
     public void moveAgent(Agent agent) {
 
-        // Agent already arrived, nothing to do
         if (agent.getState() == State.ARRIVED) {
             return;
         }
 
-        // Agent has reached its destination
-        if (agent.getCurrentPosition().equals(agent.getDestination())) {
-            agent.setState(State.ARRIVED);
-            return;
-        }
-
-        // Edge was full last tick, reset state to retry
         if (agent.getState() == State.WAITING) {
             agent.setState(State.MOVING);
         }
 
-        double remainingSpeed = agent.getSpeed();
+        double remaining = agent.getSpeed() + agent.getProgressOnEdge();
 
-        while (remainingSpeed > 0) {
+        while (remaining > 0) {
 
             if (agent.getCurrentPosition().equals(agent.getDestination())) {
                 agent.setState(State.ARRIVED);
-                break;
+                return;
             }
 
             // Use the agent's own pathfinder, fallback to engine's global one
@@ -155,12 +147,11 @@ public class SimulationEngine {
                     agent.getDestination()
             );
 
-            if (path == null || path.size() < 2) break;
+            if (path == null || path.size() < 2) return;
 
             Node nextNode = path.get(1);
             agent.setNextNode(nextNode);
 
-            // Find the edge leading to the next node
             Edge edge = null;
             for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
                 if (e.getDestination().equals(nextNode)) {
@@ -169,32 +160,26 @@ public class SimulationEngine {
                 }
             }
 
-            if (edge == null) break;
+            if (edge == null) return;
 
-            // If agent is not yet on this edge, check capacity before entering
             if (!edge.containsAgent(agent)) {
                 if (edge.getAgents().size() >= edge.getCapacity()) {
-                    // Edge is full, agent must wait
+                    // Edge is full, agent stops at current node and waits
                     agent.setState(State.WAITING);
-                    return;
+                    remaining = 0; // stop the loop, keep progress already made
+                    break;
                 }
-                // Agent enters the edge
                 edge.addAgent(agent);
             }
 
-            double progress = agent.getProgressOnEdge() + remainingSpeed;
-
-            if (progress >= edge.getDistance()) {
-                // Agent fully traverses the edge
-                double surplus = progress - edge.getDistance();
-                edge.removeAgent(agent);
+            if (remaining >= edge.getDistance()) {
+                remaining -= edge.getDistance();
                 agent.setCurrentPosition(nextNode);
                 agent.setProgressOnEdge(0.0);
-                remainingSpeed = surplus; // continue with surplus
+                edge.removeAgent(agent);
             } else {
-                // Agent stops mid-edge
-                agent.setProgressOnEdge(progress);
-                remainingSpeed = 0;
+                agent.setProgressOnEdge(remaining);
+                remaining = 0.0;
             }
         }
 

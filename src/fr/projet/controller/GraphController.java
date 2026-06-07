@@ -9,6 +9,8 @@ import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
 
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.projet.model.Edge;
 import fr.projet.model.Graph;
@@ -45,6 +47,8 @@ public class GraphController {
     
     /** Indicates whether the controller is waiting for a deletion click */
     private boolean deleteMode;
+    
+    private SimulationEngine engine;
 
     /**
      * Creates a controller bound to a graph instance.
@@ -53,6 +57,10 @@ public class GraphController {
      */
     public GraphController(Graph graph) {
         this.graph = graph;
+    }
+    
+    public void setEngine(SimulationEngine engine) {
+        this.engine = engine;
     }
 
 	/**
@@ -556,6 +564,7 @@ public class GraphController {
     }
     
     public void deleteSelectedNode() {
+
         if (selectedNode == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Delete Node");
@@ -565,12 +574,30 @@ public class GraphController {
             return;
         }
 
+        // Repositionner les agents présents sur le nœud supprimé
+        if (engine != null) {
+            List<Node> neighbors = graph.getNeighbors(selectedNode);
+
+            for (Agent agent : new ArrayList<>(engine.getAgents())) {
+                if (agent.getCurrentPosition().equals(selectedNode)) {
+                    if (!neighbors.isEmpty()) {
+                        agent.setCurrentPosition(neighbors.get(0));
+                    } else {
+                        engine.removeAgent(agent);
+                    }
+                }
+            }
+        }
+
         graph.removeNode(selectedNode);
         selectedNode = null;
 
         if (view != null) {
             view.clearSelection();
             view.renderGraph(graph);
+            if (engine != null) {
+                view.renderAgents(engine.getAgents());
+            }
         }
     }
 }
