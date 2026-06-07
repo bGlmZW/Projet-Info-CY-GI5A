@@ -66,6 +66,7 @@ public class MainApp extends Application {
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
         toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
         toolBox.deleteBtn.setOnAction(e -> graphController.deleteSelected());
+        toolBox.editBtn.setOnAction(e -> graphController.editSelected());
 
         simulationBar.startBtn.setOnAction(e -> timeline.play());
         simulationBar.pauseBtn.setOnAction(e -> timeline.pause());

@@ -168,6 +168,10 @@ public class Edge {
     public EdgeType getType() {
         return type;
     }
+    
+    public void setType(EdgeType type) {
+    	this.type = type;
+    }
 
     /**
      * Returns the list of agents currently on this edge.

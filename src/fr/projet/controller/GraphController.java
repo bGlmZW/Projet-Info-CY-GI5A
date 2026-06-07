@@ -90,10 +90,10 @@ public class GraphController {
     graph.addNode(C);
     graph.addNode(D);
 
-    graph.addEdge(new Edge(A, B, 1));
-    graph.addEdge(new Edge(A, D, 9));
-    graph.addEdge(new Edge(B, C, 1));
-    graph.addEdge(new Edge(C, D, 3));
+    graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD));
+    graph.addEdge(new Edge(A, D, 9, EdgeType.ROAD));
+    graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD));
+    graph.addEdge(new Edge(C, D, 3, EdgeType.ROAD));
     
     return graph;
 	}
@@ -666,6 +666,124 @@ public class GraphController {
             view.clearSelection();
             view.renderGraph(graph);
             if (engine != null) view.renderAgents(engine.getAgents());
+        }
+    }
+    
+    public void editSelected() {
+
+        // Modification d'un agent sélectionné
+        if (selectedAgent != null) {
+
+            TextInputDialog speedDialog = new TextInputDialog(String.valueOf(selectedAgent.getSpeed()));
+            speedDialog.setTitle("Edit Agent");
+            speedDialog.setHeaderText("Edit agent speed");
+            speedDialog.setContentText("Speed:");
+
+            Optional<String> speedResult = speedDialog.showAndWait();
+            if (speedResult.isEmpty()) return;
+
+            try {
+                double newSpeed = Double.parseDouble(speedResult.get().trim());
+                selectedAgent.setSpeed(newSpeed);
+            } catch (NumberFormatException e) {
+                // keep current speed
+            }
+
+            TextInputDialog destDialog = new TextInputDialog(
+                    String.valueOf(selectedAgent.getDestination().getId())
+            );
+            destDialog.setTitle("Edit Agent");
+            destDialog.setHeaderText("Edit agent destination");
+            destDialog.setContentText("Destination node id:");
+
+            Optional<String> destResult = destDialog.showAndWait();
+            if (destResult.isEmpty()) return;
+
+            try {
+                int destId = Integer.parseInt(destResult.get().trim());
+                Node newDest = graph.getNodeById(destId);
+                if (newDest != null && !newDest.equals(selectedAgent.getCurrentPosition())) {
+                    selectedAgent.setDestination(newDest);
+                    selectedAgent.setProgressOnEdge(0.0);
+                    selectedAgent.setNextNode(null);
+                    selectedAgent.setState(State.WAITING);
+                }
+            } catch (NumberFormatException e) {
+                // keep current destination
+            }
+
+            if (view != null) view.renderAgents(engine.getAgents());
+            return;
+        }
+
+        // Modification d'une arête sélectionnée
+        if (selectedEdge != null) {
+
+            TextInputDialog weightDialog = new TextInputDialog(
+                    String.valueOf(selectedEdge.getDistance())
+            );
+            weightDialog.setTitle("Edit Edge");
+            weightDialog.setHeaderText("Edit edge weight");
+            weightDialog.setContentText("Weight:");
+
+            Optional<String> weightResult = weightDialog.showAndWait();
+            if (weightResult.isEmpty()) return;
+
+            try {
+                double newWeight = Double.parseDouble(weightResult.get().trim());
+                selectedEdge.setDistance(newWeight);
+             // Mettre à jour l'arête inverse si elle existe
+                for (Edge e : graph.getEdges(selectedEdge.getDestination())) {
+                    if (e.getDestination().equals(selectedEdge.getSource())) {
+                        e.setDistance(newWeight);
+                        break;
+                    }
+                }
+                
+            } catch (NumberFormatException e) {
+                // keep current weight
+            }
+
+            ChoiceDialog<EdgeType> typeDialog = new ChoiceDialog<>(
+                    selectedEdge.getType() != null ? selectedEdge.getType() : EdgeType.ROAD,
+                    java.util.Arrays.asList(EdgeType.values())
+            );
+            typeDialog.setTitle("Edit Edge");
+            typeDialog.setHeaderText("Edit edge type");
+            typeDialog.setContentText("Type:");
+
+            Optional<EdgeType> typeResult = typeDialog.showAndWait();
+            if (typeResult.isEmpty()) return;
+            selectedEdge.setType(typeResult.get());
+
+            TextInputDialog capacityDialog = new TextInputDialog(
+                    String.valueOf(selectedEdge.getCapacity())
+            );
+            capacityDialog.setTitle("Edit Edge");
+            capacityDialog.setHeaderText("Edit edge capacity");
+            capacityDialog.setContentText("Capacity:");
+
+            Optional<String> capacityResult = capacityDialog.showAndWait();
+            if (capacityResult.isEmpty()) return;
+
+            try {
+                int newCapacity = Integer.parseInt(capacityResult.get().trim());
+                selectedEdge.setCapacity(newCapacity);
+            } catch (NumberFormatException e) {
+                // keep current capacity
+            }
+
+            if (view != null) view.renderGraph(graph);
+            return;
+        }
+
+        // Rien de sélectionné
+        if (selectedNode == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Edit");
+            alert.setHeaderText("Nothing selected");
+            alert.setContentText("Please select a node, an edge or an agent before editing.");
+            alert.showAndWait();
         }
     }
 }

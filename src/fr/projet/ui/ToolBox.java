@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
  */
 public class ToolBox extends HBox {
 
+	public final Button editBtn = new Button("Edit");
     public final Button addNodeBtn = new Button("Add Node");
     public final Button addEdgeBtn = new Button("Add Edge");
     public final Button addAgentBtn = new Button("Add Agent");
@@ -28,6 +29,7 @@ public class ToolBox extends HBox {
                 addNodeBtn,
                 addEdgeBtn,
                 addAgentBtn,
+                editBtn,
                 deleteBtn,
                 helpBtn
         );
