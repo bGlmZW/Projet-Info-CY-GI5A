@@ -42,6 +42,9 @@ public class GraphView extends Pane {
 
     /** Callback invoked when an edge is clicked */
     private Consumer<Edge> edgeClickHandler = edge -> {};
+    
+    private Agent selectedAgent;
+    private Consumer<Agent> agentClickHandler = agent -> {};
 
     /**
      * Creates the view and prepares background click handling.
@@ -260,6 +263,7 @@ public class GraphView extends Pane {
         this.selectedNode = node;
         this.selectedEdge = null;
         refreshSelection();
+        redrawAgents();
     }
 
     /**
@@ -272,11 +276,24 @@ public class GraphView extends Pane {
         this.selectedNode = null;
         refreshSelection();
     }
+    
+    public void setAgentClickHandler(Consumer<Agent> handler) {
+        this.agentClickHandler = (handler != null) ? handler : agent -> {};
+    }
+
+    public void setSelectedAgent(Agent agent) {
+        this.selectedAgent = agent;
+        this.selectedNode = null;
+        this.selectedEdge = null;
+        refreshSelection();
+        redrawAgents();
+    }
 
     /**
      * Clears the current selection (node or edge).
      */
     public void clearSelection() {
+    	this.selectedAgent = null;
         this.selectedNode = null;
         this.selectedEdge = null;
         refreshSelection();
@@ -329,7 +346,16 @@ public class GraphView extends Pane {
             Circle agentCircle = new Circle(10);
             agentCircle.setFill(getAgentColor(agent));
             agentCircle.setStroke(Color.BLACK);
-            agentCircle.setMouseTransparent(true);
+            if (agent.equals(selectedAgent)) {
+                agentCircle.setStroke(Color.RED);
+                agentCircle.setStrokeWidth(3);
+            }
+            agentCircle.setMouseTransparent(false);
+            final Agent currentAgent = agent;
+            agentCircle.setOnMouseClicked(e -> {
+                agentClickHandler.accept(currentAgent);
+                e.consume();
+            });
 
             double x;
             double y;

@@ -45,6 +45,7 @@ public class MainApp extends Application {
         graphController.setEngine(engine);
         view.setNodeClickHandler(graphController::handleNodeClicked);
         view.setEdgeClickHandler(graphController::handleEdgeClicked);
+        view.setAgentClickHandler(graphController::handleAgentClicked);
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
 

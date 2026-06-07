@@ -54,6 +54,8 @@ public class GraphController {
     private SimulationEngine engine;
     
     private Edge selectedEdge;
+    
+    private Agent selectedAgent;
 
     /**
      * Creates a controller bound to a graph instance.
@@ -113,6 +115,10 @@ public class GraphController {
             return;
         }
         
+        selectedAgent = null;
+        if (view != null) {
+            view.clearSelection();
+        }
         selectedEdge = null;
         if (view != null) {
             view.clearSelection();
@@ -254,6 +260,18 @@ public class GraphController {
         if (view != null) {
             view.clearSelection();
             view.setSelectedEdge(clickedEdge);
+        }
+    }
+    
+    public void handleAgentClicked(Agent agent) {
+        if (agent == null) return;
+
+        selectedAgent = agent;
+        selectedNode = null;
+        selectedEdge = null;
+
+        if (view != null) {
+            view.setSelectedAgent(agent);
         }
     }
 
@@ -572,6 +590,20 @@ public class GraphController {
     }
     
     public void deleteSelected() {
+    	
+    	// Suppression d'un agent sélectionné
+    	if (selectedAgent != null) {
+    	    if (engine != null) {
+    	        engine.removeAgent(selectedAgent);
+    	    }
+    	    selectedAgent = null;
+
+    	    if (view != null) {
+    	        view.clearSelection();
+    	        if (engine != null) view.renderAgents(engine.getAgents());
+    	    }
+    	    return;
+    	}
 
         // Suppression d'une arête sélectionnée
         if (selectedEdge != null) {
