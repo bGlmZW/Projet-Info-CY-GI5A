@@ -20,7 +20,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-
+    	
         // =========================
         // GRAPH SETUP
         // =========================

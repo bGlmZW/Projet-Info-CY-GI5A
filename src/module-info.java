@@ -4,7 +4,7 @@
 /**
  * 
  */
-module Projet {
+module Projeti {
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
 
