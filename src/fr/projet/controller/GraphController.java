@@ -24,6 +24,7 @@ import fr.projet.model.AgentType;
 import fr.projet.simulation.SimulationEngine;
 import fr.projet.model.EdgeType;
 import fr.projet.model.State;
+import java.util.Random;
 
 import fr.projet.view.*;
 
@@ -96,6 +97,70 @@ public class GraphController {
     graph.addEdge(new Edge(C, D, 3, EdgeType.ROAD));
     
     return graph;
+	}
+	
+	public void addRandomNodes(SimulationEngine engine) {
+
+	    TextInputDialog dialog = new TextInputDialog("5");
+	    dialog.setTitle("Add Random Nodes");
+	    dialog.setHeaderText("How many nodes to add?");
+	    dialog.setContentText("Number of nodes:");
+
+	    Optional<String> result = dialog.showAndWait();
+	    if (result.isEmpty()) return;
+
+	    int count;
+	    try {
+	        count = Integer.parseInt(result.get().trim());
+	        if (count <= 0) return;
+	    } catch (NumberFormatException e) {
+	        return;
+	    }
+
+	    Random random = new Random();
+	    List<Node> newNodes = new ArrayList<>();
+
+	    // Créer les nœuds avec des positions aléatoires
+	    for (int i = 0; i < count; i++) {
+	        int newId = graph.getAllNodes().stream()
+	                .mapToInt(Node::getId)
+	                .max()
+	                .orElse(0) + 1;
+
+	        Node node = new Node(newId);
+	        node.setX(50 + random.nextDouble() * 700);
+	        node.setY(50 + random.nextDouble() * 500);
+	        graph.addNode(node);
+	        newNodes.add(node);
+	    }
+
+	    // Connecter chaque nouveau nœud à au moins un nœud existant
+	    List<Node> allNodes = new ArrayList<>(graph.getAllNodes());
+
+	    for (Node newNode : newNodes) {
+	        // Choisir un nœud existant aléatoire (différent du nouveau)
+	        List<Node> candidates = new ArrayList<>(allNodes);
+	        candidates.remove(newNode);
+
+	        if (candidates.isEmpty()) continue;
+
+	        Node target = candidates.get(random.nextInt(candidates.size()));
+
+	        if (!graph.hasConnection(newNode, target)) {
+	            double weight = 1 + random.nextInt(10);
+	            int capacity = 1 + random.nextInt(5);
+	            EdgeType[] types = EdgeType.values();
+	            EdgeType type = types[random.nextInt(types.length)];
+	            Edge edge = new Edge(newNode, target, weight, type);
+	            edge.setCapacity(capacity);
+	            graph.addEdge(edge);
+	        }
+	    }
+
+	    if (view != null) {
+	        view.renderGraph(graph);
+	        if (engine != null) view.renderAgents(engine.getAgents());
+	    }
 	}
 
     // =====================================================
