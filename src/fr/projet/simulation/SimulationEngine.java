@@ -111,6 +111,8 @@ public class SimulationEngine {
         }
     }
     
+    
+    
     /**
      * Moves the agent along the shortest path toward its destination.
      * The agent progresses on the current edge according to its speed.
@@ -121,74 +123,66 @@ public class SimulationEngine {
      */
     public void moveAgent(Agent agent) {
     	
-    	// Agent already arrived, nothing to do
         if (agent.getState() == State.ARRIVED) {
             return;
         }
         
-        // Agent has reached its destination
-        if (agent.getCurrentPosition().equals(agent.getDestination())) {
-            agent.setState(State.ARRIVED);
-            return;
-        }
-
-        // Edge was full last tick, retry this tick
         if (agent.getState() == State.WAITING) {
-            agent.setState(State.MOVING); // reset pour réessayer normalement
+            agent.setState(State.MOVING);
         }
+        
+        double remaining = agent.getSpeed() + agent.getProgressOnEdge();
+        while (remaining > 0) {
+        
+	        if (agent.getCurrentPosition().equals(agent.getDestination())) {
+	            agent.setState(State.ARRIVED);
+	            return;
+	        }
+	
+	        List<Node> path = pathFinder.findPath(
+	                agent.getCurrentPosition(),
+	                agent.getDestination()
+	        );
+	
+	        if (path == null || path.size() < 2) {
+	            return;
+	        }
+        
+	        Node nextNode = path.get(1);
+	        agent.setNextNode(nextNode);
+	
+	        Edge edge = null;
+	        for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+	            if (e.getDestination().equals(nextNode)) {
+	                edge = e;
+	                break;
+	            }
+	        }
+	
+	        if (edge == null) return;
+	
+	        if (!edge.containsAgent(agent)) {
+	            if (edge.getAgents().size() >= edge.getCapacity()) {
+	                agent.setState(State.WAITING);
+	                return;
+	            }
+	            edge.addAgent(agent);
+	        }
 
-        // Compute the shortest path from current position to destination
-        List<Node> path = pathFinder.findPath(
-                agent.getCurrentPosition(),
-                agent.getDestination()
-        );
-
-        // No valid path found
-        if (path == null || path.size() < 2) {
-            return;
-        }
-
-        // The next node to reach is the second node in the path
-        Node nextNode = path.get(1);
-        agent.setNextNode(nextNode);
-
-        // Find the edge leading to the next node
-        Edge edge = null;
-        for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
-            if (e.getDestination().equals(nextNode)) {
-                edge = e;
-                break;
-            }
-        }
-
-        // No edge found toward the next node
-        if (edge == null) return;
-
-        // If the agent is not yet on the edge, check capacity before entering
-        if (!edge.containsAgent(agent)) {
-            if (edge.getAgents().size() >= edge.getCapacity()) {
-                // Edge is full, agent must wait
-                agent.setState(State.WAITING);
-                return;
-            }
-            // Agent enters the edge
-            edge.addAgent(agent);
-        }
-
-        // Update agent progress along the edge
-        double progress = agent.getProgressOnEdge() + agent.getSpeed();
-        agent.setProgressOnEdge(progress);
-
-        // Agent has fully traversed the edge
-        if (progress >= edge.getDistance()) {
-            edge.removeAgent(agent);
-            agent.setCurrentPosition(nextNode);
-            agent.setProgressOnEdge(0.0);
-            return;
-        }
-
+	        
+	        if (remaining >= edge.getDistance()) { 
+	            remaining -= edge.getDistance();
+	            agent.setCurrentPosition(nextNode);
+	            agent.setProgressOnEdge(0.0);
+	            edge.removeAgent(agent);
+	        } else {
+	            agent.setProgressOnEdge(remaining);
+	            remaining = 0.0;
+	        }
+	    }
         agent.setState(State.MOVING);
     }
+    
     
     /**
      * Updates a single agent for one simulation tick.
