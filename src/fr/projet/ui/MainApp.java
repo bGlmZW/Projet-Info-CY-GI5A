@@ -1,7 +1,5 @@
 package fr.projet.ui;
 
-// import fr.projet.ui.HelpDialog;
-
 import fr.projet.controller.GraphController;
 import fr.projet.controller.SimulationController;
 import fr.projet.model.Graph;
@@ -41,9 +39,29 @@ public class MainApp extends Application {
         GraphController graphController = new GraphController(graph);
 
         GraphView view = new GraphView();
+        StatsPanel statsPanel = new StatsPanel();
+        
         graphController.attachView(view);
-        view.setNodeClickHandler(graphController::handleNodeClicked);
+        view.setBackgroundClickHandler(point -> {
+            graphController.handleBackgroundClick(point);
+            statsPanel.clear();
+        });
 
+        view.setNodeClickHandler(node -> {
+            graphController.handleNodeClicked(node);
+            statsPanel.showNode(node, graph);
+        });
+
+        view.setEdgeClickHandler(edge -> {
+            view.setSelectedEdge(edge);
+            statsPanel.showEdge(edge);
+        });
+
+        view.setAgentClickHandler(agent -> {
+            view.setSelectedAgent(agent);
+            statsPanel.showAgent(agent);
+        });
+        
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
 
@@ -63,7 +81,10 @@ public class MainApp extends Application {
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
         toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
-        toolBox.deleteBtn.setOnAction(e -> graphController.deleteSelectedNode());
+        toolBox.deleteBtn.setOnAction(e -> graphController.deleteSelected());
+        toolBox.editBtn.setOnAction(e -> graphController.editSelected());
+        toolBox.addRandomBtn.setOnAction(e -> graphController.addRandomNodes(engine));
+        toolBox.addRandomAgentsBtn.setOnAction(e -> graphController.addRandomAgents(engine));
 
         simulationBar.startBtn.setOnAction(e -> timeline.play());
         simulationBar.pauseBtn.setOnAction(e -> timeline.pause());
@@ -91,6 +112,7 @@ public class MainApp extends Application {
         BorderPane root = new BorderPane();
         root.setTop(toolBox);
         root.setCenter(view);
+        root.setRight(statsPanel);
         root.setBottom(bottomBar);
 
         Scene scene = new Scene(root, 900, 600);

@@ -1,6 +1,11 @@
-
-module ntm {
-	requires transitive javafx.controls;
+/**
+ * 
+ */
+/**
+ * 
+ */
+module Projet {
+    requires transitive javafx.controls;
     requires transitive javafx.graphics;
 
     exports fr.projet;
