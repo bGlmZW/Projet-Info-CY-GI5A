@@ -5,6 +5,8 @@ import java.util.List;
 
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
+import fr.projet.model.AgentType;
+import fr.projet.model.EdgeType;
 
 
 /**
@@ -119,6 +121,7 @@ public class SimulationEngine {
      * @param agent the agent to move
      */
     public void moveAgent(Agent agent) {
+    	
 
         if (agent.getState() == State.ARRIVED) {
             return;
@@ -171,9 +174,12 @@ public class SimulationEngine {
                 }
                 edge.addAgent(agent);
             }
+            double multiplier = getEdgeMultiplier(edge.getType(), agent.getAgentType());
+            double effectiveDistance = edge.getDistance() / multiplier;
+            agent.setCurrentEffectiveDistance(effectiveDistance);
 
-            if (remaining >= edge.getDistance()) {
-                remaining -= edge.getDistance();
+            if (remaining >= effectiveDistance) {
+                remaining -= effectiveDistance;
                 agent.setCurrentPosition(nextNode);
                 agent.setProgressOnEdge(0.0);
                 edge.removeAgent(agent);
@@ -189,6 +195,20 @@ public class SimulationEngine {
                     ? State.ARRIVED
                     : State.MOVING
             );
+        }
+    }
+    
+    private double getEdgeMultiplier(EdgeType edgeType, AgentType agentType) {
+        if (edgeType == null) return 1.0;
+
+        switch (edgeType) {
+            case HIGHWAY:
+                return (agentType == AgentType.CARGO) ? 1.2 : 1.5;
+            case DIRT_ROAD:
+                return (agentType == AgentType.CARGO) ? 0.5 : 0.7;
+            case ROAD:
+            default:
+                return 1.0;
         }
     }
     
