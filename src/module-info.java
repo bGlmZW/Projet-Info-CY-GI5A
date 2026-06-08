@@ -4,7 +4,7 @@
 /**
  * 
  */
-module gg {
+module ProjetGenieLogiciel {
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
 

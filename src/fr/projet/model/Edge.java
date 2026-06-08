@@ -37,46 +37,19 @@ public class Edge {
      * @param destination ending node
      * @param distance    cost or distance of the edge
      */
-    public Edge(Node source, Node destination, double distance, int capacity) {
+    public Edge(Node source, Node destination, double distance, int capacity, EdgeType type) {
         this.source = source;
         this.destination = destination;
         this.distance = distance;
         this.oriented = false;
         this.capacity = capacity;
+        this.type = type;
         this.agents = new ArrayList<>();
     }
     
     public Edge(Node source, Node destination, double distance, EdgeType type) {
-        this.source = source;
-        this.destination = destination;
-        this.distance = distance;
-        this.oriented = false;
-        this.capacity = Integer.MAX_VALUE;
-        this.agents = new ArrayList<>();
-        this.type = type;
+    	this(source, destination, distance, Integer.MAX_VALUE, type);
     }
-
-    private EdgeType type;
-
-    /**
-     * Creates a new edge between two nodes.
-     * The edge is undirected by default, with unlimited capacity and no agents.
-     *
-     * @param source      starting node
-     * @param destination ending node
-     * @param distance    cost or distance of the edge
-     */
-    public Edge(Node source, Node destination, double distance, EdgeType type) {
-        this.source = source;
-        this.destination = destination;
-        this.distance = distance;
-        this.oriented = false;
-        this.capacity = Integer.MAX_VALUE;
-        this.agents = new ArrayList<>();
-        this.type = type;
-    }
-    
-    
 
     /**
      * Returns the source node of the edge.
@@ -166,14 +139,6 @@ public class Edge {
      */
     public void setCapacity(int capacity) {
         this.capacity = capacity;
-    }
-    
-    public EdgeType getType() {
-        return type;
-    }
-    
-    public void setType(EdgeType type) {
-    	this.type = type;
     }
 
     /**

@@ -97,10 +97,10 @@ public class GraphController {
     graph.addNode(C);
     graph.addNode(D);
 
-    graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD));
-    graph.addEdge(new Edge(A, D, 9, EdgeType.ROAD));
-    graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD));
-    graph.addEdge(new Edge(C, D, 3, EdgeType.ROAD));
+    graph.addEdge(new Edge(A, B, 1,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(A, D, 9,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(B, C, 1,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(C, D, 3,2, EdgeType.ROAD));
     
     return graph;
 	}
