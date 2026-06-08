@@ -89,12 +89,31 @@ public class MainApp extends Application {
         ToolBox toolBox = new ToolBox();
         SimulationBar simulationBar = new SimulationBar();
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            engine.tick();
-            view.renderAgents(engine.getAgents());
-            simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
-        }));
-        timeline.setCycleCount(Animation.INDEFINITE);
+     // Tableau pour pouvoir modifier la timeline depuis le lambda du slider
+        final Timeline[] timelineRef = new Timeline[1];
+
+        Runnable buildTimeline = () -> {
+            double interval = simulationBar.speedSlider.getValue();
+            Timeline tl = new Timeline(new KeyFrame(Duration.seconds(interval), e -> {
+                engine.tick();
+                view.renderAgents(engine.getAgents());
+                simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
+            }));
+            tl.setCycleCount(Animation.INDEFINITE);
+            timelineRef[0] = tl;
+        };
+
+        buildTimeline.run(); // construction initiale
+
+        // Quand le slider bouge, on reconstruit la timeline
+        simulationBar.speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = Math.round(newVal.doubleValue() * 10.0) / 10.0;
+            simulationBar.speedLabel.setText(String.format("Vitesse: %.1fs/tick", val));
+            boolean wasPlaying = timelineRef[0].getStatus() == Animation.Status.RUNNING;
+            timelineRef[0].stop();
+            buildTimeline.run();
+            if (wasPlaying) timelineRef[0].play();
+        });
 
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
@@ -118,10 +137,10 @@ public class MainApp extends Application {
         	statsPanel.showGraphOverview(graph, engine.getAgents().size());
         });
 
-        simulationBar.startBtn.setOnAction(e -> timeline.play());
-        simulationBar.pauseBtn.setOnAction(e -> timeline.pause());
+        simulationBar.startBtn.setOnAction(e -> timelineRef[0].play());
+        simulationBar.pauseBtn.setOnAction(e -> timelineRef[0].pause());
         simulationBar.resetBtn.setOnAction(e -> {
-            timeline.pause();
+        	timelineRef[0].pause();
             engine.reset();
             view.renderGraph(graph);
             view.renderAgents(engine.getAgents());
