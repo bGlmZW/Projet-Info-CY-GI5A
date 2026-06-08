@@ -296,7 +296,8 @@ public class GraphController {
 	            agent = AgentFactory.create(randomType, newId, source, destination);
 	            agent.setSpeed(speed); // override avec la plage choisie
 	        } else {
-	            agent = new Agent(newId, speed, source, destination);
+	        	agent = new Agent(newId, speed, source, destination);
+	        	agent.setAgentType(AgentType.NORMAL);
 	        }
 
 	        // Algorithme
@@ -710,7 +711,8 @@ public class GraphController {
         Agent agent;
 
         if (useCustomSpeed) {
-            agent = new Agent(newId, customSpeed, selectedNode, destination);
+        	agent = new Agent(newId, customSpeed, selectedNode, destination);
+        	agent.setAgentType(agentType);
         } else {
             agent = AgentFactory.create(agentType, newId, selectedNode, destination);
         }

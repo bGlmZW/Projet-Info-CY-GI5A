@@ -463,7 +463,10 @@ public class GraphView extends Pane {
                     Circle nextNodeCircle = nodeViews.get(agent.getNextNode());
 
                     if (nextNodeCircle != null) {
-                        double ratio = agent.getProgressOnEdge() / currentEdge.getDistance();
+                    	double effectiveDist = agent.getCurrentEffectiveDistance() > 0
+                    	        ? agent.getCurrentEffectiveDistance()
+                    	        : currentEdge.getDistance();
+                    	double ratio = agent.getProgressOnEdge() / effectiveDist;
                         ratio = Math.max(0.0, Math.min(ratio, 1.0));
 
                         x = currentNodeCircle.getCenterX() + (nextNodeCircle.getCenterX() - currentNodeCircle.getCenterX()) * ratio;
