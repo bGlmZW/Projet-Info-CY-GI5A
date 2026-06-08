@@ -929,6 +929,13 @@ public class GraphController {
             List<Node> neighbors = graph.getNeighbors(selectedNode);
 
             for (Agent agent : new ArrayList<>(engine.getAgents())) {
+            	if (agent.getInitialPosition() == selectedNode) {
+            		if (!neighbors.isEmpty()) {
+                        agent.setInitialPosition(neighbors.get(0));
+                    } else {
+                        engine.removeAgent(agent);
+                    }
+            	}
                 if (agent.getCurrentPosition().equals(selectedNode)) {
                     if (!neighbors.isEmpty()) {
                         agent.setCurrentPosition(neighbors.get(0));

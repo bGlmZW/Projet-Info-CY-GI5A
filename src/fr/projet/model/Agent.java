@@ -215,6 +215,10 @@ public class Agent {
     public Node getInitialPosition() {
         return initialPosition;
     }
+    
+    public void setInitialPosition(Node node) {
+    	this.initialPosition = node;
+    }
 
     /**
      * Returns the current path followed by the agent.
