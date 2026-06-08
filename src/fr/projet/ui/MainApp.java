@@ -39,13 +39,38 @@ public class MainApp extends Application {
         // VIEW
         // =========================
         GraphController graphController = new GraphController(graph);
+        
 
         GraphView view = new GraphView();
+        StatsPanel statsPanel = new StatsPanel();
         graphController.attachView(view);
         graphController.setEngine(engine);
-        view.setNodeClickHandler(graphController::handleNodeClicked);
-        view.setEdgeClickHandler(graphController::handleEdgeClicked);
-        view.setAgentClickHandler(graphController::handleAgentClicked);
+
+        view.setBackgroundClickHandler(point -> {
+            graphController.handleBackgroundClick(point);
+            statsPanel.clear();
+        });
+        view.setNodeClickHandler(node -> {
+            graphController.handleNodeClicked(node);
+            statsPanel.showNode(node, graph);
+        });
+        view.setEdgeClickHandler(edge -> {
+            graphController.handleEdgeClicked(edge);
+            if (graphController.getSelectedEdge() != null) {
+                statsPanel.showEdge(edge);
+            } else {
+                statsPanel.clear();
+            }
+        });
+        view.setAgentClickHandler(agent -> {
+            graphController.handleAgentClicked(agent);
+            if (graphController.getSelectedAgent() != null) {
+                statsPanel.showAgent(agent);
+            } else {
+                statsPanel.clear();
+            }
+        });
+        
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
 
@@ -96,6 +121,7 @@ public class MainApp extends Application {
         BorderPane root = new BorderPane();
         root.setTop(toolBox);
         root.setCenter(view);
+        root.setRight(statsPanel);
         root.setBottom(bottomBar);
 
         Scene scene = new Scene(root, 900, 600);

@@ -45,6 +45,11 @@ public class GraphView extends Pane {
     
     private Agent selectedAgent;
     private Consumer<Agent> agentClickHandler = agent -> {};
+    
+    private Node draggedNode;
+    private boolean nodeWasDragged;
+    private double dragOffsetX;
+    private double dragOffsetY;
 
     /**
      * Creates the view and prepares background click handling.
@@ -112,11 +117,50 @@ public class GraphView extends Pane {
                 node.setY(y);
             }
 
+            Text label = new Text(String.valueOf(node.getId()));
+            label.setMouseTransparent(true);
+            label.setX(x - 5);
+            label.setY(y + 5);
+            label.setFill(Color.BLACK);
+
             Circle circle = new Circle(25);
             circle.setCenterX(x);
             circle.setCenterY(y);
-            circle.setOnMouseClicked(e -> {
-                nodeClickHandler.accept(node);
+
+            circle.setOnMousePressed(e -> {
+                draggedNode = node;
+                nodeWasDragged = false;
+                Point2D p = sceneToLocal(e.getSceneX(), e.getSceneY());
+                dragOffsetX = node.getX() - p.getX();
+                dragOffsetY = node.getY() - p.getY();
+                e.consume();
+            });
+
+            circle.setOnMouseDragged(e -> {
+                if (draggedNode != node) return;
+                nodeWasDragged = true;
+                Point2D p = sceneToLocal(e.getSceneX(), e.getSceneY());
+                double newX = p.getX() + dragOffsetX;
+                double newY = p.getY() + dragOffsetY;
+                node.setX(newX);
+                node.setY(newY);
+                circle.setCenterX(newX);
+                circle.setCenterY(newY);
+                label.setX(newX - 5);
+                label.setY(newY + 5);
+                e.consume();
+            });
+
+            circle.setOnMouseReleased(e -> {
+                if (draggedNode == node) {
+                    draggedNode = null;
+                    if (nodeWasDragged) {
+                        renderGraph(graph);
+                    } else {
+                        nodeClickHandler.accept(node);
+                    }
+                    nodeWasDragged = false;
+                }
                 e.consume();
             });
 
@@ -132,11 +176,6 @@ public class GraphView extends Pane {
                 circle.setStrokeWidth(1);
             }
 
-            Text label = new Text(String.valueOf(node.getId()));
-            label.setMouseTransparent(true);
-            label.setX(x - 5);
-            label.setY(y + 5);
-            label.setFill(Color.BLACK);
 
             nodeViews.put(node, circle);
             labels.put(node, label);

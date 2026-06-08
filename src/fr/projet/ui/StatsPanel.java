@@ -1,0 +1,206 @@
+package fr.projet.ui;
+
+import fr.projet.model.Agent;
+import fr.projet.model.Edge;
+import fr.projet.model.Graph;
+import fr.projet.model.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+/**
+ * Right-side dashboard showing statistics about the selected graph element.
+ */
+public class StatsPanel extends VBox {
+
+    private final Label titleLabel = new Label("Stats dashboard");
+    private final VBox contentBox = new VBox(8);
+
+    /**
+     * Creates an empty stats panel.
+     */
+    public StatsPanel() {
+        setSpacing(12);
+        setPrefWidth(320);
+        setStyle("-fx-padding: 14; -fx-background-color: #f7f7f7; -fx-border-color: #d0d0d0;");
+
+        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+
+        contentBox.setSpacing(8);
+
+        getChildren().addAll(titleLabel, contentBox);
+        clear();
+    }
+
+    /**
+     * Clears the dashboard.
+     */
+    public void clear() {
+        contentBox.getChildren().clear();
+        contentBox.getChildren().add(new Label("Click a node, edge, or agent to see statistics."));
+    }
+
+    /**
+     * Displays statistics for a node.
+     *
+     * @param node selected node
+     * @param graph current graph
+     */
+    public void showNode(Node node, Graph graph) {
+        if (node == null || graph == null) {
+            clear();
+            return;
+        }
+
+        contentBox.getChildren().clear();
+        contentBox.getChildren().add(sectionTitle("NODE"));
+
+        StringBuilder neighborsText = new StringBuilder();
+        List<Node> neighbors = graph.getNeighbors(node);
+        for (int i = 0; i < neighbors.size(); i++) {
+            neighborsText.append(neighbors.get(i).getId());
+            if (i < neighbors.size() - 1) {
+                neighborsText.append(", ");
+            }
+        }
+
+        int agentCount = 0;
+        double totalSpeed = 0.0;
+
+        if (node.getAgents() != null) {
+            agentCount = node.getAgents().size();
+            for (Agent agent : node.getAgents()) {
+                totalSpeed += agent.getSpeed();
+            }
+        }
+
+        double avgSpeed = agentCount > 0 ? totalSpeed / agentCount : 0.0;
+
+        addStat("ID", String.valueOf(node.getId()));
+        addStat("Position",
+                "("
+                + String.format(Locale.US, "%.2f", node.getX())
+                + ", "
+                + String.format(Locale.US, "%.2f", node.getY())
+                + ")");
+        addStat("Outgoing edges", String.valueOf(graph.getEdges(node).size()));
+        addStat("Agents on node", String.valueOf(agentCount));
+        addStat("Average agent speed", String.format(Locale.US, "%.2f", avgSpeed));
+        addStat("Neighbors", neighborsText.length() == 0 ? "none" : neighborsText.toString());
+    }
+
+    /**
+     * Displays statistics for an edge.
+     *
+     * @param edge selected edge
+     */
+    public void showEdge(Edge edge) {
+        if (edge == null) {
+            clear();
+            return;
+        }
+
+        contentBox.getChildren().clear();
+        contentBox.getChildren().add(sectionTitle("EDGE"));
+
+        int agentCount = 0;
+        double totalSpeed = 0.0;
+
+        if (edge.getAgents() != null) {
+            agentCount = edge.getAgents().size();
+            for (Agent agent : edge.getAgents()) {
+                totalSpeed += agent.getSpeed();
+            }
+        }
+
+        double avgSpeed = agentCount > 0 ? totalSpeed / agentCount : 0.0;
+
+        addStat("From", String.valueOf(edge.getSource().getId()));
+        addStat("To", String.valueOf(edge.getDestination().getId()));
+        addStat("Type", String.valueOf(edge.getType()));
+        addStat("Distance", String.format(Locale.US, "%.2f", edge.getDistance()));
+        addStat("Capacity", String.valueOf(edge.getCapacity()));
+        addStat("Oriented", String.valueOf(edge.isOriented()));
+        addStat("Agents on edge", String.valueOf(agentCount));
+        addStat("Average agent speed", String.format(Locale.US, "%.2f", avgSpeed));
+    }
+
+    /**
+     * Displays statistics for an agent.
+     *
+     * @param agent selected agent
+     */
+    public void showAgent(Agent agent) {
+        if (agent == null) {
+            clear();
+            return;
+        }
+
+        contentBox.getChildren().clear();
+        contentBox.getChildren().add(sectionTitle("AGENT"));
+
+        String type = agent.getClass().getSimpleName().replace("Agent", "");
+        if (type.isBlank()) {
+            type = "Agent";
+        }
+
+        String remainingPath = "not available";
+        if (agent.getCurrentPath() != null
+                && !agent.getCurrentPath().isEmpty()
+                && agent.getPathIndex() >= 0
+                && agent.getPathIndex() < agent.getCurrentPath().size()) {
+
+            remainingPath = agent.getCurrentPath().stream()
+                    .skip(agent.getPathIndex())
+                    .map(n -> String.valueOf(n.getId()))
+                    .collect(Collectors.joining(" -> "));
+        }
+
+        addStat("ID", String.valueOf(agent.getId()));
+        addStat("Type", type);
+        addStat("Speed", String.format(Locale.US, "%.2f", agent.getSpeed()));
+        addStat("State", String.valueOf(agent.getState()));
+        addStat("Current position", String.valueOf(agent.getCurrentPosition().getId()));
+        addStat("Destination", String.valueOf(agent.getDestination().getId()));
+        addStat("Next node", agent.getNextNode() != null ? String.valueOf(agent.getNextNode().getId()) : "none");
+        addStat("Progress on edge", String.format(Locale.US, "%.2f", agent.getProgressOnEdge()));
+        addStat("Remaining path", remainingPath);
+    }
+
+    /**
+     * Creates a bold section title.
+     *
+     * @param text title text
+     * @return label for the title
+     */
+    private Label sectionTitle(String text) {
+        Label label = new Label(text);
+        label.setFont(Font.font("System", FontWeight.BOLD, 16));
+        return label;
+    }
+
+    /**
+     * Adds one statistic line with a bold name and a normal value.
+     *
+     * @param name stat name
+     * @param value stat value
+     */
+    private void addStat(String name, String value) {
+        Label nameLabel = new Label(name + ":");
+        nameLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+        nameLabel.setMinWidth(150);
+
+        Label valueLabel = new Label(value);
+        valueLabel.setFont(Font.font("System", 14));
+        valueLabel.setWrapText(true);
+
+        HBox line = new HBox(8, nameLabel, valueLabel);
+        contentBox.getChildren().add(line);
+    }
+}

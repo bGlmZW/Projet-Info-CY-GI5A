@@ -1,7 +1,7 @@
 /**
  * Main module of the graph-based agent simulation project.
  */
-module ProjetGenieLogiciel {
+module ProjetGenieLogicel3 {
 	
 	requires transitive javafx.controls;
     requires transitive javafx.graphics;

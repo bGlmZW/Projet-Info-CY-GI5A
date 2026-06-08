@@ -70,6 +70,14 @@ public class GraphController {
     public void setEngine(SimulationEngine engine) {
         this.engine = engine;
     }
+    
+    public Edge getSelectedEdge() {
+        return selectedEdge;
+    }
+
+    public Agent getSelectedAgent() {
+        return selectedAgent;
+    }
 
 	/**
      * Builds and returns a configured graph with nodes and edges.
