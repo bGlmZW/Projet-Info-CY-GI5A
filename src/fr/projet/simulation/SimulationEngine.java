@@ -5,6 +5,8 @@ import java.util.List;
 
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
+import fr.projet.model.AgentType;
+import fr.projet.model.EdgeType;
 
 
 /**
@@ -24,14 +26,14 @@ public class SimulationEngine {
     private long currentTick;
     
     /**  */
-    private PathFinder pathFinder;
+    private IPathFinder pathFinder;
 
     /**
      * Creates a new simulation engine.
      *
      * @param graph graph used during the simulation
      */
-    public SimulationEngine(Graph graph, PathFinder pathFinder) {
+    public SimulationEngine(Graph graph, IPathFinder pathFinder) {
         this.graph = graph;
         this.pathFinder = pathFinder;
         this.agents = new ArrayList<>();
@@ -113,55 +115,101 @@ public class SimulationEngine {
     
     /**
      * Moves the agent along the shortest path toward its destination.
-     * The agent progresses on the current edge according to its speed.
-     * When the edge is fully traversed, the agent moves to the next node.
+     * Handles speed surplus (multiple edges per tick) and edge capacity.
+     * If the next edge is at full capacity, the agent waits until a spot is available.
      *
      * @param agent the agent to move
      */
     public void moveAgent(Agent agent) {
+    	
 
-        if (agent.getCurrentPosition().equals(agent.getDestination())) {
-            agent.setState(State.ARRIVED);
+        if (agent.getState() == State.ARRIVED) {
             return;
         }
 
-        List<Node> path = pathFinder.findPath(
-                agent.getCurrentPosition(),
-                agent.getDestination()
-        );
-
-        if (path == null || path.size() < 2) {
-            return;
+        if (agent.getState() == State.WAITING) {
+            agent.setState(State.MOVING);
         }
 
-        Node nextNode = path.get(1);
+        double remaining = agent.getSpeed() + agent.getProgressOnEdge();
 
-        agent.setNextNode(nextNode);
+        while (remaining > 0) {
 
-        Edge edge = null;
+            if (agent.getCurrentPosition().equals(agent.getDestination())) {
+                agent.setState(State.ARRIVED);
+                return;
+            }
 
-        for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
-            if (e.getDestination().equals(nextNode)) {
-                edge = e;
-                break;
+            // Use the agent's own pathfinder, fallback to engine's global one
+            IPathFinder agentPathFinder = agent.getPathFinder() != null
+                    ? agent.getPathFinder()
+                    : pathFinder;
+
+            List<Node> path = agentPathFinder.findPath(
+                    agent.getCurrentPosition(),
+                    agent.getDestination()
+            );
+
+            if (path == null || path.size() < 2) return;
+
+            Node nextNode = path.get(1);
+            agent.setNextNode(nextNode);
+
+            Edge edge = null;
+            for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+                if (e.getDestination().equals(nextNode)) {
+                    edge = e;
+                    break;
+                }
+            }
+
+            if (edge == null) return;
+
+            if (!edge.containsAgent(agent)) {
+                if (edge.getAgents().size() >= edge.getCapacity()) {
+                    // Edge is full, agent stops at current node and waits
+                    agent.setState(State.WAITING);
+                    remaining = 0; // stop the loop, keep progress already made
+                    break;
+                }
+                edge.addAgent(agent);
+            }
+            double multiplier = getEdgeMultiplier(edge.getType(), agent.getAgentType());
+            double effectiveDistance = edge.getDistance() / multiplier;
+            agent.setCurrentEffectiveDistance(effectiveDistance);
+
+            if (remaining >= effectiveDistance) {
+                remaining -= effectiveDistance;
+                agent.setCurrentPosition(nextNode);
+                agent.setProgressOnEdge(0.0);
+                edge.removeAgent(agent);
+            } else {
+                agent.setProgressOnEdge(remaining);
+                remaining = 0.0;
             }
         }
 
-        if (edge == null) return;
-
-        // progression réelle
-        double progress = agent.getProgressOnEdge() + agent.getSpeed();
-
-        agent.setProgressOnEdge(progress);
-
-        // poids = temps nécessaire
-        if (progress >= edge.getDistance()) {
-
-            agent.setCurrentPosition(nextNode);
-            agent.setProgressOnEdge(0.0);
+        if (agent.getState() != State.WAITING) {
+            agent.setState(
+                agent.getCurrentPosition().equals(agent.getDestination())
+                    ? State.ARRIVED
+                    : State.MOVING
+            );
         }
+    }
+    
+    private double getEdgeMultiplier(EdgeType edgeType, AgentType agentType) {
+        if (edgeType == null) return 1.0;
 
-        agent.setState(State.MOVING);
+        switch (edgeType) {
+            case HIGHWAY:
+                return (agentType == AgentType.CARGO) ? 1.2 : 1.5;
+            case DIRT_ROAD:
+                return (agentType == AgentType.CARGO) ? 0.5 : 0.7;
+            case ROAD:
+            default:
+                return 1.0;
+        }
     }
     
     /**
@@ -178,10 +226,10 @@ public class SimulationEngine {
 
         moveAgent(agent);
 
-        if (!agent.getCurrentPosition().equals(agent.getDestination())) {
+        if (!agent.getCurrentPosition().equals(agent.getDestination())
+                && agent.getState() != State.WAITING) {
             agent.setState(State.MOVING);
-        }
-    }
+        }    }
 
     /**
      * Advances the simulation by one tick.

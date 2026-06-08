@@ -12,6 +12,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -39,14 +40,47 @@ public class MainApp extends Application {
         // VIEW
         // =========================
         GraphController graphController = new GraphController(graph);
+        
 
         GraphView view = new GraphView();
+        
+        StatsPanel statsPanel = new StatsPanel();
+        LegendPanel legendPanel = new LegendPanel();
+        
         graphController.attachView(view);
-        view.setEdgeClickHandler(graphController::handleEdgeClicked);
-        view.setNodeClickHandler(graphController::handleNodeClicked);
+        graphController.setEngine(engine);
 
+        view.setBackgroundClickHandler(point -> {
+            graphController.handleBackgroundClick(point);
+            statsPanel.showGraphOverview(graph, engine.getAgents().size());
+        });
+        
+        view.setNodeClickHandler(node -> {
+            graphController.handleNodeClicked(node);
+            statsPanel.showNode(node, graph);
+        });
+        
+        view.setEdgeClickHandler(edge -> {
+            graphController.handleEdgeClicked(edge);
+            if (graphController.getSelectedEdge() != null) {
+                statsPanel.showEdge(edge);
+            } else {
+                statsPanel.clear();
+            }
+        });
+        
+        view.setAgentClickHandler(agent -> {
+            graphController.handleAgentClicked(agent);
+            if (graphController.getSelectedAgent() != null) {
+                statsPanel.showAgent(agent);
+            } else {
+                statsPanel.clear();
+            }
+        });
+        
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
+        statsPanel.showGraphOverview(graph, engine.getAgents().size());
 
         // =========================
         // UI
@@ -64,7 +98,22 @@ public class MainApp extends Application {
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
         toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
-        toolBox.deleteBtn.setOnAction(e -> graphController.enableDeleteMode());
+        
+        toolBox.deleteBtn.setOnAction(e -> {
+            graphController.deleteSelected();
+            statsPanel.showGraphOverview(graph, engine.getAgents().size());
+        });
+        
+        toolBox.editBtn.setOnAction(e -> graphController.editSelected());
+        toolBox.addRandomBtn.setOnAction(e -> {
+        	graphController.addRandomNodes(engine);
+        	statsPanel.showGraphOverview(graph, engine.getAgents().size());
+    	});
+    	
+        toolBox.addRandomAgentsBtn.setOnAction(e -> {
+        	graphController.addRandomAgents(engine);
+        	statsPanel.showGraphOverview(graph, engine.getAgents().size());
+        });
 
         simulationBar.startBtn.setOnAction(e -> timeline.play());
         simulationBar.pauseBtn.setOnAction(e -> timeline.pause());
@@ -74,6 +123,7 @@ public class MainApp extends Application {
             view.renderGraph(graph);
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: 0");
+            statsPanel.showGraphOverview(graph, engine.getAgents().size());
         });
 
         simulationBar.nextTickBtn.setOnAction(e -> {
@@ -92,10 +142,17 @@ public class MainApp extends Application {
         BorderPane root = new BorderPane();
         root.setTop(toolBox);
         root.setCenter(view);
+        
+        // Split StatsPanel and LegendPanel in half
+        VBox rightBar = new VBox(12, statsPanel, legendPanel);
+        root.setRight(rightBar);
+  
         root.setBottom(bottomBar);
 
-        Scene scene = new Scene(root, 900, 600);
-        stage.setTitle("Graph Simulation Demo");
+        Scene scene = new Scene(root, 1100, 700);
+        stage.setMinWidth(900);
+        stage.setMinHeight(600);
+        stage.setTitle("LifeLine GPS — Emergency Simulation");
         stage.setScene(scene);
         stage.show();
     }

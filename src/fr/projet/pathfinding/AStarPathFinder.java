@@ -8,7 +8,7 @@ import java.util.*;
  * Implementation of the A* pathfinding algorithm.
  * Uses a simple heuristic based on node id difference.
  */
-public class AStarPathFinder implements PathFinder {
+public class AStarPathFinder implements IPathFinder {
 
     private Graph graph;
 
