@@ -4,7 +4,7 @@
 /**
  * 
  */
-module hh {
+module gg {
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
 

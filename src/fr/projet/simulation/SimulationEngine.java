@@ -1,14 +1,12 @@
 package fr.projet.simulation;
 
-import fr.projet.model.AgentType;
-import fr.projet.model.EdgeType;
-
 import java.util.ArrayList;
-
 import java.util.List;
 
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
+import fr.projet.model.AgentType;
+import fr.projet.model.EdgeType;
 
 
 /**
@@ -123,6 +121,7 @@ public class SimulationEngine {
      * @param agent the agent to move
      */
     public void moveAgent(Agent agent) {
+    	
 
         if (agent.getState() == State.ARRIVED) {
             return;
@@ -199,12 +198,6 @@ public class SimulationEngine {
         }
     }
     
-    /**
-     * 
-     * @param edgeType
-     * @param agentType
-     * @return
-     */
     private double getEdgeMultiplier(EdgeType edgeType, AgentType agentType) {
         if (edgeType == null) return 1.0;
 

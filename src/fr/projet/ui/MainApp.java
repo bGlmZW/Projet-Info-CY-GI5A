@@ -1,5 +1,7 @@
 package fr.projet.ui;
 
+// import fr.projet.ui.HelpDialog;
+
 import fr.projet.controller.GraphController;
 import fr.projet.controller.SimulationController;
 import fr.projet.model.Graph;
@@ -20,7 +22,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-    	
+
         // =========================
         // GRAPH SETUP
         // =========================
@@ -37,29 +39,36 @@ public class MainApp extends Application {
         // VIEW
         // =========================
         GraphController graphController = new GraphController(graph);
+        
 
         GraphView view = new GraphView();
         StatsPanel statsPanel = new StatsPanel();
-        
         graphController.attachView(view);
+        graphController.setEngine(engine);
+
         view.setBackgroundClickHandler(point -> {
             graphController.handleBackgroundClick(point);
             statsPanel.clear();
         });
-
         view.setNodeClickHandler(node -> {
             graphController.handleNodeClicked(node);
             statsPanel.showNode(node, graph);
         });
-
         view.setEdgeClickHandler(edge -> {
-            view.setSelectedEdge(edge);
-            statsPanel.showEdge(edge);
+            graphController.handleEdgeClicked(edge);
+            if (graphController.getSelectedEdge() != null) {
+                statsPanel.showEdge(edge);
+            } else {
+                statsPanel.clear();
+            }
         });
-
         view.setAgentClickHandler(agent -> {
-            view.setSelectedAgent(agent);
-            statsPanel.showAgent(agent);
+            graphController.handleAgentClicked(agent);
+            if (graphController.getSelectedAgent() != null) {
+                statsPanel.showAgent(agent);
+            } else {
+                statsPanel.clear();
+            }
         });
         
         view.renderGraph(graph);
@@ -115,8 +124,10 @@ public class MainApp extends Application {
         root.setRight(statsPanel);
         root.setBottom(bottomBar);
 
-        Scene scene = new Scene(root, 900, 600);
-        stage.setTitle("Graph Simulation Demo");
+        Scene scene = new Scene(root, 1100, 700);
+        stage.setMinWidth(900);
+        stage.setMinHeight(600);
+        stage.setTitle("LifeLine GPS — Emergency Simulation");
         stage.setScene(scene);
         stage.show();
     }

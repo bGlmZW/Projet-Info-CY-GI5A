@@ -250,34 +250,18 @@ public class Agent {
         this.pathIndex = pathIndex;
     }
     
-    /**
-     * 
-     * @return
-     */
     public AgentType getAgentType() {
         return agentType;
     }
 
-    /**
-     * 
-     * @param agentType
-     */
     public void setAgentType(AgentType agentType) {
         this.agentType = agentType;
     }
-
-    /**
-     * 
-     * @return
-     */
+    
     public double getCurrentEffectiveDistance() {
         return currentEffectiveDistance;
     }
 
-    /**
-     * 
-     * @param currentEffectiveDistance
-     */
     public void setCurrentEffectiveDistance(double currentEffectiveDistance) {
         this.currentEffectiveDistance = currentEffectiveDistance;
     }

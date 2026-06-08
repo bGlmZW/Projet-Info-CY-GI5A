@@ -1,11 +1,11 @@
 package fr.projet.view;
 
 import fr.projet.model.*;
-
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Text;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
@@ -24,13 +24,6 @@ public class GraphView extends Pane {
 
     /** Callback invoked when a node is clicked */
     private Consumer<Node> nodeClickHandler = node -> {};
-    
-    /** Callback invoked when an edge is clicked */
-    private Consumer<Edge> edgeClickHandler = edge -> {};
-    
-    /** Callback invoked when an agent is clicked */
-    private Agent selectedAgent;
-    private Consumer<Agent> agentClickHandler = agent -> {};
 
     private final Map<Node, Circle> nodeViews = new HashMap<>();
     private final Map<Agent, Circle> agentViews = new HashMap<>();
@@ -47,14 +40,15 @@ public class GraphView extends Pane {
 
     /** Stores how many agents are displayed at the same visual position */
     private final Map<String, Integer> positionCounts = new HashMap<>();
+
+    /** Callback invoked when an edge is clicked */
+    private Consumer<Edge> edgeClickHandler = edge -> {};
     
-    /** Node currently being dragged */
+    private Agent selectedAgent;
+    private Consumer<Agent> agentClickHandler = agent -> {};
+    
     private Node draggedNode;
-  
-    /** True only when the node has actually been moved during the drag */
     private boolean nodeWasDragged;
-    
-    /** Offset between mouse position and node center during dragging */
     private double dragOffsetX;
     private double dragOffsetY;
 
@@ -105,7 +99,7 @@ public class GraphView extends Pane {
         // =========================
         Map<Node, Text> labels = new HashMap<>();
         for (int i = 0; i < n; i++) {
-        	
+
             Node node = nodes.get(i);
 
             double x;
@@ -123,7 +117,7 @@ public class GraphView extends Pane {
                 node.setX(x);
                 node.setY(y);
             }
-            
+
             Text label = new Text(String.valueOf(node.getId()));
             label.setMouseTransparent(true);
             label.setX(x - 5);
@@ -136,72 +130,38 @@ public class GraphView extends Pane {
 
             circle.setOnMousePressed(e -> {
                 draggedNode = node;
-
-                // Convert mouse position to GraphView coordinates.
-                Point2D p = sceneToLocal(e.getSceneX(), e.getSceneY());
-
-                // Keep the initial cursor-to-node offset so the node does not "jump".
-                dragOffsetX = node.getX() - p.getX();
-                dragOffsetY = node.getY() - p.getY();
-
-                e.consume();
-            });
-
-            circle.setOnMousePressed(e -> {
-                draggedNode = node;
                 nodeWasDragged = false;
-
                 Point2D p = sceneToLocal(e.getSceneX(), e.getSceneY());
-
-                // Keep the cursor-to-node offset so the node does not jump.
                 dragOffsetX = node.getX() - p.getX();
                 dragOffsetY = node.getY() - p.getY();
-
                 e.consume();
             });
 
             circle.setOnMouseDragged(e -> {
-                if (draggedNode != node) {
-                    return;
-                }
-
+                if (draggedNode != node) return;
                 nodeWasDragged = true;
-
                 Point2D p = sceneToLocal(e.getSceneX(), e.getSceneY());
-
                 double newX = p.getX() + dragOffsetX;
                 double newY = p.getY() + dragOffsetY;
-
-                // Update the model coordinates.
                 node.setX(newX);
                 node.setY(newY);
-
-                // Update the visual node position immediately.
                 circle.setCenterX(newX);
                 circle.setCenterY(newY);
-
-                // Keep the label attached to the node while dragging.
                 label.setX(newX - 5);
                 label.setY(newY + 5);
-
                 e.consume();
             });
 
             circle.setOnMouseReleased(e -> {
                 if (draggedNode == node) {
                     draggedNode = null;
-
-                    // If the node moved, redraw once at the end.
-                    // Otherwise, treat it as a normal click selection.
                     if (nodeWasDragged) {
                         renderGraph(graph);
                     } else {
                         nodeClickHandler.accept(node);
                     }
-
                     nodeWasDragged = false;
                 }
-
                 e.consume();
             });
 
@@ -216,6 +176,7 @@ public class GraphView extends Pane {
                 circle.setStroke(Color.BLACK);
                 circle.setStrokeWidth(1);
             }
+
 
             nodeViews.put(node, circle);
             labels.put(node, label);
@@ -247,8 +208,7 @@ public class GraphView extends Pane {
                 );
 
                 line.setStrokeWidth(2);
-                line.setCursor(Cursor.HAND);
-                
+
                 // Highlight selected edge
                 if (edge.equals(selectedEdge)) {
                     line.setStroke(Color.ORANGE);
@@ -256,6 +216,7 @@ public class GraphView extends Pane {
                 } else {
                     line.setStroke(Color.BLACK);
                 }
+                applyEdgeStyle(line, edge);
 
                 final Edge currentEdge = edge;
                 line.setOnMouseClicked(e -> {
@@ -411,6 +372,7 @@ public class GraphView extends Pane {
                 line.setStroke(Color.BLACK);
                 line.setStrokeWidth(2);
             }
+            applyEdgeStyle(line, edge);
         }
     }
 
@@ -500,6 +462,21 @@ public class GraphView extends Pane {
 
             agentViews.put(agent, agentCircle);
             getChildren().add(agentCircle);
+        }
+    }
+    
+    /**
+     * Applies the visual style of an edge depending on whether it is oriented.
+     *
+     * @param line edge line to style
+     * @param edge corresponding edge model
+     */
+    private void applyEdgeStyle(Line line, Edge edge) {
+        line.setStrokeLineCap(StrokeLineCap.BUTT);
+        line.getStrokeDashArray().clear();
+
+        if (!edge.isOriented()) {
+            line.getStrokeDashArray().addAll(12.0, 10.0);
         }
     }
 

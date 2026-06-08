@@ -26,8 +26,6 @@ import fr.projet.model.EdgeType;
 import fr.projet.model.State;
 import java.util.Random;
 
-import fr.projet.view.*;
-
 /**
  * Controller responsible for building and configuring the graph.
  * Separates graph construction logic from the UI layer.
@@ -70,6 +68,14 @@ public class GraphController {
     public void setEngine(SimulationEngine engine) {
         this.engine = engine;
     }
+    
+    public Edge getSelectedEdge() {
+        return selectedEdge;
+    }
+
+    public Agent getSelectedAgent() {
+        return selectedAgent;
+    }
 
 	/**
      * Builds and returns a configured graph with nodes and edges.
@@ -99,6 +105,10 @@ public class GraphController {
     return graph;
 	}
 	
+	/**
+	 * 
+	 * @param engine
+	 */
 	public void addRandomNodes(SimulationEngine engine) {
 
 	    TextInputDialog dialog = new TextInputDialog("5");
@@ -163,6 +173,10 @@ public class GraphController {
 	    }
 	}
 	
+	/**
+	 * 
+	 * @param engine
+	 */
 	public void addRandomAgents(SimulationEngine engine) {
 
 	    if (engine == null) return;
@@ -427,6 +441,23 @@ public class GraphController {
         if (typeResult.isEmpty()) {
             return;
         }
+        
+        // Edge orientation input
+        ChoiceDialog<String> orientationDialog = new ChoiceDialog<>(
+                "Non oriented",
+                "Oriented",
+                "Non oriented"
+        );
+        orientationDialog.setTitle("Edge orientation");
+        orientationDialog.setHeaderText("Choose edge orientation");
+        orientationDialog.setContentText("Orientation:");
+
+        Optional<String> orientationResult = orientationDialog.showAndWait();
+        if (orientationResult.isEmpty()) {
+            return;
+        }
+
+        boolean oriented = "Oriented".equals(orientationResult.get());
 
         EdgeType edgeType = typeResult.get();
 
@@ -450,6 +481,7 @@ public class GraphController {
         // Create edge only if it does not already exist
         if (!graph.hasConnection(selectedNode, clickedNode)) {
             Edge newEdge = new Edge(selectedNode, clickedNode, weight, edgeType);
+            newEdge.setOriented(oriented);
             newEdge.setCapacity(capacity);
             graph.addEdge(newEdge);
         }
