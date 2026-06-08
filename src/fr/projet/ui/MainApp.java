@@ -12,6 +12,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -42,7 +43,10 @@ public class MainApp extends Application {
         
 
         GraphView view = new GraphView();
+        
         StatsPanel statsPanel = new StatsPanel();
+        LegendPanel legendPanel = new LegendPanel();
+        
         graphController.attachView(view);
         graphController.setEngine(engine);
 
@@ -121,7 +125,11 @@ public class MainApp extends Application {
         BorderPane root = new BorderPane();
         root.setTop(toolBox);
         root.setCenter(view);
-        root.setRight(statsPanel);
+        
+        // Split StatsPanel and LegendPanel in half
+        VBox rightBar = new VBox(12, statsPanel, legendPanel);
+        root.setRight(rightBar);
+  
         root.setBottom(bottomBar);
 
         Scene scene = new Scene(root, 1100, 700);

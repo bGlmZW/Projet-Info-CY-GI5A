@@ -211,7 +211,7 @@ public class GraphView extends Pane {
 
                 // Highlight selected edge
                 if (edge.equals(selectedEdge)) {
-                    line.setStroke(Color.ORANGE);
+                    line.setStroke(Color.GOLD);
                     line.setStrokeWidth(4);
                 } else {
                     line.setStroke(Color.BLACK);
@@ -232,7 +232,7 @@ public class GraphView extends Pane {
                 });
                 line.setOnMouseExited(e -> {
                     if (currentEdge.equals(selectedEdge)) {
-                        line.setStroke(Color.ORANGE);
+                        line.setStroke(Color.GOLD);
                     } else {
                         line.setStroke(Color.BLACK);
                     }
@@ -366,7 +366,7 @@ public class GraphView extends Pane {
             Line line = entry.getValue();
 
             if (edge.equals(selectedEdge)) {
-                line.setStroke(Color.ORANGE);
+                line.setStroke(Color.GOLD);
                 line.setStrokeWidth(4);
             } else {
                 line.setStroke(Color.BLACK);
