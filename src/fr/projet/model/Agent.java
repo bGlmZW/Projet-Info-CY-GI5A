@@ -39,6 +39,12 @@ public class Agent {
 
     private IPathFinder pathFinder;
 
+    
+    private AgentType agentType;
+    
+    private double currentEffectiveDistance;
+
+
     /**
      * Creates a new agent.
      *
@@ -245,7 +251,24 @@ public class Agent {
     public void setPathIndex(int pathIndex) {
         this.pathIndex = pathIndex;
     }
+
     
+    public AgentType getAgentType() {
+        return agentType;
+    }
+
+    public void setAgentType(AgentType agentType) {
+        this.agentType = agentType;
+    }
+    
+    public double getCurrentEffectiveDistance() {
+        return currentEffectiveDistance;
+    }
+
+    public void setCurrentEffectiveDistance(double currentEffectiveDistance) {
+        this.currentEffectiveDistance = currentEffectiveDistance;
+    }
+
     /**
      * Returns a string representation of the agent.
      *

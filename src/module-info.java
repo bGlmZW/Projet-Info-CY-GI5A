@@ -1,9 +1,12 @@
 /**
- * Main module of the graph-based agent simulation project.
+ * 
+ */
+/**
+ * 
  */
 module ProjetGenieLogiciel {
-	
-	requires transitive javafx.controls;
+
+    requires transitive javafx.controls;
     requires transitive javafx.graphics;
 
     exports fr.projet;

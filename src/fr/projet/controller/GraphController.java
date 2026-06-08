@@ -70,6 +70,14 @@ public class GraphController {
     public void setEngine(SimulationEngine engine) {
         this.engine = engine;
     }
+    public Edge getSelectedEdge() {
+        return selectedEdge;
+    }
+
+    public Agent getSelectedAgent() {
+        return selectedAgent;
+    }
+
 
 	/**
      * Builds and returns a configured graph with nodes and edges.
@@ -91,14 +99,21 @@ public class GraphController {
     graph.addNode(C);
     graph.addNode(D);
 
-    graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD));
-    graph.addEdge(new Edge(A, D, 9, EdgeType.ROAD));
-    graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD));
-    graph.addEdge(new Edge(C, D, 3, EdgeType.ROAD));
+
+    graph.addEdge(new Edge(A, B, 1,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(A, D, 9,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(B, C, 1,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(C, D, 3,2, EdgeType.ROAD));
+
     
     return graph;
 	}
 	
+
+	/**
+	 * 
+	 * @param engine
+	 */
 	public void addRandomNodes(SimulationEngine engine) {
 
 	    TextInputDialog dialog = new TextInputDialog("5");
@@ -163,6 +178,12 @@ public class GraphController {
 	    }
 	}
 	
+
+	/**
+	 * 
+	 * @param engine
+	 */
+
 	public void addRandomAgents(SimulationEngine engine) {
 
 	    if (engine == null) return;
@@ -296,7 +317,10 @@ public class GraphController {
 	            agent = AgentFactory.create(randomType, newId, source, destination);
 	            agent.setSpeed(speed); // override avec la plage choisie
 	        } else {
-	            agent = new Agent(newId, speed, source, destination);
+
+	        	agent = new Agent(newId, speed, source, destination);
+	        	agent.setAgentType(AgentType.NORMAL);
+
 	        }
 
 	        // Algorithme
@@ -413,7 +437,9 @@ public class GraphController {
             }
         }
 
+
      // Edge type input
+
         ChoiceDialog<EdgeType> typeDialog = new ChoiceDialog<>(
                 EdgeType.ROAD,
                 java.util.Arrays.asList(EdgeType.values())
@@ -426,6 +452,25 @@ public class GraphController {
         if (typeResult.isEmpty()) {
             return;
         }
+
+        
+        // Edge orientation input
+        ChoiceDialog<String> orientationDialog = new ChoiceDialog<>(
+                "Non oriented",
+                "Oriented",
+                "Non oriented"
+        );
+        orientationDialog.setTitle("Edge orientation");
+        orientationDialog.setHeaderText("Choose edge orientation");
+        orientationDialog.setContentText("Orientation:");
+
+        Optional<String> orientationResult = orientationDialog.showAndWait();
+        if (orientationResult.isEmpty()) {
+            return;
+        }
+
+        boolean oriented = "Oriented".equals(orientationResult.get());
+
 
         EdgeType edgeType = typeResult.get();
 
@@ -449,6 +494,9 @@ public class GraphController {
         // Create edge only if it does not already exist
         if (!graph.hasConnection(selectedNode, clickedNode)) {
             Edge newEdge = new Edge(selectedNode, clickedNode, weight, edgeType);
+
+            newEdge.setOriented(oriented);
+
             newEdge.setCapacity(capacity);
             graph.addEdge(newEdge);
         }
@@ -710,7 +758,10 @@ public class GraphController {
         Agent agent;
 
         if (useCustomSpeed) {
-            agent = new Agent(newId, customSpeed, selectedNode, destination);
+
+        	agent = new Agent(newId, customSpeed, selectedNode, destination);
+        	agent.setAgentType(agentType);
+
         } else {
             agent = AgentFactory.create(agentType, newId, selectedNode, destination);
         }
