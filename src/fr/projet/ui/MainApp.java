@@ -98,8 +98,10 @@ public class MainApp extends Application {
         root.setCenter(view);
         root.setBottom(bottomBar);
 
-        Scene scene = new Scene(root, 900, 600);
-        stage.setTitle("Graph Simulation Demo");
+        Scene scene = new Scene(root, 1100, 700);
+        stage.setMinWidth(900);
+        stage.setMinHeight(600);
+        stage.setTitle("LifeLine GPS — Emergency Simulation");
         stage.setScene(scene);
         stage.show();
     }
