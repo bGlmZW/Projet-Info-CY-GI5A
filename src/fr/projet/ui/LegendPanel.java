@@ -29,9 +29,9 @@ public class LegendPanel extends VBox {
 
         getChildren().addAll(
                 title,
-                nodeRow("Normal node", Color.LIGHTGRAY),
-                nodeRow("Hospital node", Color.DODGERBLUE),
-                nodeRow("Accident node", Color.CRIMSON),
+                nodeRow("Point of interest", Color.LIGHTGRAY),
+                nodeRow("Hospital", Color.DODGERBLUE),
+                nodeRow("Accident", Color.CRIMSON),
                 lineRow("Oriented edge", false),
                 lineRow("Non oriented edge", true)
         );

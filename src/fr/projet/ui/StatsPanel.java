@@ -10,8 +10,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -39,11 +41,11 @@ public class StatsPanel extends VBox {
     }
 
     /**
-     * Clears the dashboard.
+     * Shows the general graph overview when nothing is selected.
      */
     public void clear() {
         contentBox.getChildren().clear();
-        contentBox.getChildren().add(new Label("Click a node, edge, or agent to see statistics."));
+        contentBox.getChildren().add(new Label("No selection."));
     }
 
     /**
@@ -202,5 +204,53 @@ public class StatsPanel extends VBox {
 
         HBox line = new HBox(8, nameLabel, valueLabel);
         contentBox.getChildren().add(line);
+    }
+    
+    /**
+     * Displays general information about the whole graph.
+     *
+     * @param graph current graph
+     * @param agentCount number of agents currently in the simulation
+     */
+    public void showGraphOverview(Graph graph, int agentCount) {
+        if (graph == null) {
+            clear();
+            return;
+        }
+
+        contentBox.getChildren().clear();
+        contentBox.getChildren().add(sectionTitle("GRAPH OVERVIEW"));
+
+        int nodeCount = graph.getAllNodes().size();
+        
+        int edgeCount = 0;
+        
+        // Prevent unoriented edges from being counted twice
+        Set<String> seen = new HashSet<>();
+        for (Node node : graph.getAllNodes()) {
+            for (Edge edge : graph.getEdges(node)) {
+                String key;
+
+                if (edge.isOriented()) {
+                    key = edge.getSource().getId() + "->" + edge.getDestination().getId();
+                } else {
+                    int a = Math.min(edge.getSource().getId(), edge.getDestination().getId());
+                    int b = Math.max(edge.getSource().getId(), edge.getDestination().getId());
+                    key = a + "--" + b; // 1--2 and 2--1 are the same edge
+                }
+
+                if (seen.add(key)) {
+                    edgeCount++;
+                }
+            }
+        }
+
+        addStat("Nodes", String.valueOf(nodeCount));
+        addStat("Routes / edges", String.valueOf(edgeCount));
+        addStat("Agents", String.valueOf(agentCount));
+
+        // Placeholder pour quand on aura les types de noeuds
+        addStat("Hospital nodes", "0");
+        addStat("Accident nodes", "0");
     }
 }
