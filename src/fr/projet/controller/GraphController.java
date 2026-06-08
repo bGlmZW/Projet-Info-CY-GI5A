@@ -350,6 +350,16 @@ public class GraphController {
      * @param clickedNode node clicked by the user
      */
     public void handleNodeClicked(Node clickedNode) {
+    	// Clicking on node cancels node creation mode.
+        if (nodeCreationMode) {
+            selectedNode = null;
+            disableNodeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
 
         if (clickedNode == null) {
             return;
@@ -516,6 +526,29 @@ public class GraphController {
      * @param clickedEdge edge clicked by the user
      */
     public void handleEdgeClicked(Edge clickedEdge) {
+    	
+    	// Clicking on edge cancels edge creation mode.
+        if (edgeCreationMode) {
+            selectedNode = null;
+            disableEdgeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
+     // Clicking on node cancels node creation mode.
+        if (nodeCreationMode) {
+            selectedNode = null;
+            disableNodeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
         if (clickedEdge == null) return;
 
         if (clickedEdge.equals(selectedEdge)) {
@@ -535,6 +568,28 @@ public class GraphController {
     }
     
     public void handleAgentClicked(Agent agent) {
+    	// Clicking on agent cancels edge creation mode.
+        if (edgeCreationMode) {
+            selectedNode = null;
+            disableEdgeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
+     // Clicking on agent cancels node creation mode.
+        if (nodeCreationMode) {
+            selectedNode = null;
+            disableNodeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
         if (agent == null) return;
 
         if (agent.equals(selectedAgent)) {
@@ -777,6 +832,14 @@ public class GraphController {
             view.renderAgents(engine.getAgents());
         }
     }
+    
+    public void disableAllModes() {
+        disableEdgeCreationMode();
+        disableNodeCreationMode();
+        disableDeleteMode();
+        selectedNode = null;
+        if (view != null) view.clearSelection();
+    }
 
     // =====================================================
     // NODE CREATION
@@ -787,6 +850,7 @@ public class GraphController {
      * The next click on the graph background will create a new node.
      */
     public void enableNodeCreationMode() {
+    	disableAllModes();
         nodeCreationMode = true;
         selectedNode = null;
 
@@ -816,6 +880,7 @@ public class GraphController {
      * The next two node clicks will be used to create an edge.
      */
     public void enableEdgeCreationMode() {
+    	disableAllModes();
         edgeCreationMode = true;
         selectedNode = null;
 
@@ -845,6 +910,7 @@ public class GraphController {
      * The next click on a node or an edge will remove it.
      */
     public void enableDeleteMode() {
+    	disableAllModes();
         deleteMode = true;
         selectedNode = null;
 
