@@ -5,7 +5,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.StrokeLineCap;
+// import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
@@ -127,6 +128,7 @@ public class GraphView extends Pane {
             Circle circle = new Circle(25);
             circle.setCenterX(x);
             circle.setCenterY(y);
+            circle.setCursor(Cursor.HAND);
 
             circle.setOnMousePressed(e -> {
                 draggedNode = node;
@@ -208,6 +210,7 @@ public class GraphView extends Pane {
                 );
 
                 line.setStrokeWidth(2);
+                line.setCursor(Cursor.HAND);
 
                 // Highlight selected edge
                 if (edge.equals(selectedEdge)) {
@@ -216,7 +219,6 @@ public class GraphView extends Pane {
                 } else {
                     line.setStroke(Color.BLACK);
                 }
-                applyEdgeStyle(line, edge);
 
                 final Edge currentEdge = edge;
                 line.setOnMouseClicked(e -> {
@@ -230,6 +232,7 @@ public class GraphView extends Pane {
                         line.setStroke(Color.RED);
                     }
                 });
+                
                 line.setOnMouseExited(e -> {
                     if (currentEdge.equals(selectedEdge)) {
                         line.setStroke(Color.GOLD);
@@ -245,12 +248,25 @@ public class GraphView extends Pane {
 
                 double midX = (src.getCenterX() + dst.getCenterX()) / 2;
                 double midY = (src.getCenterY() + dst.getCenterY()) / 2;
-
                 weight.setX(midX);
                 weight.setY(midY);
+                
+                // Arrows
+                Polygon arrowToDst = createArrowHead(src.getCenterX(), src.getCenterY(), dst.getCenterX(), dst.getCenterY());
 
                 edgeViews.put(edge, line);
-                getChildren().addAll(line, weight);
+                
+                getChildren().add(line);
+                getChildren().add(weight);
+                getChildren().add(arrowToDst);
+                
+                if (!edge.isOriented()) {
+                    Polygon arrowToSrc = createArrowHead(
+                            dst.getCenterX(), dst.getCenterY(),
+                            src.getCenterX(), src.getCenterY()
+                    );
+                    getChildren().add(arrowToSrc);
+                }
             }
         }
 
@@ -372,7 +388,6 @@ public class GraphView extends Pane {
                 line.setStroke(Color.BLACK);
                 line.setStrokeWidth(2);
             }
-            applyEdgeStyle(line, edge);
         }
     }
 
@@ -465,12 +480,9 @@ public class GraphView extends Pane {
         }
     }
     
-    /**
-     * Applies the visual style of an edge depending on whether it is oriented.
-     *
-     * @param line edge line to style
-     * @param edge corresponding edge model
-     */
+    
+    /* A UTILISER QUAND ON AURA D'AUTRES TYPES DE EDGES
+     * 
     private void applyEdgeStyle(Line line, Edge edge) {
         line.setStrokeLineCap(StrokeLineCap.BUTT);
         line.getStrokeDashArray().clear();
@@ -478,7 +490,7 @@ public class GraphView extends Pane {
         if (!edge.isOriented()) {
             line.getStrokeDashArray().addAll(12.0, 10.0);
         }
-    }
+    }*/
 
     /**
      * Returns a stable color for an agent based on its id.
@@ -515,5 +527,42 @@ public class GraphView extends Pane {
      */
     public void setDeleteMode(boolean active) {
         setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
+    }
+    
+    /**
+     * Creates a small arrowhead polygon at the end of an edge.
+     *
+     * @param x1 start x
+     * @param y1 start y
+     * @param x2 end x
+     * @param y2 end y
+     * @return arrowhead polygon
+     */
+    private Polygon createArrowHead(double x1, double y1, double x2, double y2) {
+        double size = 10.0;
+        double nodeRadius = 25.0; // Match the node circle radius
+        double gap = 4.0;
+
+        double angle = Math.atan2(y2 - y1, x2 - x1);
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+
+        double endX = x2 - (nodeRadius + gap) * cos;
+        double endY = y2 - (nodeRadius + gap) * sin;
+
+        double xA = endX - size * cos + (size / 2.0) * sin;
+        double yA = endY - size * sin - (size / 2.0) * cos;
+
+        double xB = endX - size * cos - (size / 2.0) * sin;
+        double yB = endY - size * sin + (size / 2.0) * cos;
+
+        Polygon arrow = new Polygon(
+                endX, endY,
+                xA, yA,
+                xB, yB
+        );
+
+        arrow.setFill(Color.BLACK);
+        return arrow;
     }
 }
