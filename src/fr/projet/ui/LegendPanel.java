@@ -32,6 +32,7 @@ public class LegendPanel extends VBox {
                 nodeRow("Hospital", Color.DODGERBLUE),
                 nodeRow("Accident", Color.CRIMSON),
                 nodeRow("Selected node", Color.GOLD),
+                blockedNodeRow("Blocked node"),
                 orientedEdgeRow("Oriented edge"),
                 nonOrientedEdgeRow("Non oriented edge")
         );
@@ -119,6 +120,42 @@ public class LegendPanel extends VBox {
         icon.getChildren().addAll(line1, arrow1, line2, arrow2);
 
         Label label = new Label(text);
+        HBox row = new HBox(10, icon, label);
+        row.setPadding(new Insets(2, 0, 2, 0));
+        return row;
+    }
+    
+    /**
+     * Builds one legend row for a blocked node.
+     * The icon is a normal node circle with a red cross drawn over it.
+     *
+     * @param text label displayed next to the icon
+     * @return row containing the blocked node icon and its label
+     */
+    private HBox blockedNodeRow(String text) {
+        Pane icon = new Pane();
+        icon.setPrefSize(18, 18);
+
+        Circle circle = new Circle(9);
+        circle.setCenterX(9);
+        circle.setCenterY(9);
+        circle.setFill(Color.LIGHTGRAY);
+        circle.setStroke(Color.BLACK);
+
+        // Calculating diagonals
+        Line line1 = new Line(3, 3, 15, 15);
+        Line line2 = new Line(15, 3, 3, 15);
+
+        line1.setStroke(Color.BLACK);
+        line2.setStroke(Color.BLACK);
+
+        line1.setStrokeWidth(3);
+        line2.setStrokeWidth(3);
+
+        icon.getChildren().addAll(circle, line1, line2);
+
+        Label label = new Label(text);
+
         HBox row = new HBox(10, icon, label);
         row.setPadding(new Insets(2, 0, 2, 0));
         return row;

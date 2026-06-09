@@ -308,13 +308,24 @@ public class GraphView extends Pane {
                 getChildren().add(arrowToDst);
             }
         }
-
+        
         for (Node node : nodes) {
+
             Circle circle = nodeViews.get(node);
             Text label = labels.get(node);
 
-            if (circle != null) getChildren().add(circle);
-            if (label != null) getChildren().add(label);
+            // First, draw the node circle
+            if (circle != null) {
+                getChildren().add(circle);
+            }
+
+            // Draw a red cross over the node if it is blocked
+            addBlockedCross(node);
+            
+            // Draw the node id above the circle and the cross
+            if (label != null) {
+                getChildren().add(label);
+            }
         }
 
         redrawAgents();
@@ -628,6 +639,40 @@ public class GraphView extends Pane {
         }
 
         return Color.LIGHTGRAY;
+    }
+    
+    /**
+     * Displays a cross on a node to indicate to the user that the node is locked.
+     * 
+     * @param node to block
+     */
+    private void addBlockedCross(Node node) {
+        if (!node.isBlocked()) {
+            return;
+        }
+
+        Circle circle = nodeViews.get(node);
+        if (circle == null) {
+            return;
+        }
+
+        double x = circle.getCenterX();
+        double y = circle.getCenterY();
+        double size = 15;
+
+        Line line1 = new Line(x - size, y - size, x + size, y + size);
+        Line line2 = new Line(x + size, y - size, x - size, y + size);
+
+        line1.setStroke(Color.BLACK);
+        line2.setStroke(Color.BLACK);
+
+        line1.setStrokeWidth(4);
+        line2.setStrokeWidth(4);
+
+        line1.setMouseTransparent(true);
+        line2.setMouseTransparent(true);
+
+        getChildren().addAll(line1, line2);
     }
 
 }
