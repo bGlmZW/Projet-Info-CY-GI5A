@@ -29,32 +29,7 @@ public class Edge {
     
     private EdgeType type;
     
-    /**
-     * Creates a new edge between two nodes.
-     * The edge is undirected by default, with unlimited capacity and no agents.
-     *
-     * @param source      starting node
-     * @param destination ending node
-     * @param distance    cost or distance of the edge
-     */
-    public Edge(Node source, Node destination, double distance, int capacity) {
-        this.source = source;
-        this.destination = destination;
-        this.distance = distance;
-        this.oriented = false;
-        this.capacity = capacity;
-        this.agents = new ArrayList<>();
-    }
-    
-    public Edge(Node source, Node destination, double distance, EdgeType type) {
-        this.source = source;
-        this.destination = destination;
-        this.distance = distance;
-        this.oriented = false;
-        this.capacity = Integer.MAX_VALUE;
-        this.agents = new ArrayList<>();
-        this.type = type;
-    }
+
 
     /**
      * Creates a new edge between two nodes.
@@ -64,16 +39,19 @@ public class Edge {
      * @param destination ending node
      * @param distance    cost or distance of the edge
      */
-    public Edge(Node source, Node destination, double distance) {
+    public Edge(Node source, Node destination, double distance, int capacity, EdgeType type) {
         this.source = source;
         this.destination = destination;
         this.distance = distance;
         this.oriented = false;
-        this.capacity = Integer.MAX_VALUE;
+        this.capacity = capacity;
+        this.type = type;
         this.agents = new ArrayList<>();
     }
-    
-    
+
+    public Edge(Node source, Node destination, double distance, EdgeType type) {
+    	this(source, destination, distance, Integer.MAX_VALUE, type);
+    }
 
     /**
      * Returns the source node of the edge.
@@ -173,6 +151,8 @@ public class Edge {
     	this.type = type;
     }
 
+  
+   
     /**
      * Returns the list of agents currently on this edge.
      *

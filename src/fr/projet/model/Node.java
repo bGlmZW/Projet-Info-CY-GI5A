@@ -66,6 +66,24 @@ public class Node {
     public void setMaxCapacity(int maxCapacity) {
         this.maxCapacity = maxCapacity;
     }
+    
+    /**
+     * 
+     * @param agent
+     */
+    public void addAgent(Agent agent) {
+        if (agent != null && !agents.contains(agent)) {
+            agents.add(agent);
+        }
+    }
+
+    /**
+     * 
+     * @param agent
+     */
+    public void removeAgent(Agent agent) {
+        agents.remove(agent);
+    }
 
     /**
      * Returns the list of agents currently on this node.

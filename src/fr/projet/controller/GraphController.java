@@ -26,6 +26,8 @@ import fr.projet.model.EdgeType;
 import fr.projet.model.State;
 import java.util.Random;
 
+import fr.projet.view.*;
+
 /**
  * Controller responsible for building and configuring the graph.
  * Separates graph construction logic from the UI layer.
@@ -65,16 +67,36 @@ public class GraphController {
         this.graph = graph;
     }
     
+    /**
+     * 
+     * @param engine
+     */
     public void setEngine(SimulationEngine engine) {
         this.engine = engine;
     }
     
+    /**
+     * 
+     * @return
+     */
     public Edge getSelectedEdge() {
         return selectedEdge;
     }
 
+    /**
+     * 
+     * @return
+     */
     public Agent getSelectedAgent() {
         return selectedAgent;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public Node getSelectedNode() {
+        return selectedNode;
     }
 
 	/**
@@ -97,14 +119,17 @@ public class GraphController {
     graph.addNode(C);
     graph.addNode(D);
 
-    graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD));
-    graph.addEdge(new Edge(A, D, 9, EdgeType.ROAD));
-    graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD));
-    graph.addEdge(new Edge(C, D, 3, EdgeType.ROAD));
+
+    graph.addEdge(new Edge(A, B, 1,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(A, D, 9,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(B, C, 1,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(C, D, 3,2, EdgeType.ROAD));
+
     
     return graph;
 	}
 	
+
 	/**
 	 * 
 	 * @param engine
@@ -173,10 +198,12 @@ public class GraphController {
 	    }
 	}
 	
+
 	/**
 	 * 
 	 * @param engine
 	 */
+
 	public void addRandomAgents(SimulationEngine engine) {
 
 	    if (engine == null) return;
@@ -310,8 +337,10 @@ public class GraphController {
 	            agent = AgentFactory.create(randomType, newId, source, destination);
 	            agent.setSpeed(speed); // override avec la plage choisie
 	        } else {
+
 	        	agent = new Agent(newId, speed, source, destination);
 	        	agent.setAgentType(AgentType.NORMAL);
+
 	        }
 
 	        // Algorithme
@@ -341,6 +370,16 @@ public class GraphController {
      * @param clickedNode node clicked by the user
      */
     public void handleNodeClicked(Node clickedNode) {
+    	// Clicking on node cancels node creation mode.
+        if (nodeCreationMode) {
+            selectedNode = null;
+            disableNodeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
 
         if (clickedNode == null) {
             return;
@@ -428,7 +467,9 @@ public class GraphController {
             }
         }
 
-        // Edge type input
+
+     // Edge type input
+
         ChoiceDialog<EdgeType> typeDialog = new ChoiceDialog<>(
                 EdgeType.ROAD,
                 java.util.Arrays.asList(EdgeType.values())
@@ -441,6 +482,7 @@ public class GraphController {
         if (typeResult.isEmpty()) {
             return;
         }
+
         
         // Edge orientation input
         ChoiceDialog<String> orientationDialog = new ChoiceDialog<>(
@@ -458,6 +500,7 @@ public class GraphController {
         }
 
         boolean oriented = "Oriented".equals(orientationResult.get());
+
 
         EdgeType edgeType = typeResult.get();
 
@@ -481,7 +524,9 @@ public class GraphController {
         // Create edge only if it does not already exist
         if (!graph.hasConnection(selectedNode, clickedNode)) {
             Edge newEdge = new Edge(selectedNode, clickedNode, weight, edgeType);
+
             newEdge.setOriented(oriented);
+
             newEdge.setCapacity(capacity);
             graph.addEdge(newEdge);
         }
@@ -501,6 +546,29 @@ public class GraphController {
      * @param clickedEdge edge clicked by the user
      */
     public void handleEdgeClicked(Edge clickedEdge) {
+    	
+    	// Clicking on edge cancels edge creation mode.
+        if (edgeCreationMode) {
+            selectedNode = null;
+            disableEdgeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
+     // Clicking on node cancels node creation mode.
+        if (nodeCreationMode) {
+            selectedNode = null;
+            disableNodeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
         if (clickedEdge == null) return;
 
         if (clickedEdge.equals(selectedEdge)) {
@@ -520,6 +588,28 @@ public class GraphController {
     }
     
     public void handleAgentClicked(Agent agent) {
+    	// Clicking on agent cancels edge creation mode.
+        if (edgeCreationMode) {
+            selectedNode = null;
+            disableEdgeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
+     // Clicking on agent cancels node creation mode.
+        if (nodeCreationMode) {
+            selectedNode = null;
+            disableNodeCreationMode();
+
+            if (view != null) {
+                view.clearSelection();
+            }
+            return;
+        }
+        
         if (agent == null) return;
 
         if (agent.equals(selectedAgent)) {
@@ -743,22 +833,30 @@ public class GraphController {
         Agent agent;
 
         if (useCustomSpeed) {
+
         	agent = new Agent(newId, customSpeed, selectedNode, destination);
         	agent.setAgentType(agentType);
+
         } else {
             agent = AgentFactory.create(agentType, newId, selectedNode, destination);
         }
 
         agent.setPathFinder(agentPathFinder);
+        
         engine.addAgent(agent);
 
-        // Clear the selection after creating the agent so the UI goes back to a neutral state
-        selectedNode = null;
-
         if (view != null) {
-            view.clearSelection();
             view.renderAgents(engine.getAgents());
+            view.setSelectedNode(selectedNode);
         }
+    }
+    
+    public void disableAllModes() {
+        disableEdgeCreationMode();
+        disableNodeCreationMode();
+        disableDeleteMode();
+        selectedNode = null;
+        if (view != null) view.clearSelection();
     }
 
     // =====================================================
@@ -770,6 +868,7 @@ public class GraphController {
      * The next click on the graph background will create a new node.
      */
     public void enableNodeCreationMode() {
+    	disableAllModes();
         nodeCreationMode = true;
         selectedNode = null;
 
@@ -799,6 +898,7 @@ public class GraphController {
      * The next two node clicks will be used to create an edge.
      */
     public void enableEdgeCreationMode() {
+    	disableAllModes();
         edgeCreationMode = true;
         selectedNode = null;
 
@@ -828,6 +928,7 @@ public class GraphController {
      * The next click on a node or an edge will remove it.
      */
     public void enableDeleteMode() {
+    	disableAllModes();
         deleteMode = true;
         selectedNode = null;
 
@@ -854,7 +955,7 @@ public class GraphController {
     
     public void deleteSelected() {
     	
-    	// Suppression d'un agent sélectionné
+    	// Delete a selected agent
     	if (selectedAgent != null) {
     	    if (engine != null) {
     	        engine.removeAgent(selectedAgent);
@@ -868,7 +969,7 @@ public class GraphController {
     	    return;
     	}
 
-        // Suppression d'une arête sélectionnée
+    	// Delete a selected edge
         if (selectedEdge != null) {
 
             if (engine != null) {
@@ -877,12 +978,15 @@ public class GraphController {
                             && agent.getNextNode() != null
                             && agent.getCurrentPosition().equals(selectedEdge.getSource())
                             && agent.getNextNode().equals(selectedEdge.getDestination())) {
-                        // L'agent est sur cette arête, on le replace sur le nœud source
-                        agent.setCurrentPosition(selectedEdge.getSource());
-                        agent.setProgressOnEdge(0.0);
-                        agent.setNextNode(null);
-                        agent.setState(State.WAITING);
-                        selectedEdge.removeAgent(agent);
+                    	// The agent is on this edge, we move it back to the source node
+                    	selectedEdge.removeAgent(agent);
+
+                    	agent.setCurrentPosition(selectedEdge.getSource());
+                    	selectedEdge.getSource().addAgent(agent);
+
+                    	agent.setProgressOnEdge(0.0);
+                    	agent.setNextNode(null);
+                    	agent.setState(State.WAITING);
                     }
                 }
             }
@@ -898,7 +1002,7 @@ public class GraphController {
             return;
         }
 
-        // Suppression d'un nœud sélectionné
+        // Delete a selected node
         if (selectedNode == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Delete");
@@ -912,9 +1016,19 @@ public class GraphController {
             List<Node> neighbors = graph.getNeighbors(selectedNode);
 
             for (Agent agent : new ArrayList<>(engine.getAgents())) {
+            	if (agent.getInitialPosition() == selectedNode) {
+            		if (!neighbors.isEmpty()) {
+                        agent.setInitialPosition(neighbors.get(0));
+                    } else {
+                        engine.removeAgent(agent);
+                    }
+            	}
                 if (agent.getCurrentPosition().equals(selectedNode)) {
                     if (!neighbors.isEmpty()) {
-                        agent.setCurrentPosition(neighbors.get(0));
+                    	selectedNode.removeAgent(agent);
+
+                    	agent.setCurrentPosition(neighbors.get(0));
+                    	neighbors.get(0).addAgent(agent);
                     } else {
                         engine.removeAgent(agent);
                     }
@@ -934,7 +1048,7 @@ public class GraphController {
     
     public void editSelected() {
 
-        // Modification d'un agent sélectionné
+    	// Edit a selected agent
     	if (selectedAgent != null) {
 
     	    // Type selection
@@ -995,7 +1109,7 @@ public class GraphController {
     	        try {
     	            selectedAgent.setSpeed(Double.parseDouble(speedResult.get().trim()));
     	        } catch (NumberFormatException e) {
-    	            // keep current speed
+    	            // Keep current speed
     	        }
     	    }
 

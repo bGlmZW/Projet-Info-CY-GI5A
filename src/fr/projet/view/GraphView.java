@@ -5,8 +5,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+
 // import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.Polygon;
+
 import javafx.scene.text.Text;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
@@ -47,11 +49,15 @@ public class GraphView extends Pane {
     
     private Agent selectedAgent;
     private Consumer<Agent> agentClickHandler = agent -> {};
-    
+
     private Node draggedNode;
     private boolean nodeWasDragged;
     private double dragOffsetX;
     private double dragOffsetY;
+    
+    /**Handler to display the node's new coordinates after dragging it */
+    private Consumer<Node> nodeDragHandler = node -> {};
+
 
     /**
      * Creates the view and prepares background click handling.
@@ -74,6 +80,14 @@ public class GraphView extends Pane {
      */
     public void setBackgroundClickHandler(Consumer<Point2D> handler) {
         this.backgroundClickHandler = (handler != null) ? handler : point -> {};
+    }
+    
+    /**
+     * 
+     * @param handler
+     */
+    public void setNodeDragHandler(Consumer<Node> handler) {
+        this.nodeDragHandler = (handler != null) ? handler : node -> {};
     }
 
     /**
@@ -119,6 +133,7 @@ public class GraphView extends Pane {
                 node.setY(y);
             }
 
+
             Text label = new Text(String.valueOf(node.getId()));
             label.setMouseTransparent(true);
             label.setX(x - 5);
@@ -147,6 +162,7 @@ public class GraphView extends Pane {
                 double newY = p.getY() + dragOffsetY;
                 node.setX(newX);
                 node.setY(newY);
+                nodeDragHandler.accept(node);
                 circle.setCenterX(newX);
                 circle.setCenterY(newY);
                 label.setX(newX - 5);
@@ -164,6 +180,7 @@ public class GraphView extends Pane {
                     }
                     nodeWasDragged = false;
                 }
+
                 e.consume();
             });
 
@@ -178,6 +195,8 @@ public class GraphView extends Pane {
                 circle.setStroke(Color.BLACK);
                 circle.setStrokeWidth(1);
             }
+
+
 
 
             nodeViews.put(node, circle);
@@ -210,11 +229,13 @@ public class GraphView extends Pane {
                 );
 
                 line.setStrokeWidth(2);
+
                 line.setCursor(Cursor.HAND);
 
                 // Highlight selected edge
                 if (edge.equals(selectedEdge)) {
                     line.setStroke(Color.GOLD);
+
                     line.setStrokeWidth(4);
                 } else {
                     line.setStroke(Color.BLACK);
@@ -232,10 +253,12 @@ public class GraphView extends Pane {
                         line.setStroke(Color.RED);
                     }
                 });
+
                 
                 line.setOnMouseExited(e -> {
                     if (currentEdge.equals(selectedEdge)) {
                         line.setStroke(Color.GOLD);
+
                     } else {
                         line.setStroke(Color.BLACK);
                     }
@@ -248,6 +271,7 @@ public class GraphView extends Pane {
 
                 double midX = (src.getCenterX() + dst.getCenterX()) / 2;
                 double midY = (src.getCenterY() + dst.getCenterY()) / 2;
+
                 weight.setX(midX);
                 weight.setY(midY);
                 
@@ -267,6 +291,7 @@ public class GraphView extends Pane {
                     );
                     getChildren().add(arrowToSrc);
                 }
+
             }
         }
 
@@ -382,7 +407,9 @@ public class GraphView extends Pane {
             Line line = entry.getValue();
 
             if (edge.equals(selectedEdge)) {
+
                 line.setStroke(Color.GOLD);
+
                 line.setStrokeWidth(4);
             } else {
                 line.setStroke(Color.BLACK);
@@ -440,10 +467,12 @@ public class GraphView extends Pane {
                     Circle nextNodeCircle = nodeViews.get(agent.getNextNode());
 
                     if (nextNodeCircle != null) {
+
                     	double effectiveDist = agent.getCurrentEffectiveDistance() > 0
                     	        ? agent.getCurrentEffectiveDistance()
                     	        : currentEdge.getDistance();
                     	double ratio = agent.getProgressOnEdge() / effectiveDist;
+
                         ratio = Math.max(0.0, Math.min(ratio, 1.0));
 
                         x = currentNodeCircle.getCenterX() + (nextNodeCircle.getCenterX() - currentNodeCircle.getCenterX()) * ratio;
@@ -479,6 +508,7 @@ public class GraphView extends Pane {
             getChildren().add(agentCircle);
         }
     }
+
     
     
     /* A UTILISER QUAND ON AURA D'AUTRES TYPES DE EDGES
@@ -491,6 +521,7 @@ public class GraphView extends Pane {
             line.getStrokeDashArray().addAll(12.0, 10.0);
         }
     }*/
+
 
     /**
      * Returns a stable color for an agent based on its id.
@@ -528,6 +559,7 @@ public class GraphView extends Pane {
     public void setDeleteMode(boolean active) {
         setCursor(active ? Cursor.CROSSHAIR : Cursor.DEFAULT);
     }
+
     
     /**
      * Creates a small arrowhead polygon at the end of an edge.
@@ -565,4 +597,5 @@ public class GraphView extends Pane {
         arrow.setFill(Color.BLACK);
         return arrow;
     }
+
 }

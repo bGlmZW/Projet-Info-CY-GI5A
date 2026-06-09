@@ -40,7 +40,7 @@ public class MainApp extends Application {
         // VIEW
         // =========================
         GraphController graphController = new GraphController(graph);
-        
+
 
         GraphView view = new GraphView();
         
@@ -58,6 +58,12 @@ public class MainApp extends Application {
         view.setNodeClickHandler(node -> {
             graphController.handleNodeClicked(node);
             statsPanel.showNode(node, graph);
+        });
+        
+        view.setNodeDragHandler(node -> {
+            if (graphController.getSelectedNode() != null && graphController.getSelectedNode().equals(node)) {
+                statsPanel.showNode(node, graph);
+            }
         });
         
         view.setEdgeClickHandler(edge -> {
@@ -78,6 +84,7 @@ public class MainApp extends Application {
             }
         });
         
+
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
         statsPanel.showGraphOverview(graph, engine.getAgents().size());
@@ -92,16 +99,37 @@ public class MainApp extends Application {
             engine.tick();
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
+
+            if (graphController.getSelectedNode() != null) {
+                statsPanel.showNode(graphController.getSelectedNode(), graph);
+            } else if (graphController.getSelectedEdge() != null) {
+                statsPanel.showEdge(graphController.getSelectedEdge());
+            } else if (graphController.getSelectedAgent() != null) {
+                statsPanel.showAgent(graphController.getSelectedAgent());
+            } else {
+                statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            }
         }));
         timeline.setCycleCount(Animation.INDEFINITE);
 
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
-        toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
+        
+        toolBox.addAgentBtn.setOnAction(e -> {
+            graphController.createAgentAtSelectedNode(engine);
+            view.renderAgents(engine.getAgents());
+
+            if (graphController.getSelectedNode() != null) {
+                statsPanel.showNode(graphController.getSelectedNode(), graph);
+            } else {
+                statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            }
+        });
         
         toolBox.deleteBtn.setOnAction(e -> {
             graphController.deleteSelected();
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
+
         });
         
         toolBox.editBtn.setOnAction(e -> graphController.editSelected());
@@ -130,9 +158,20 @@ public class MainApp extends Application {
             engine.tick();
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
+
+            if (graphController.getSelectedNode() != null) {
+                statsPanel.showNode(graphController.getSelectedNode(), graph);
+            } else if (graphController.getSelectedEdge() != null) {
+                statsPanel.showEdge(graphController.getSelectedEdge());
+            } else if (graphController.getSelectedAgent() != null) {
+                statsPanel.showAgent(graphController.getSelectedAgent());
+            } else {
+                statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            }
         });
 
         toolBox.helpBtn.setOnAction(e -> HelpDialog.show());
+
 
         // =========================
         // LAYOUT
@@ -142,11 +181,13 @@ public class MainApp extends Application {
         BorderPane root = new BorderPane();
         root.setTop(toolBox);
         root.setCenter(view);
+
         
         // Split StatsPanel and LegendPanel in half
         VBox rightBar = new VBox(12, statsPanel, legendPanel);
         root.setRight(rightBar);
   
+
         root.setBottom(bottomBar);
 
         Scene scene = new Scene(root, 1100, 700);

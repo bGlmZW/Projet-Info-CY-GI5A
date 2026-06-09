@@ -77,9 +77,16 @@ public class SimulationEngine {
      * @param agent agent to add
      */
     public void addAgent(Agent agent) {
-        agents.add(agent);
-    }
+        if (agent == null) {
+            return;
+        }
 
+        agents.add(agent);
+
+        if (agent.getCurrentPosition() != null) {
+            agent.getCurrentPosition().addAgent(agent);
+        }
+    }
     /**
      * Removes an agent from the simulation entirely.
      * This method removes the agent from the simulation's managed list and 
@@ -163,15 +170,18 @@ public class SimulationEngine {
                 }
             }
 
-            if (edge == null) return;
+            if (edge == null) {
+            	return;
+            }
 
             if (!edge.containsAgent(agent)) {
                 if (edge.getAgents().size() >= edge.getCapacity()) {
-                    // Edge is full, agent stops at current node and waits
                     agent.setState(State.WAITING);
-                    remaining = 0; // stop the loop, keep progress already made
+                    remaining = 0;
                     break;
                 }
+
+                agent.getCurrentPosition().removeAgent(agent);
                 edge.addAgent(agent);
             }
             double multiplier = getEdgeMultiplier(edge.getType(), agent.getAgentType());
@@ -180,9 +190,11 @@ public class SimulationEngine {
 
             if (remaining >= effectiveDistance) {
                 remaining -= effectiveDistance;
-                agent.setCurrentPosition(nextNode);
-                agent.setProgressOnEdge(0.0);
+
                 edge.removeAgent(agent);
+                agent.setCurrentPosition(nextNode);
+                nextNode.addAgent(agent);
+                agent.setProgressOnEdge(0.0);
             } else {
                 agent.setProgressOnEdge(remaining);
                 remaining = 0.0;
@@ -196,6 +208,7 @@ public class SimulationEngine {
                     : State.MOVING
             );
         }
+
     }
     
     private double getEdgeMultiplier(EdgeType edgeType, AgentType agentType) {
@@ -210,6 +223,7 @@ public class SimulationEngine {
             default:
                 return 1.0;
         }
+
     }
     
     /**
@@ -251,14 +265,26 @@ public class SimulationEngine {
      */
     public void reset() {
         currentTick = 0;
+        
+        for (Node node : graph.getAllNodes()) {
+            node.getAgents().clear();
+        }
+
+        for (Node node : graph.getAllNodes()) {
+            for (Edge edge : graph.getEdges(node)) {
+                edge.getAgents().clear();
+            }
+        }
 
         for (Agent agent : agents) {
-            agent.setCurrentPosition(agent.getInitialPosition());
-            agent.setProgressOnEdge(0.0);
-            agent.setNextNode(null);
-            agent.setCurrentPath(null);
-            agent.setPathIndex(0);
-            agent.setState(State.WAITING);
+        	agent.setCurrentPosition(agent.getInitialPosition());
+        	agent.setProgressOnEdge(0.0);
+        	agent.setNextNode(null);
+        	agent.setState(State.WAITING);
+
+        	if (agent.getCurrentPosition() != null) {
+        	    agent.getCurrentPosition().addAgent(agent);
+        	}
         }
     }
 }
