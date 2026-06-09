@@ -4,7 +4,7 @@
 /**
  * 
  */
-module sim {
+module fsdf {
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
 

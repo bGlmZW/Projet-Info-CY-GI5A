@@ -17,6 +17,9 @@ public class PathFinderFactory {
             case ASTAR:
                 return new AStarPathFinder(graph);
 
+            case CONGESTION_AWARE:
+                return new CongestionAwarePathFinder(graph);
+
             default:
                 throw new IllegalArgumentException("Unknown PathFinder type");
         }
