@@ -66,5 +66,4 @@ public class AgentFactory {
 	    agent.setAgentType(type);
 	    return agent;
 	}
-
 }

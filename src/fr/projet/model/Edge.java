@@ -144,14 +144,23 @@ public class Edge {
         this.capacity = capacity;
     }
     
+    /**
+     * 
+     * @return
+     */
     public EdgeType getType() {
         return type;
     }
     
+    /**
+     * 
+     * @param type
+     */
     public void setType(EdgeType type) {
     	this.type = type;
     }
 
+    
     /**
      * 
      * @param speed

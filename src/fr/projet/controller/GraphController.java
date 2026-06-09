@@ -119,17 +119,14 @@ public class GraphController {
     graph.addNode(C);
     graph.addNode(D);
 
-
     graph.addEdge(new Edge(A, B, 1,2, EdgeType.ROAD));
     graph.addEdge(new Edge(A, D, 9,2, EdgeType.ROAD));
     graph.addEdge(new Edge(B, C, 1,2, EdgeType.ROAD));
     graph.addEdge(new Edge(C, D, 3,2, EdgeType.ROAD));
-
     
     return graph;
 	}
 	
-
 	/**
 	 * 
 	 * @param engine
@@ -337,10 +334,8 @@ public class GraphController {
 	            agent = AgentFactory.create(randomType, newId, source, destination);
 	            agent.setSpeed(speed); // override avec la plage choisie
 	        } else {
-
 	        	agent = new Agent(newId, speed, source, destination);
 	        	agent.setAgentType(AgentType.NORMAL);
-
 	        }
 
 	        // Algorithme
@@ -371,19 +366,9 @@ public class GraphController {
      */
     public void handleNodeClicked(Node clickedNode) {
     	// Clicking on node cancels node creation mode.
-        if (nodeCreationMode) {
-            selectedNode = null;
-            disableNodeCreationMode();
-
-            if (view != null) {
-                view.clearSelection();
-            }
-            return;
-        }
-
-        if (clickedNode == null) {
-            return;
-        }
+    	if (clickedNode == null) {
+    	    return;
+    	}
         
         selectedAgent = null;
         if (view != null) {
@@ -851,6 +836,9 @@ public class GraphController {
         }
     }
     
+    /**
+     * 
+     */
     public void disableAllModes() {
         disableEdgeCreationMode();
         disableNodeCreationMode();
@@ -1023,6 +1011,7 @@ public class GraphController {
                         engine.removeAgent(agent);
                     }
             	}
+            	
                 if (agent.getCurrentPosition().equals(selectedNode)) {
                     if (!neighbors.isEmpty()) {
                     	selectedNode.removeAgent(agent);
@@ -1203,7 +1192,49 @@ public class GraphController {
 
             if (view != null) view.renderGraph(graph);
             return;
-        }
+        	}
+        
+        	// Modification d'un nœud sélectionné
+        	if (selectedNode != null) {
+
+	            // Capacité maximale
+	            TextInputDialog capacityDialog = new TextInputDialog(
+	                    String.valueOf(selectedNode.getMaxCapacity() == Integer.MAX_VALUE
+	                            ? 0 : selectedNode.getMaxCapacity())
+	            );
+	            capacityDialog.setTitle("Edit Node");
+	            capacityDialog.setHeaderText("Edit node max capacity");
+	            capacityDialog.setContentText("Max capacity (0 = unlimited):");
+	
+	            Optional<String> capacityResult = capacityDialog.showAndWait();
+	            if (capacityResult.isEmpty()) return;
+	
+	            try {
+	                int cap = Integer.parseInt(capacityResult.get().trim());
+	                selectedNode.setMaxCapacity(cap <= 0 ? Integer.MAX_VALUE : cap);
+	            } catch (NumberFormatException e) {
+	                // keep current
+	            }
+	
+	            // Bloqué ou non
+	            ChoiceDialog<String> blockedDialog = new ChoiceDialog<>(
+	                    selectedNode.isBlocked() ? "BLOCKED" : "OPEN",
+	                    "OPEN", "BLOCKED"
+	            );
+	            blockedDialog.setTitle("Edit Node");
+	            blockedDialog.setHeaderText("Node status");
+	            blockedDialog.setContentText("Status:");
+	
+	            Optional<String> blockedResult = blockedDialog.showAndWait();
+	            if (blockedResult.isEmpty()) return;
+	            selectedNode.setBlocked("BLOCKED".equals(blockedResult.get()));
+	
+	            if (view != null) {
+	                view.renderGraph(graph);
+	                if (engine != null) view.renderAgents(engine.getAgents());
+	            }
+	            return;
+        	}
 
         // Rien de sélectionné
         if (selectedNode == null) {

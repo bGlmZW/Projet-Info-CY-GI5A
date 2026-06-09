@@ -82,6 +82,12 @@ public class StatsPanel extends VBox {
                 + String.format(Locale.US, "%.2f", node.getY())
                 + ")");
         addStat("Outgoing edges", String.valueOf(graph.getEdges(node).size()));
+        addStat("Max capacity",
+                node.getMaxCapacity() == Integer.MAX_VALUE
+                        ? "unlimited"
+                        : String.valueOf(node.getMaxCapacity()));
+        addStat("Congestion", node.isHeavilyCongested() ? "⚠ HEAVY" : "normal");
+        addStat("Blocked", node.isBlocked() ? "YES" : "no");
         addStat("Agents on node", String.valueOf(agentCount));
         addStat("Agents passed", String.valueOf(node.getPassCount()));
         addStat("Average speed", String.format(Locale.US, "%.2f", node.getAveragePassedSpeed()));

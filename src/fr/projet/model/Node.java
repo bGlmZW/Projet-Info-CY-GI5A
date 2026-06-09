@@ -29,6 +29,9 @@ public class Node {
     
     private int passCount = 0;
     private double passedSpeedSum = 0.0;
+    
+    /** Remaining congestion wait cycles (set to 2 when overcrowded) */
+    private int congestionWaitCycles = 0;
 
     /**
      * Creates a new node with a given identifier.
@@ -122,6 +125,22 @@ public class Node {
      */
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
+    }
+    
+    public int getCongestionWaitCycles() {
+        return congestionWaitCycles;
+    }
+
+    public void setCongestionWaitCycles(int cycles) {
+        this.congestionWaitCycles = cycles;
+    }
+    
+    /**
+     * Returns true if this node is currently in heavy congestion mode
+     * @return
+     */
+    public boolean isHeavilyCongested() {
+        return agents.size() > maxCapacity;
     }
 
     /**

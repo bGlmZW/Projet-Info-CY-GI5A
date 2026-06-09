@@ -48,7 +48,9 @@ public class AStarPathFinder implements IPathFinder {
             for (Edge edge : graph.getEdges(current)) {
 
                 Node neighbor = edge.getDestination();
-
+                
+                if (neighbor.isBlocked()) continue; // Skip blocked nodes
+                
                 double tentativeG = gScore.get(current) + edge.getDistance();
 
                 if (tentativeG < gScore.get(neighbor)) {
