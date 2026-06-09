@@ -29,6 +29,8 @@ public class SimulationBar extends HBox {
         style(pauseBtn,   "|| Pause", "#B7950B", "#9A7D0A");
         style(resetBtn,    "o Reset",      "#626567", "#515A5A");
         style(nextTickBtn, ">> Next Tick", "#2471A3", "#1A5276");
+        tickLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;"
+                         + "-fx-text-fill: #ECF0F1; -fx-padding: 0 12;");
         getChildren().addAll(
                 nextTickBtn,
                 startBtn,
