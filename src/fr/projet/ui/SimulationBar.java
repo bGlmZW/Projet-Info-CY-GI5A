@@ -27,7 +27,8 @@ public class SimulationBar extends HBox {
         setAlignment(Pos.CENTER_LEFT);
         style(startBtn,  "> Start",  "#1E8449", "#196F3D");
         style(pauseBtn,   "|| Pause", "#B7950B", "#9A7D0A");
-        style(resetBtn,   "o Reset",  "#626567", "#515A5A");
+        style(resetBtn,    "o Reset",      "#626567", "#515A5A");
+        style(nextTickBtn, ">> Next Tick", "#2471A3", "#1A5276");
         getChildren().addAll(
                 nextTickBtn,
                 startBtn,
