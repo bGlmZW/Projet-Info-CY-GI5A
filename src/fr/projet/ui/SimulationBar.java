@@ -21,7 +21,7 @@ public class SimulationBar extends HBox {
      * Creates the simulation control bar.
      */
     public SimulationBar() {
-        setSpacing(10);
+        setSpacing(8);
         setStyle("-fx-background-color: #17202A;");
         setPadding(new Insets(8, 16, 8, 16));
         setAlignment(Pos.CENTER_LEFT);
