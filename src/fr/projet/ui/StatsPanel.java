@@ -75,9 +75,9 @@ public class StatsPanel extends VBox {
         int agentCount = 0;
         double totalSpeed = 0.0;
 
-        if (node.getAgents() != null) {
-            agentCount = node.getAgents().size();
-            for (Agent agent : node.getAgents()) {
+        if (node.getAllAgents() != null) {
+            agentCount = node.getAllAgents().size();
+            for (Agent agent : node.getAllAgents()) {
                 totalSpeed += agent.getSpeed();
             }
         }

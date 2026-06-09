@@ -823,6 +823,7 @@ public class GraphController {
 
         agent.setPathFinder(agentPathFinder);
         engine.addAgent(agent);
+        selectedNode.addAgent(agent);
 
         // Clear the selection after creating the agent so the UI goes back to a neutral state
         selectedNode = null;

@@ -197,4 +197,17 @@ public class Graph {
             );
         }
     }
+    
+    /**
+     * Returns all edges in the graph.
+     *
+     * @return list of all edges
+     */
+    public List<Edge> getAllEdges() {
+        List<Edge> allEdges = new ArrayList<>();
+        for (List<Edge> edges : adjacencyList.values()) {
+            allEdges.addAll(edges);
+        }
+        return allEdges;
+    }
 }
