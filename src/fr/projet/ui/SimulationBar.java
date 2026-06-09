@@ -33,4 +33,14 @@ public class SimulationBar extends HBox {
                 tickLabel
         );
     }
+
+    private String css(String color) {
+        return "-fx-background-color: " + color + ";"
+             + "-fx-text-fill: white;"
+             + "-fx-background-radius: 6;"
+             + "-fx-font-size: 12px;"
+             + "-fx-font-weight: bold;"
+             + "-fx-padding: 6 14;"
+             + "-fx-cursor: hand;";
+    }
 }
