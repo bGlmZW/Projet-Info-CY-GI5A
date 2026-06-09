@@ -70,7 +70,9 @@ public class AStarPathFinder implements IPathFinder {
      * Heuristic function (simple version for your project).
      */
     private double heuristic(Node a, Node b) {
-        return Math.abs(a.getId() - b.getId());
+        double dx = a.getX() - b.getX();
+        double dy = a.getY() - b.getY();
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     /**

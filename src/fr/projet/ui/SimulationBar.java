@@ -7,6 +7,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+
+
 public class SimulationBar extends HBox {
 
     public final Button nextTickBtn = new Button("Next Tick");
@@ -15,6 +17,7 @@ public class SimulationBar extends HBox {
     public final Button resetBtn    = new Button("Reset");
     public final Label  tickLabel   = new Label("Tick: 0");
     public final ComboBox<String> arrivalBehaviorBox = new ComboBox<>();
+    public final ComboBox<String> pathFinderBox = new ComboBox<>();
 
     // Slider vitesse : 0.2s (rapide) → 3.0s (lent)
     public final Slider speedSlider = new Slider(0.2, 3.0, 1.0);
@@ -35,6 +38,12 @@ public class SimulationBar extends HBox {
         arrivalBehaviorBox.setValue("Nouvelle destination");
 
         VBox arrivalBox = new VBox(2, new Label("À l'arrivée:"), arrivalBehaviorBox);
+        pathFinderBox.getItems().addAll("Dijkstra", "A*", "Congestion-Aware");
+        pathFinderBox.setValue("Dijkstra");
+
+        VBox pathFinderBoxContainer = new VBox(2, new Label("Algorithme:"), pathFinderBox);
+
+        getChildren().add(pathFinderBoxContainer);
 
         getChildren().addAll(
                 nextTickBtn,

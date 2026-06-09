@@ -9,6 +9,9 @@ import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
 import fr.projet.view.GraphView;
 import fr.projet.simulation.ArrivalBehavior;
+import fr.projet.pathfinding.PathFinderFactory;
+import fr.projet.pathfinding.PathFinderType;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -155,6 +158,16 @@ public class MainApp extends Application {
             } else {
                 engine.setArrivalBehavior(ArrivalBehavior.RANDOM_DESTINATION);
             }
+        });
+        
+        simulationBar.pathFinderBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            PathFinderType type;
+            switch (newVal) {
+                case "A*":               type = PathFinderType.ASTAR;            break;
+                case "Congestion-Aware": type = PathFinderType.CONGESTION_AWARE; break;
+                default:                 type = PathFinderType.DIJKSTRA;         break;
+            }
+            engine.setDefaultPathFinder(PathFinderFactory.create(type, graph));
         });
 
         simulationBar.nextTickBtn.setOnAction(e -> {

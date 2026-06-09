@@ -80,6 +80,10 @@ public class SimulationEngine {
     public void setArrivalBehavior(ArrivalBehavior behavior) {
         this.arrivalBehavior = behavior;
     }
+    
+    public void setDefaultPathFinder(IPathFinder pathFinder) {
+        this.pathFinder = pathFinder;
+    }
 
     /**
      * Adds an agent to the simulation.
