@@ -29,8 +29,9 @@ public class Edge {
     
     private EdgeType type;
     
-
-
+    private int passCount = 0;
+    private double passedSpeedSum = 0.0;
+    
     /**
      * Creates a new edge between two nodes.
      * The edge is undirected by default, with unlimited capacity and no agents.
@@ -143,15 +144,50 @@ public class Edge {
         this.capacity = capacity;
     }
     
+    /**
+     * 
+     * @return
+     */
     public EdgeType getType() {
         return type;
     }
     
+    /**
+     * 
+     * @param type
+     */
     public void setType(EdgeType type) {
     	this.type = type;
     }
 
-  
+    
+    /**
+     * 
+     * @param speed
+     */
+    public void registerPass(double speed) {
+        passCount++;
+        passedSpeedSum += speed;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public int getPassCount() {
+        return passCount;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public double getAveragePassedSpeed() {
+        if (passCount == 0) {
+            return 0.0;
+        }
+        return passedSpeedSum / passCount;
+    }
    
     /**
      * Returns the list of agents currently on this edge.
@@ -190,6 +226,14 @@ public class Edge {
         if (!agents.contains(agent)) {
             agents.add(agent);
         }
+    }
+    
+    /**
+     * 
+     */
+    public void resetPassStats() {
+        passCount = 0;
+        passedSpeedSum = 0.0;
     }
 
     /**

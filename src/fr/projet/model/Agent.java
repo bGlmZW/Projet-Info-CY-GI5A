@@ -39,14 +39,12 @@ public class Agent {
 
     private IPathFinder pathFinder;
 
-    
     private AgentType agentType;
     
     private double currentEffectiveDistance;
     
     /** Remaining congestion wait cycles for this agent at its current node */
     private int nodeWaitCycles = 0;
-
 
 
     /**
@@ -220,6 +218,10 @@ public class Agent {
         return initialPosition;
     }
     
+    /**
+     * 
+     * @param node
+     */
     public void setInitialPosition(Node node) {
     	this.initialPosition = node;
     }

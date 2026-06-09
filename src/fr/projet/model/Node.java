@@ -27,6 +27,9 @@ public class Node {
     /** Y coordinate used for rendering the node */
     private Double y;
     
+    private int passCount = 0;
+    private double passedSpeedSum = 0.0;
+    
     /** Remaining congestion wait cycles (set to 2 when overcrowded) */
     private int congestionWaitCycles = 0;
 
@@ -69,6 +72,24 @@ public class Node {
     public void setMaxCapacity(int maxCapacity) {
         this.maxCapacity = maxCapacity;
     }
+    
+    /**
+     * 
+     * @param agent
+     */
+    public void addAgent(Agent agent) {
+        if (agent != null && !agents.contains(agent)) {
+            agents.add(agent);
+        }
+    }
+
+    /**
+     * 
+     * @param agent
+     */
+    public void removeAgent(Agent agent) {
+        agents.remove(agent);
+    }
 
     /**
      * Returns the list of agents currently on this node.
@@ -104,6 +125,22 @@ public class Node {
      */
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
+    }
+    
+    public int getCongestionWaitCycles() {
+        return congestionWaitCycles;
+    }
+
+    public void setCongestionWaitCycles(int cycles) {
+        this.congestionWaitCycles = cycles;
+    }
+    
+    /**
+     * Returns true if this node is currently in heavy congestion mode
+     * @return
+     */
+    public boolean isHeavilyCongested() {
+        return agents.size() > maxCapacity;
     }
 
     /**
@@ -142,17 +179,40 @@ public class Node {
         this.y = y;
     }
     
-    public int getCongestionWaitCycles() {
-        return congestionWaitCycles;
+    /**
+     * 
+     * @param speed
+     */
+    public void registerPass(double speed) {
+        passCount++;
+        passedSpeedSum += speed;
     }
 
-    public void setCongestionWaitCycles(int cycles) {
-        this.congestionWaitCycles = cycles;
+    /**
+     * 
+     * @return
+     */
+    public int getPassCount() {
+        return passCount;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public double getAveragePassedSpeed() {
+        if (passCount == 0) {
+            return 0.0;
+        }
+        return passedSpeedSum / passCount;
     }
     
-    /** Returns true if this node is currently in heavy congestion mode */
-    public boolean isHeavilyCongested() {
-        return agents.size() > maxCapacity;
+    /**
+     * 
+     */
+    public void resetPassStats() {
+        passCount = 0;
+        passedSpeedSum = 0.0;
     }
     
     @Override

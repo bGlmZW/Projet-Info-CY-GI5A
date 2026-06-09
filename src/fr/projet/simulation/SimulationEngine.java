@@ -2,9 +2,6 @@ package fr.projet.simulation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.Iterator;
 
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
@@ -27,9 +24,6 @@ public class SimulationEngine {
 
     /** Current simulation tick */
     private long currentTick;
-    
-    private ArrivalBehavior arrivalBehavior = ArrivalBehavior.RANDOM_DESTINATION;
-    private final Random random = new Random();
     
     /**  */
     private IPathFinder pathFinder;
@@ -76,14 +70,6 @@ public class SimulationEngine {
     public List<Agent> getAgents() {
         return agents;
     }
-    
-    public void setArrivalBehavior(ArrivalBehavior behavior) {
-        this.arrivalBehavior = behavior;
-    }
-    
-    public void setDefaultPathFinder(IPathFinder pathFinder) {
-        this.pathFinder = pathFinder;
-    }
 
     /**
      * Adds an agent to the simulation.
@@ -91,9 +77,16 @@ public class SimulationEngine {
      * @param agent agent to add
      */
     public void addAgent(Agent agent) {
-        agents.add(agent);
-    }
+        if (agent == null) {
+            return;
+        }
 
+        agents.add(agent);
+
+        if (agent.getCurrentPosition() != null) {
+            agent.getCurrentPosition().addAgent(agent);
+        }
+    }
     /**
      * Removes an agent from the simulation entirely.
      * This method removes the agent from the simulation's managed list and 
@@ -153,7 +146,7 @@ public class SimulationEngine {
                 agent.setState(State.ARRIVED);
                 return;
             }
-
+            
             // Vérifier la forte congestion du nœud actuel
             Node currentNode = agent.getCurrentPosition();
             if (currentNode.isHeavilyCongested()) {
@@ -181,6 +174,9 @@ public class SimulationEngine {
                     agent.getCurrentPosition(),
                     agent.getDestination()
             );
+            
+            agent.setCurrentPath(path);
+            agent.setPathIndex(0);
 
             if (path == null || path.size() < 2) {
                 agent.setState(State.WAITING);
@@ -189,32 +185,33 @@ public class SimulationEngine {
 
             Node nextNode = path.get(1);
 
-         // Si le prochain nœud est bloqué, l'agent attend
-         if (nextNode.isBlocked()) {
-             agent.setState(State.WAITING);
-             remaining = 0;
-             break;
-         }
-
-         agent.setNextNode(nextNode);
-
-         Edge edge = null;
-         for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
-                if (e.getDestination().equals(nextNode)) {
-                    edge = e;
-                    break;
-                }
-            }
+	         // Si le prochain nœud est bloqué, l'agent attend
+	         if (nextNode.isBlocked()) {
+	             agent.setState(State.WAITING);
+	             remaining = 0;
+	             break;
+	         }
+	
+	         agent.setNextNode(nextNode);
+	
+	         Edge edge = null;
+	         for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+	                if (e.getDestination().equals(nextNode)) {
+	                    edge = e;
+	                    break;
+	                }
+	         }
 
             if (edge == null) return;
 
             if (!edge.containsAgent(agent)) {
                 if (edge.getAgents().size() >= edge.getCapacity()) {
-                    // Edge is full, agent stops at current node and waits
                     agent.setState(State.WAITING);
-                    remaining = 0; // stop the loop, keep progress already made
+                    remaining = 0;
                     break;
                 }
+
+                agent.getCurrentPosition().removeAgent(agent);
                 edge.addAgent(agent);
             }
             double multiplier = getEdgeMultiplier(edge.getType(), agent.getAgentType());
@@ -224,9 +221,14 @@ public class SimulationEngine {
             if (remaining >= effectiveDistance) {
                 remaining -= effectiveDistance;
 
-                agent.setCurrentPosition(nextNode);
-                agent.setProgressOnEdge(0.0);
                 edge.removeAgent(agent);
+
+                edge.registerPass(agent.getSpeed());
+                nextNode.registerPass(agent.getSpeed());
+
+                agent.setCurrentPosition(nextNode);
+                nextNode.addAgent(agent);
+                agent.setProgressOnEdge(0.0);
             } else {
                 agent.setProgressOnEdge(remaining);
                 remaining = 0.0;
@@ -243,6 +245,12 @@ public class SimulationEngine {
 
     }
     
+    /**
+     * 
+     * @param edgeType
+     * @param agentType
+     * @return
+     */
     private double getEdgeMultiplier(EdgeType edgeType, AgentType agentType) {
         if (edgeType == null) return 1.0;
 
@@ -281,33 +289,14 @@ public class SimulationEngine {
      * Advances the simulation by one tick.
      */
     public void tick() {
+
         currentTick++;
+
         System.out.println("Tick " + currentTick);
 
         for (Agent agent : agents) {
             updateAgent(agent);
             System.out.println(agent);
-        }
-
-        // Traiter les agents arrivés APRÈS l'itération
-        if (arrivalBehavior == ArrivalBehavior.REMOVE) {
-            Iterator<Agent> it = agents.iterator();
-            while (it.hasNext()) {
-                Agent agent = it.next();
-                if (agent.getState() == State.ARRIVED) {
-                    // Nettoyer la présence de l'agent dans le graphe
-                    if (agent.getCurrentPosition() != null) {
-                        agent.getCurrentPosition().getAgents().remove(agent);
-                    }
-                    it.remove();
-                }
-            }
-        } else {
-            for (Agent agent : agents) {
-                if (agent.getState() == State.ARRIVED) {
-                    handleArrival(agent);
-                }
-            }
         }
     }
 
@@ -316,39 +305,28 @@ public class SimulationEngine {
      */
     public void reset() {
         currentTick = 0;
-
-        for (Agent agent : agents) {
-            agent.setCurrentPosition(agent.getInitialPosition());
-            agent.setProgressOnEdge(0.0);
-            agent.setNextNode(null);
-            agent.setCurrentPath(null);
-            agent.setPathIndex(0);
-            agent.setState(State.WAITING);
-        }
-    }
-    
-    private void handleArrival(Agent agent) {
-        if (arrivalBehavior == ArrivalBehavior.REMOVE) {
-            // sera supprimé après l'itération dans tick()
-            agent.setState(State.ARRIVED);
-            return;
+        
+        for (Node node : graph.getAllNodes()) {
+        	node.resetPassStats();
+            node.getAgents().clear();
         }
 
-        // RANDOM_DESTINATION : choisir un nouveau nœud différent de la position actuelle
-        Set<Node> allNodes = graph.getAllNodes();
-        List<Node> candidates = new ArrayList<>();
-        for (Node n : allNodes) {
-            if (!n.equals(agent.getCurrentPosition())) {
-                candidates.add(n);
+        for (Node node : graph.getAllNodes()) {
+            for (Edge edge : graph.getEdges(node)) {
+            	edge.resetPassStats();
+                edge.getAgents().clear();
             }
         }
 
-        if (candidates.isEmpty()) return;
+        for (Agent agent : agents) {
+        	agent.setCurrentPosition(agent.getInitialPosition());
+        	agent.setProgressOnEdge(0.0);
+        	agent.setNextNode(null);
+        	agent.setState(State.WAITING);
 
-        Node newDestination = candidates.get(random.nextInt(candidates.size()));
-        agent.setDestination(newDestination);
-        agent.setProgressOnEdge(0.0);
-        agent.setNextNode(null);
-        agent.setState(State.MOVING);
+        	if (agent.getCurrentPosition() != null) {
+        	    agent.getCurrentPosition().addAgent(agent);
+        	}
+        }
     }
 }

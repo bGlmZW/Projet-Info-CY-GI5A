@@ -5,6 +5,5 @@ package fr.projet.pathfinding;
  */
 public enum PathFinderType {
     DIJKSTRA,
-    ASTAR,
-    CONGESTION_AWARE
+    ASTAR
 }

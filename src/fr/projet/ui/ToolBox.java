@@ -6,13 +6,13 @@ import javafx.scene.layout.HBox;
 
 public class ToolBox extends HBox {
     public final Button addRandomAgentsBtn = new Button();
-    public final Button addRandomBtn       = new Button();
-    public final Button editBtn            = new Button();
-    public final Button addNodeBtn         = new Button();
-    public final Button addEdgeBtn         = new Button();
-    public final Button addAgentBtn        = new Button();
-    public final Button deleteBtn          = new Button();
-    public final Button helpBtn            = new Button();
+    public final Button addRandomBtn = new Button();
+    public final Button editBtn = new Button();
+    public final Button addNodeBtn = new Button();
+    public final Button addEdgeBtn = new Button();
+    public final Button addAgentBtn = new Button();
+    public final Button deleteBtn = new Button();
+    public final Button helpBtn = new Button();
 
     public ToolBox() {
         setSpacing(8);

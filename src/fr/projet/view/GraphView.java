@@ -50,11 +50,13 @@ public class GraphView extends Pane {
     private Agent selectedAgent;
     private Consumer<Agent> agentClickHandler = agent -> {};
 
-    
     private Node draggedNode;
     private boolean nodeWasDragged;
     private double dragOffsetX;
     private double dragOffsetY;
+    
+    /**Handler to display the node's new coordinates after dragging it */
+    private Consumer<Node> nodeDragHandler = node -> {};
 
 
     /**
@@ -79,6 +81,14 @@ public class GraphView extends Pane {
     public void setBackgroundClickHandler(Consumer<Point2D> handler) {
         this.backgroundClickHandler = (handler != null) ? handler : point -> {};
     }
+    
+    /**
+     * 
+     * @param handler
+     */
+    public void setNodeDragHandler(Consumer<Node> handler) {
+        this.nodeDragHandler = (handler != null) ? handler : node -> {};
+    }
 
     /**
      * Renders the graph by drawing nodes, edges, and labels.
@@ -102,6 +112,7 @@ public class GraphView extends Pane {
         // =========================
         // NODES
         // =========================
+        
         Map<Node, Text> labels = new HashMap<>();
         for (int i = 0; i < n; i++) {
 
@@ -152,6 +163,7 @@ public class GraphView extends Pane {
                 double newY = p.getY() + dragOffsetY;
                 node.setX(newX);
                 node.setY(newY);
+                nodeDragHandler.accept(node);
                 circle.setCenterX(newX);
                 circle.setCenterY(newY);
                 label.setX(newX - 5);
@@ -195,30 +207,47 @@ public class GraphView extends Pane {
         // =========================
         // EDGES
         // =========================
-        Set<String> drawn = new HashSet<>();
 
         for (Node node : nodes) {
             for (Edge edge : graph.getEdges(node)) {
 
-                String key = edge.getSource().getId() + "-" + edge.getDestination().getId();
-                String reverse = edge.getDestination().getId() + "-" + edge.getSource().getId();
 
-                if (drawn.contains(key) || drawn.contains(reverse)) continue;
-
-                drawn.add(key);
 
                 Circle src = nodeViews.get(edge.getSource());
                 Circle dst = nodeViews.get(edge.getDestination());
 
-                if (src == null || dst == null) continue;
+                if (src == null || dst == null) {
+                	continue;
+                }
+                
+                // Calculation to display two edges in the case of an undirected edge
+                double x1 = src.getCenterX();
+                double y1 = src.getCenterY();
+                double x2 = dst.getCenterX();
+                double y2 = dst.getCenterY();
+
+                double dx = x2 - x1;
+                double dy = y2 - y1;
+                double length = Math.sqrt(dx * dx + dy * dy);
+
+                double offsetX = 0;
+                double offsetY = 0;
+
+                if (!edge.isOriented() && length > 0) {
+                    double offset = 8.0;
+
+                    offsetX = -dy / length * offset;
+                    offsetY = dx / length * offset;
+                }
 
                 Line line = new Line(
-                    src.getCenterX(), src.getCenterY(),
-                    dst.getCenterX(), dst.getCenterY()
+                    x1 + offsetX,
+                    y1 + offsetY,
+                    x2 + offsetX,
+                    y2 + offsetY
                 );
 
                 line.setStrokeWidth(2);
-
                 line.setCursor(Cursor.HAND);
 
                 // Highlight selected edge
@@ -265,22 +294,18 @@ public class GraphView extends Pane {
                 weight.setY(midY);
                 
                 // Arrows
-                Polygon arrowToDst = createArrowHead(src.getCenterX(), src.getCenterY(), dst.getCenterX(), dst.getCenterY());
+                Polygon arrowToDst = createArrowHead(
+                        x1 + offsetX,
+                        y1 + offsetY,
+                        x2 + offsetX,
+                        y2 + offsetY
+                );
 
                 edgeViews.put(edge, line);
                 
                 getChildren().add(line);
                 getChildren().add(weight);
                 getChildren().add(arrowToDst);
-                
-                if (!edge.isOriented()) {
-                    Polygon arrowToSrc = createArrowHead(
-                            dst.getCenterX(), dst.getCenterY(),
-                            src.getCenterX(), src.getCenterY()
-                    );
-                    getChildren().add(arrowToSrc);
-                }
-
             }
         }
 

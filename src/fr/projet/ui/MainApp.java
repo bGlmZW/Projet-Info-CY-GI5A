@@ -8,10 +8,6 @@ import fr.projet.model.Graph;
 import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
 import fr.projet.view.GraphView;
-import fr.projet.simulation.ArrivalBehavior;
-import fr.projet.pathfinding.PathFinderFactory;
-import fr.projet.pathfinding.PathFinderType;
-
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -64,6 +60,12 @@ public class MainApp extends Application {
             statsPanel.showNode(node, graph);
         });
         
+        view.setNodeDragHandler(node -> {
+            if (graphController.getSelectedNode() != null && graphController.getSelectedNode().equals(node)) {
+                statsPanel.showNode(node, graph);
+            }
+        });
+        
         view.setEdgeClickHandler(edge -> {
             graphController.handleEdgeClicked(edge);
             if (graphController.getSelectedEdge() != null) {
@@ -93,36 +95,36 @@ public class MainApp extends Application {
         ToolBox toolBox = new ToolBox();
         SimulationBar simulationBar = new SimulationBar();
 
-     // Tableau pour pouvoir modifier la timeline depuis le lambda du slider
-        final Timeline[] timelineRef = new Timeline[1];
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            engine.tick();
+            view.renderAgents(engine.getAgents());
+            simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
 
-        Runnable buildTimeline = () -> {
-            double interval = simulationBar.speedSlider.getValue();
-            Timeline tl = new Timeline(new KeyFrame(Duration.seconds(interval), e -> {
-                engine.tick();
-                view.renderAgents(engine.getAgents());
-                simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
-            }));
-            tl.setCycleCount(Animation.INDEFINITE);
-            timelineRef[0] = tl;
-        };
-
-        buildTimeline.run(); // construction initiale
-
-        // Quand le slider bouge, on reconstruit la timeline
-        simulationBar.speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            double val = Math.round(newVal.doubleValue() * 10.0) / 10.0;
-            simulationBar.speedLabel.setText(String.format("Vitesse: %.1fs/tick", val));
-            boolean wasPlaying = timelineRef[0].getStatus() == Animation.Status.RUNNING;
-            timelineRef[0].stop();
-            buildTimeline.run();
-            if (wasPlaying) timelineRef[0].play();
-        });
+            if (graphController.getSelectedNode() != null) {
+                statsPanel.showNode(graphController.getSelectedNode(), graph);
+            } else if (graphController.getSelectedEdge() != null) {
+                statsPanel.showEdge(graphController.getSelectedEdge());
+            } else if (graphController.getSelectedAgent() != null) {
+                statsPanel.showAgent(graphController.getSelectedAgent());
+            } else {
+                statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            }
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
 
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
-        toolBox.addAgentBtn.setOnAction(e ->graphController.createAgentAtSelectedNode(engine));
+        
+        toolBox.addAgentBtn.setOnAction(e -> {
+            graphController.createAgentAtSelectedNode(engine);
+            view.renderAgents(engine.getAgents());
 
+            if (graphController.getSelectedNode() != null) {
+                statsPanel.showNode(graphController.getSelectedNode(), graph);
+            } else {
+                statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            }
+        });
         
         toolBox.deleteBtn.setOnAction(e -> {
             graphController.deleteSelected();
@@ -141,39 +143,31 @@ public class MainApp extends Application {
         	statsPanel.showGraphOverview(graph, engine.getAgents().size());
         });
 
-        simulationBar.startBtn.setOnAction(e -> timelineRef[0].play());
-        simulationBar.pauseBtn.setOnAction(e -> timelineRef[0].pause());
+        simulationBar.startBtn.setOnAction(e -> timeline.play());
+        simulationBar.pauseBtn.setOnAction(e -> timeline.pause());
         simulationBar.resetBtn.setOnAction(e -> {
-        	timelineRef[0].pause();
+            timeline.pause();
             engine.reset();
             view.renderGraph(graph);
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: 0");
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
         });
-        
-        simulationBar.arrivalBehaviorBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if ("Supprimer l'agent".equals(newVal)) {
-                engine.setArrivalBehavior(ArrivalBehavior.REMOVE);
-            } else {
-                engine.setArrivalBehavior(ArrivalBehavior.RANDOM_DESTINATION);
-            }
-        });
-        
-        simulationBar.pathFinderBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            PathFinderType type;
-            switch (newVal) {
-                case "A*":               type = PathFinderType.ASTAR;            break;
-                case "Congestion-Aware": type = PathFinderType.CONGESTION_AWARE; break;
-                default:                 type = PathFinderType.DIJKSTRA;         break;
-            }
-            engine.setDefaultPathFinder(PathFinderFactory.create(type, graph));
-        });
 
         simulationBar.nextTickBtn.setOnAction(e -> {
             engine.tick();
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
+
+            if (graphController.getSelectedNode() != null) {
+                statsPanel.showNode(graphController.getSelectedNode(), graph);
+            } else if (graphController.getSelectedEdge() != null) {
+                statsPanel.showEdge(graphController.getSelectedEdge());
+            } else if (graphController.getSelectedAgent() != null) {
+                statsPanel.showAgent(graphController.getSelectedAgent());
+            } else {
+                statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            }
         });
 
         toolBox.helpBtn.setOnAction(e -> HelpDialog.show());
