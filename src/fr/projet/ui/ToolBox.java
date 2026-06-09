@@ -4,20 +4,25 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
+/**
+ * Toolbar for graph editing and agent management actions.
+ */
 public class ToolBox extends HBox {
+
     public final Button addRandomAgentsBtn = new Button();
-    public final Button addRandomBtn = new Button();
-    public final Button editBtn = new Button();
-    public final Button addNodeBtn = new Button();
-    public final Button addEdgeBtn = new Button();
-    public final Button addAgentBtn = new Button();
-    public final Button deleteBtn = new Button();
-    public final Button helpBtn = new Button();
+    public final Button addRandomBtn       = new Button();
+    public final Button editBtn            = new Button();
+    public final Button addNodeBtn         = new Button();
+    public final Button addEdgeBtn         = new Button();
+    public final Button addAgentBtn        = new Button();
+    public final Button deleteBtn          = new Button();
+    public final Button helpBtn            = new Button();
 
     public ToolBox() {
         setSpacing(8);
         setPadding(new Insets(10, 16, 10, 16));
         setStyle("-fx-background-color: #1C2833;");
+
         style(addNodeBtn,        "+ Node",          "#2471A3", "#1A5276");
         style(addEdgeBtn,        "-- Edge",         "#1E8449", "#196F3D");
         style(addAgentBtn,       "Ambulance",       "#922B21", "#7B241C");
@@ -26,6 +31,7 @@ public class ToolBox extends HBox {
         style(editBtn,           "/ Edit",          "#B7950B", "#9A7D0A");
         style(deleteBtn,         "X Delete",        "#626567", "#515A5A");
         style(helpBtn,           "? Help",          "#2C3E50", "#1A252F");
+
         getChildren().addAll(
             addNodeBtn, addEdgeBtn, addAgentBtn,
             addRandomBtn, addRandomAgentsBtn,
@@ -51,5 +57,4 @@ public class ToolBox extends HBox {
              + "-fx-padding: 7 14;"
              + "-fx-cursor: hand;";
     }
-
 }
