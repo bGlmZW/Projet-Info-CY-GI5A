@@ -154,6 +154,24 @@ public class SimulationEngine {
                 return;
             }
 
+            // Vérifier la forte congestion du nœud actuel
+            Node currentNode = agent.getCurrentPosition();
+            if (currentNode.isHeavilyCongested()) {
+                if (agent.getNodeWaitCycles() < 2) {
+                    // L'agent doit encore attendre
+                    agent.setNodeWaitCycles(agent.getNodeWaitCycles() + 1);
+                    agent.setState(State.WAITING);
+                    remaining = 0;
+                    break;
+                } else {
+                    // L'agent a attendu 2 cycles, il peut partir
+                    agent.setNodeWaitCycles(0);
+                }
+            } else {
+                // Nœud normal : reset du compteur au cas où
+                agent.setNodeWaitCycles(0);
+            }
+
             // Use the agent's own pathfinder, fallback to engine's global one
             IPathFinder agentPathFinder = agent.getPathFinder() != null
                     ? agent.getPathFinder()
@@ -164,13 +182,24 @@ public class SimulationEngine {
                     agent.getDestination()
             );
 
-            if (path == null || path.size() < 2) return;
+            if (path == null || path.size() < 2) {
+                agent.setState(State.WAITING);
+                return;
+            }
 
             Node nextNode = path.get(1);
-            agent.setNextNode(nextNode);
 
-            Edge edge = null;
-            for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+         // Si le prochain nœud est bloqué, l'agent attend
+         if (nextNode.isBlocked()) {
+             agent.setState(State.WAITING);
+             remaining = 0;
+             break;
+         }
+
+         agent.setNextNode(nextNode);
+
+         Edge edge = null;
+         for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
                 if (e.getDestination().equals(nextNode)) {
                     edge = e;
                     break;

@@ -26,6 +26,9 @@ public class Node {
 
     /** Y coordinate used for rendering the node */
     private Double y;
+    
+    /** Remaining congestion wait cycles (set to 2 when overcrowded) */
+    private int congestionWaitCycles = 0;
 
     /**
      * Creates a new node with a given identifier.
@@ -137,6 +140,19 @@ public class Node {
      */
     public void setY(Double y) {
         this.y = y;
+    }
+    
+    public int getCongestionWaitCycles() {
+        return congestionWaitCycles;
+    }
+
+    public void setCongestionWaitCycles(int cycles) {
+        this.congestionWaitCycles = cycles;
+    }
+    
+    /** Returns true if this node is currently in heavy congestion mode */
+    public boolean isHeavilyCongested() {
+        return agents.size() > maxCapacity;
     }
     
     @Override

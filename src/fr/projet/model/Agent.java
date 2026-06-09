@@ -43,6 +43,10 @@ public class Agent {
     private AgentType agentType;
     
     private double currentEffectiveDistance;
+    
+    /** Remaining congestion wait cycles for this agent at its current node */
+    private int nodeWaitCycles = 0;
+
 
 
     /**
@@ -271,6 +275,14 @@ public class Agent {
 
     public void setCurrentEffectiveDistance(double currentEffectiveDistance) {
         this.currentEffectiveDistance = currentEffectiveDistance;
+    }
+    
+    public int getNodeWaitCycles() {
+        return nodeWaitCycles;
+    }
+
+    public void setNodeWaitCycles(int cycles) {
+        this.nodeWaitCycles = cycles;
     }
 
     /**

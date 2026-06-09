@@ -41,9 +41,9 @@ public class CongestionAwarePathFinder implements IPathFinder {
             if (current.equals(destination)) break;
 
             for (Edge edge : graph.getEdges(current)) {
-
                 Node neighbor = edge.getDestination();
-                double cost   = computeCost(edge);
+                if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
+                double cost = computeCost(edge);
                 double newDist = distances.get(current) + cost;
 
                 if (newDist < distances.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {

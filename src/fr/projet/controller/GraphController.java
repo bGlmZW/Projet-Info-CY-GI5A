@@ -1181,6 +1181,48 @@ public class GraphController {
             return;
         }
 
+     // Modification d'un nœud sélectionné
+        if (selectedNode != null) {
+
+            // Capacité maximale
+            TextInputDialog capacityDialog = new TextInputDialog(
+                    String.valueOf(selectedNode.getMaxCapacity() == Integer.MAX_VALUE
+                            ? 0 : selectedNode.getMaxCapacity())
+            );
+            capacityDialog.setTitle("Edit Node");
+            capacityDialog.setHeaderText("Edit node max capacity");
+            capacityDialog.setContentText("Max capacity (0 = unlimited):");
+
+            Optional<String> capacityResult = capacityDialog.showAndWait();
+            if (capacityResult.isEmpty()) return;
+
+            try {
+                int cap = Integer.parseInt(capacityResult.get().trim());
+                selectedNode.setMaxCapacity(cap <= 0 ? Integer.MAX_VALUE : cap);
+            } catch (NumberFormatException e) {
+                // keep current
+            }
+
+            // Bloqué ou non
+            ChoiceDialog<String> blockedDialog = new ChoiceDialog<>(
+                    selectedNode.isBlocked() ? "BLOCKED" : "OPEN",
+                    "OPEN", "BLOCKED"
+            );
+            blockedDialog.setTitle("Edit Node");
+            blockedDialog.setHeaderText("Node status");
+            blockedDialog.setContentText("Status:");
+
+            Optional<String> blockedResult = blockedDialog.showAndWait();
+            if (blockedResult.isEmpty()) return;
+            selectedNode.setBlocked("BLOCKED".equals(blockedResult.get()));
+
+            if (view != null) {
+                view.renderGraph(graph);
+                if (engine != null) view.renderAgents(engine.getAgents());
+            }
+            return;
+        }
+        
         // Rien de sélectionné
         if (selectedNode == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);

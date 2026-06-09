@@ -93,6 +93,13 @@ public class StatsPanel extends VBox {
                 + ")");
         addStat("Outgoing edges", String.valueOf(graph.getEdges(node).size()));
         addStat("Agents on node", String.valueOf(agentCount));
+        addStat("Max capacity",
+                node.getMaxCapacity() == Integer.MAX_VALUE
+                        ? "unlimited"
+                        : String.valueOf(node.getMaxCapacity()));
+        addStat("Congestion",
+                node.isHeavilyCongested() ? "⚠ HEAVY" : "normal");
+        addStat("Blocked", node.isBlocked() ? "YES" : "no");
         addStat("Average agent speed", String.format(Locale.US, "%.2f", avgSpeed));
         addStat("Neighbors", neighborsText.length() == 0 ? "none" : neighborsText.toString());
     }
