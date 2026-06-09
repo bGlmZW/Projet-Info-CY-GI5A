@@ -72,17 +72,7 @@ public class StatsPanel extends VBox {
             }
         }
 
-        int agentCount = 0;
-        double totalSpeed = 0.0;
-
-        if (node.getAgents() != null) {
-            agentCount = node.getAgents().size();
-            for (Agent agent : node.getAgents()) {
-                totalSpeed += agent.getSpeed();
-            }
-        }
-
-        double avgSpeed = agentCount > 0 ? totalSpeed / agentCount : 0.0;
+        int agentCount = node.getAgents().size();
 
         addStat("ID", String.valueOf(node.getId()));
         addStat("Position",
@@ -93,7 +83,8 @@ public class StatsPanel extends VBox {
                 + ")");
         addStat("Outgoing edges", String.valueOf(graph.getEdges(node).size()));
         addStat("Agents on node", String.valueOf(agentCount));
-        addStat("Average agent speed", String.format(Locale.US, "%.2f", avgSpeed));
+        addStat("Agents passed", String.valueOf(node.getPassCount()));
+        addStat("Average speed", String.format(Locale.US, "%.2f", node.getAveragePassedSpeed()));
         addStat("Neighbors", neighborsText.length() == 0 ? "none" : neighborsText.toString());
     }
 
@@ -111,17 +102,7 @@ public class StatsPanel extends VBox {
         contentBox.getChildren().clear();
         contentBox.getChildren().add(sectionTitle("EDGE"));
 
-        int agentCount = 0;
-        double totalSpeed = 0.0;
-
-        if (edge.getAgents() != null) {
-            agentCount = edge.getAgents().size();
-            for (Agent agent : edge.getAgents()) {
-                totalSpeed += agent.getSpeed();
-            }
-        }
-
-        double avgSpeed = agentCount > 0 ? totalSpeed / agentCount : 0.0;
+        int agentCount = edge.getAgents().size();
 
         addStat("From", String.valueOf(edge.getSource().getId()));
         addStat("To", String.valueOf(edge.getDestination().getId()));
@@ -130,7 +111,8 @@ public class StatsPanel extends VBox {
         addStat("Capacity", String.valueOf(edge.getCapacity()));
         addStat("Oriented", String.valueOf(edge.isOriented()));
         addStat("Agents on edge", String.valueOf(agentCount));
-        addStat("Average agent speed", String.format(Locale.US, "%.2f", avgSpeed));
+        addStat("Agents passed", String.valueOf(edge.getPassCount()));
+        addStat("Averagespeed", String.format(Locale.US, "%.2f", edge.getAveragePassedSpeed()));
     }
 
     /**

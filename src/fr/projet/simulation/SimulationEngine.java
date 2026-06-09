@@ -192,6 +192,10 @@ public class SimulationEngine {
                 remaining -= effectiveDistance;
 
                 edge.removeAgent(agent);
+
+                edge.registerPass(agent.getSpeed());
+                nextNode.registerPass(agent.getSpeed());
+
                 agent.setCurrentPosition(nextNode);
                 nextNode.addAgent(agent);
                 agent.setProgressOnEdge(0.0);

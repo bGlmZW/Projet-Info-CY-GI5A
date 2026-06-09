@@ -26,6 +26,9 @@ public class Node {
 
     /** Y coordinate used for rendering the node */
     private Double y;
+    
+    private int passCount = 0;
+    private double passedSpeedSum = 0.0;
 
     /**
      * Creates a new node with a given identifier.
@@ -155,6 +158,34 @@ public class Node {
      */
     public void setY(Double y) {
         this.y = y;
+    }
+    
+    /**
+     * 
+     * @param speed
+     */
+    public void registerPass(double speed) {
+        passCount++;
+        passedSpeedSum += speed;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public int getPassCount() {
+        return passCount;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public double getAveragePassedSpeed() {
+        if (passCount == 0) {
+            return 0.0;
+        }
+        return passedSpeedSum / passCount;
     }
     
     @Override
