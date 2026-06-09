@@ -8,6 +8,7 @@ import fr.projet.model.Graph;
 import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
 import fr.projet.view.GraphView;
+import fr.projet.simulation.ArrivalBehavior;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -146,6 +147,14 @@ public class MainApp extends Application {
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: 0");
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
+        });
+        
+        simulationBar.arrivalBehaviorBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if ("Supprimer l'agent".equals(newVal)) {
+                engine.setArrivalBehavior(ArrivalBehavior.REMOVE);
+            } else {
+                engine.setArrivalBehavior(ArrivalBehavior.RANDOM_DESTINATION);
+            }
         });
 
         simulationBar.nextTickBtn.setOnAction(e -> {

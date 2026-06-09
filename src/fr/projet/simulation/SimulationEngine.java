@@ -2,6 +2,9 @@ package fr.projet.simulation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.Iterator;
 
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
@@ -24,6 +27,9 @@ public class SimulationEngine {
 
     /** Current simulation tick */
     private long currentTick;
+    
+    private ArrivalBehavior arrivalBehavior = ArrivalBehavior.RANDOM_DESTINATION;
+    private final Random random = new Random();
     
     /**  */
     private IPathFinder pathFinder;
@@ -69,6 +75,10 @@ public class SimulationEngine {
      */
     public List<Agent> getAgents() {
         return agents;
+    }
+    
+    public void setArrivalBehavior(ArrivalBehavior behavior) {
+        this.arrivalBehavior = behavior;
     }
 
     /**
@@ -238,14 +248,33 @@ public class SimulationEngine {
      * Advances the simulation by one tick.
      */
     public void tick() {
-
         currentTick++;
-
         System.out.println("Tick " + currentTick);
 
         for (Agent agent : agents) {
             updateAgent(agent);
             System.out.println(agent);
+        }
+
+        // Traiter les agents arrivés APRÈS l'itération
+        if (arrivalBehavior == ArrivalBehavior.REMOVE) {
+            Iterator<Agent> it = agents.iterator();
+            while (it.hasNext()) {
+                Agent agent = it.next();
+                if (agent.getState() == State.ARRIVED) {
+                    // Nettoyer la présence de l'agent dans le graphe
+                    if (agent.getCurrentPosition() != null) {
+                        agent.getCurrentPosition().getAgents().remove(agent);
+                    }
+                    it.remove();
+                }
+            }
+        } else {
+            for (Agent agent : agents) {
+                if (agent.getState() == State.ARRIVED) {
+                    handleArrival(agent);
+                }
+            }
         }
     }
 
@@ -263,5 +292,30 @@ public class SimulationEngine {
             agent.setPathIndex(0);
             agent.setState(State.WAITING);
         }
+    }
+    
+    private void handleArrival(Agent agent) {
+        if (arrivalBehavior == ArrivalBehavior.REMOVE) {
+            // sera supprimé après l'itération dans tick()
+            agent.setState(State.ARRIVED);
+            return;
+        }
+
+        // RANDOM_DESTINATION : choisir un nouveau nœud différent de la position actuelle
+        Set<Node> allNodes = graph.getAllNodes();
+        List<Node> candidates = new ArrayList<>();
+        for (Node n : allNodes) {
+            if (!n.equals(agent.getCurrentPosition())) {
+                candidates.add(n);
+            }
+        }
+
+        if (candidates.isEmpty()) return;
+
+        Node newDestination = candidates.get(random.nextInt(candidates.size()));
+        agent.setDestination(newDestination);
+        agent.setProgressOnEdge(0.0);
+        agent.setNextNode(null);
+        agent.setState(State.MOVING);
     }
 }

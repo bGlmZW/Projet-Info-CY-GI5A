@@ -3,6 +3,7 @@ package fr.projet.ui;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -13,6 +14,7 @@ public class SimulationBar extends HBox {
     public final Button pauseBtn    = new Button("Pause");
     public final Button resetBtn    = new Button("Reset");
     public final Label  tickLabel   = new Label("Tick: 0");
+    public final ComboBox<String> arrivalBehaviorBox = new ComboBox<>();
 
     // Slider vitesse : 0.2s (rapide) → 3.0s (lent)
     public final Slider speedSlider = new Slider(0.2, 3.0, 1.0);
@@ -29,6 +31,10 @@ public class SimulationBar extends HBox {
         speedSlider.setPrefWidth(180);
 
         VBox speedBox = new VBox(2, speedLabel, speedSlider);
+        arrivalBehaviorBox.getItems().addAll("Nouvelle destination", "Supprimer l'agent");
+        arrivalBehaviorBox.setValue("Nouvelle destination");
+
+        VBox arrivalBox = new VBox(2, new Label("À l'arrivée:"), arrivalBehaviorBox);
 
         getChildren().addAll(
                 nextTickBtn,
@@ -36,7 +42,8 @@ public class SimulationBar extends HBox {
                 pauseBtn,
                 resetBtn,
                 tickLabel,
-                speedBox
+                speedBox,
+                arrivalBox
         );
     }
 }
