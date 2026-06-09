@@ -34,6 +34,15 @@ public class SimulationBar extends HBox {
         );
     }
 
+    private void style(Button btn, String text, String base, String hover) {
+        btn.setText(text);
+        String s = css(base);
+        String h = css(hover);
+        btn.setStyle(s);
+        btn.setOnMouseEntered(e -> btn.setStyle(h));
+        btn.setOnMouseExited(e -> btn.setStyle(s));
+    }
+
     private String css(String color) {
         return "-fx-background-color: " + color + ";"
              + "-fx-text-fill: white;"
