@@ -135,15 +135,25 @@ public class StatsPanel extends VBox {
         }
 
         String remainingPath = "not available";
-        if (agent.getCurrentPath() != null
-                && !agent.getCurrentPath().isEmpty()
-                && agent.getPathIndex() >= 0
-                && agent.getPathIndex() < agent.getCurrentPath().size()) {
 
-            remainingPath = agent.getCurrentPath().stream()
-                    .skip(agent.getPathIndex())
-                    .map(n -> String.valueOf(n.getId()))
-                    .collect(Collectors.joining(" -> "));
+        if (agent.getPathFinder() != null
+                && agent.getCurrentPosition() != null
+                && agent.getDestination() != null
+                && !agent.getCurrentPosition().equals(agent.getDestination())) {
+
+            List<Node> path = agent.getPathFinder().findPath(
+                    agent.getCurrentPosition(),
+                    agent.getDestination()
+            );
+
+            if (path != null && !path.isEmpty()) {
+                remainingPath = path.stream()
+                        .map(n -> String.valueOf(n.getId()))
+                        .collect(Collectors.joining(" -> "));
+            }
+        } else if (agent.getCurrentPosition() != null
+                && agent.getCurrentPosition().equals(agent.getDestination())) {
+            remainingPath = "arrived";
         }
 
         addStat("ID", String.valueOf(agent.getId()));

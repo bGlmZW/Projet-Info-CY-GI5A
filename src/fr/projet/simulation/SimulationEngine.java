@@ -156,6 +156,9 @@ public class SimulationEngine {
                     agent.getCurrentPosition(),
                     agent.getDestination()
             );
+            
+            agent.setCurrentPath(path);
+            agent.setPathIndex(0);
 
             if (path == null || path.size() < 2) return;
 
