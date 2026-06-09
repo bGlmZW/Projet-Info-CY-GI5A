@@ -853,6 +853,7 @@ public class GraphController {
         agent.setPathFinder(agentPathFinder);
         
         engine.addAgent(agent);
+        selectedNode.addAgent(agent);
 
         if (view != null) {
             view.renderAgents(engine.getAgents());

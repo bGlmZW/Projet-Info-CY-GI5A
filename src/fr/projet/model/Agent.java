@@ -117,9 +117,14 @@ public class Agent {
      * @param currentPosition new current node
      */
     public void setCurrentPosition(Node currentPosition) {
+        if (this.currentPosition != null) {
+        	if(this.currentPosition.containsAgent(this)) {
+        		this.currentPosition.removeAgent(this);
+        	}
+        }
         this.currentPosition = currentPosition;
+        currentPosition.addAgent(this);
     }
-
     /**
      * Returns the destination node of the agent.
      *

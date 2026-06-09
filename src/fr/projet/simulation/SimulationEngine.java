@@ -11,6 +11,13 @@ import fr.projet.pathfinding.*;
 import fr.projet.model.AgentType;
 import fr.projet.model.EdgeType;
 
+<<<<<<< HEAD
+=======
+import java.util.HashSet;
+
+
+
+>>>>>>> fix/priority-agent
 /**
  * Manages the execution of the simulation.
  * The simulation engine maintains the graph, the agents,
@@ -125,7 +132,7 @@ public class SimulationEngine {
 
         // Remove the agent from its current node (WAITING or ARRIVED state)
         if (agent.getCurrentPosition() != null) {
-            agent.getCurrentPosition().getAgents().remove(agent);
+            agent.getCurrentPosition().removeAgent(agent);
         }
 
         // Remove the agent from the edge it is currently traversing (MOVING state)
@@ -232,7 +239,10 @@ public class SimulationEngine {
                     remaining = 0;
                     break;
                 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix/priority-agent
                 agent.getCurrentPosition().removeAgent(agent);
                 edge.addAgent(agent);
             }
@@ -311,13 +321,41 @@ public class SimulationEngine {
      * Advances the simulation by one tick.
      */
     public void tick() {
-        currentTick++;
-        System.out.println("Tick " + currentTick);
+    	currentTick++;
+    	System.out.println("Tick " + currentTick);
+    	
+    	Set<Agent> alreadyUpdated = new HashSet<>();
 
+<<<<<<< HEAD
         for (Agent agent : agents) {
             updateAgent(agent);
             System.out.println(agent);
         }
+=======
+    	for (Node node : graph.getAllNodes()) {
+    	    for (Agent agent : new ArrayList<>(node.getPriorityAgents())) {
+    	        if (alreadyUpdated.add(agent)) {
+    	            updateAgent(agent);
+    	            System.out.println(agent);
+    	        }
+    	    }
+    	    for (Agent agent : new ArrayList<>(node.getNoPriorityAgents())) {
+    	        if (alreadyUpdated.add(agent)) {
+    	            updateAgent(agent);
+    	            System.out.println("sur noeud > " + agent);
+    	        }
+    	    }
+    	}
+
+    	for (Edge edge : graph.getAllEdges()) {
+    	    for (Agent agent : new ArrayList<>(edge.getAgents())) {
+    	        if (alreadyUpdated.add(agent)) {
+    	            updateAgent(agent);
+    	            System.out.println("sur edge > " + agent);
+    	        }
+    	    }
+    	}
+>>>>>>> fix/priority-agent
         
         // Traiter les agents arrivés APRÈS l'itération
         if (arrivalBehavior == ArrivalBehavior.REMOVE) {
@@ -327,7 +365,7 @@ public class SimulationEngine {
                 if (agent.getState() == State.ARRIVED) {
                     // Nettoyer la présence de l'agent dans le graphe
                     if (agent.getCurrentPosition() != null) {
-                        agent.getCurrentPosition().getAgents().remove(agent);
+                        agent.getCurrentPosition().removeAgent(agent);
                     }
                     it.remove();
                 }

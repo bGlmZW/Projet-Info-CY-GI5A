@@ -1,6 +1,8 @@
 package fr.projet.model;
 
 import java.util.ArrayList;
+
+
 import java.util.List;
 
 /**
@@ -15,8 +17,11 @@ public class Node {
     /** Maximum number of agents allowed in this node */
     private int maxCapacity;
 
-    /** List of agents currently located on this node */
-    private List<Agent> agents;
+    /** List of priority agents currently located on this node */
+    private List<Agent> priorityAgents;
+    
+    /** List of no-priority agents currently located on this node */
+    private List<Agent> noPriorityAgents;
 
     /** Indicates whether the node is blocked (not accessible) */
     private boolean blocked;
@@ -45,7 +50,8 @@ public class Node {
     public Node(int id) {
         this.id = id;
         this.maxCapacity = Integer.MAX_VALUE;
-        this.agents = new ArrayList<>();
+        this.priorityAgents = new ArrayList<>();
+        this.noPriorityAgents = new ArrayList<>();
         this.blocked = false;
         this.name = null;
         this.type = NodeType.POINT_OF_INTEREST;
@@ -101,18 +107,52 @@ public class Node {
      *
      * @return list of agents
      */
-    public List<Agent> getAgents() {
-        return agents;
+    public List<Agent> getAllAgents() {
+    	List<Agent> allAgents = new ArrayList<>();
+    	allAgents.addAll(priorityAgents);
+    	allAgents.addAll(noPriorityAgents);
+    	return allAgents;
+    	
+    }
+       
+    
+
+    /**
+     * Returns the list of priority agents currently located on this node.
+     *
+     * @return list of priority agents
+     */
+    public List<Agent> getPriorityAgents() {
+        return priorityAgents;
     }
 
     /**
-     * Sets the list of agents currently on this node.
+     * Sets the list of priority agents currently located on this node.
      *
-     * @param agents new list of agents
+     * @param priorityAgents list of priority agents to set
      */
-    public void setAgents(List<Agent> agents) {
-        this.agents = agents;
+    public void setPriorityAgents(List<Agent> priorityAgents) {
+        this.priorityAgents = priorityAgents;
     }
+
+    /**
+     * Returns the list of no-priority agents currently located on this node.
+     *
+     * @return list of no-priority agents
+     */
+    public List<Agent> getNoPriorityAgents() {
+        return noPriorityAgents;
+    }
+
+    /**
+     * Sets the list of no-priority agents currently located on this node.
+     *
+     * @param noPriorityAgents list of no-priority agents to set
+     */
+    public void setNoPriorityAgents(List<Agent> noPriorityAgents) {
+        this.noPriorityAgents = noPriorityAgents;
+    }
+
 
     /**
      * Returns whether the node is blocked.
@@ -132,6 +172,7 @@ public class Node {
         this.blocked = blocked;
     }
     
+<<<<<<< HEAD
     public int getCongestionWaitCycles() {
         return congestionWaitCycles;
     }
@@ -146,6 +187,44 @@ public class Node {
      */
     public boolean isHeavilyCongested() {
         return agents.size() > maxCapacity;
+=======
+    public boolean containsAgent(Agent agent) {
+    	if (agent.getAgentType() == AgentType.PRIORITY) {
+    		return priorityAgents.contains(agent);
+        } else {
+            return noPriorityAgents.contains(agent);
+        }
+    }
+    
+    /**
+     * Adds an agent to this node if it is not already present.
+     *
+     * @param agent the agent to add
+     */
+    public void addAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            if (!priorityAgents.contains(agent)) {
+                priorityAgents.add(agent);
+            }
+        } else {
+            if (!noPriorityAgents.contains(agent)) {
+                noPriorityAgents.add(agent);
+            }
+        }
+    }
+
+    /**
+     * Removes an agent from this node.
+     *
+     * @param agent the agent to remove
+     */
+    public void removeAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            priorityAgents.remove(agent);
+        } else {
+            noPriorityAgents.remove(agent);
+        }
+>>>>>>> fix/priority-agent
     }
 
     /**
@@ -212,6 +291,7 @@ public class Node {
         return passedSpeedSum / passCount;
     }
     
+<<<<<<< HEAD
     /**
      * 
      */
@@ -238,6 +318,11 @@ public class Node {
 
     public void setType(NodeType type) {
         this.type = type;
+=======
+    /** Returns true if this node is currently in heavy congestion mode */
+    public boolean isHeavilyCongested() {
+        return getAllAgents().size() > maxCapacity;
+>>>>>>> fix/priority-agent
     }
     
     @Override
