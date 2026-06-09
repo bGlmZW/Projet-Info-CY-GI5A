@@ -18,6 +18,10 @@ import java.util.function.Consumer;
 import java.util.*;
 
 public class GraphView extends Pane {
+	
+	/** Constants used to define the rendering limits of the graph */
+	private static final double NODE_RADIUS = 25.0;
+	private static final double VIEW_MARGIN = NODE_RADIUS + 5.0;
 
     /** Currently selected node for visual highlighting */
     private Node selectedNode;
@@ -68,7 +72,7 @@ public class GraphView extends Pane {
 
         addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getTarget() == this) {
-                backgroundClickHandler.accept(new Point2D(e.getX(), e.getY()));
+            	backgroundClickHandler.accept(clampPoint(new Point2D(e.getX(), e.getY())));
             }
         });
     }
@@ -159,10 +163,13 @@ public class GraphView extends Pane {
                 if (draggedNode != node) return;
                 nodeWasDragged = true;
                 Point2D p = sceneToLocal(e.getSceneX(), e.getSceneY());
-                double newX = p.getX() + dragOffsetX;
-                double newY = p.getY() + dragOffsetY;
+                
+                double newX = clampX(p.getX() + dragOffsetX);
+                double newY = clampY(p.getY() + dragOffsetY);
+
                 node.setX(newX);
                 node.setY(newY);
+                
                 nodeDragHandler.accept(node);
                 circle.setCenterX(newX);
                 circle.setCenterY(newY);
@@ -673,6 +680,50 @@ public class GraphView extends Pane {
         line2.setMouseTransparent(true);
 
         getChildren().addAll(line1, line2);
+    }
+    
+    /**
+     * Set a limit on the horizontal axis to prevent the graph from extending beyond the ToolBox.
+     * 
+     * @param x x-axis
+     * @return corrected x-coordinate
+     */
+    private double clampX(double x) {
+        double maxX = getWidth() - VIEW_MARGIN;
+
+        if (maxX <= VIEW_MARGIN) {
+            return x;
+        }
+
+        // x must be greater than VIEW_MARGIN but less than maxX
+        return Math.max(VIEW_MARGIN, Math.min(x, maxX));
+    }
+
+    /**
+     * Set a limit on the vertical axis to prevent the graph from extending beyond the ToolBox.
+     * 
+     * @param y y-axis
+     * @return corrected y-coordinate
+     */
+    private double clampY(double y) {
+        double maxY = getHeight() - VIEW_MARGIN;
+
+        if (maxY <= VIEW_MARGIN) {
+            return y;
+        }
+
+        return Math.max(VIEW_MARGIN, Math.min(y, maxY));
+    }
+
+    /**
+     * Limits a complete point, meaning both x and y at the same time.
+     * 
+     * @param point
+     * @return a new corrected point
+     */
+    private Point2D clampPoint(Point2D point) {
+        return new Point2D(clampX(point.getX()), clampY(point.getY())
+        );
     }
 
 }

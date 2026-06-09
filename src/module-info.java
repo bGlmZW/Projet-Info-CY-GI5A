@@ -4,7 +4,7 @@
 /**
  * 
  */
-module fsdf {
+module h {
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
 
