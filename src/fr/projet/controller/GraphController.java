@@ -123,10 +123,10 @@ public class GraphController {
     graph.addNode(C);
     graph.addNode(D);
 
-    graph.addEdge(new Edge(A, B, 1,2, EdgeType.ROAD));
-    graph.addEdge(new Edge(A, D, 9,2, EdgeType.ROAD));
-    graph.addEdge(new Edge(B, C, 1,2, EdgeType.ROAD));
-    graph.addEdge(new Edge(C, D, 3,2, EdgeType.ROAD));
+    graph.addEdge(new Edge(A, B, 1,2, EdgeType.ROAD, true));
+    graph.addEdge(new Edge(A, D, 9,2, EdgeType.ROAD, false));
+    graph.addEdge(new Edge(B, C, 1,2, EdgeType.ROAD, false));
+    graph.addEdge(new Edge(C, D, 3,2, EdgeType.ROAD, true));
     
     return graph;
 	}
@@ -187,7 +187,7 @@ public class GraphController {
 	            int capacity = 1 + random.nextInt(5);
 	            EdgeType[] types = EdgeType.values();
 	            EdgeType type = types[random.nextInt(types.length)];
-	            Edge edge = new Edge(newNode, target, weight, type);
+	            Edge edge = new Edge(newNode, target, weight, capacity, type, random.nextBoolean());
 	            edge.setCapacity(capacity);
 	            graph.addEdge(edge);
 	        }
@@ -512,11 +512,7 @@ public class GraphController {
 
         // Create edge only if it does not already exist
         if (!graph.hasConnection(selectedNode, clickedNode)) {
-            Edge newEdge = new Edge(selectedNode, clickedNode, weight, edgeType);
-
-            newEdge.setOriented(oriented);
-
-            newEdge.setCapacity(capacity);
+            Edge newEdge = new Edge(selectedNode, clickedNode, weight, capacity, edgeType, oriented);
             graph.addEdge(newEdge);
         }
 

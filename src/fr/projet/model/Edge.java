@@ -40,18 +40,18 @@ public class Edge {
      * @param destination ending node
      * @param distance    cost or distance of the edge
      */
-    public Edge(Node source, Node destination, double distance, int capacity, EdgeType type) {
+    public Edge(Node source, Node destination, double distance, int capacity, EdgeType type, boolean oriented) {
         this.source = source;
         this.destination = destination;
         this.distance = distance;
-        this.oriented = false;
+        this.oriented = oriented;
         this.capacity = capacity;
         this.type = type;
         this.agents = new ArrayList<>();
     }
 
-    public Edge(Node source, Node destination, double distance, EdgeType type) {
-    	this(source, destination, distance, Integer.MAX_VALUE, type);
+    public Edge(Node source, Node destination, double distance, EdgeType type, boolean oriented) {
+    	this(source, destination, distance, Integer.MAX_VALUE, type, oriented);
     }
 
     /**
