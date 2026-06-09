@@ -31,13 +31,7 @@ public class SimulationBar extends HBox {
         style(nextTickBtn, ">> Next Tick", "#2471A3", "#1A5276");
         tickLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;"
                          + "-fx-text-fill: #ECF0F1; -fx-padding: 0 12;");
-        getChildren().addAll(
-                nextTickBtn,
-                startBtn,
-                pauseBtn,
-                resetBtn,
-                tickLabel
-        );
+        getChildren().addAll(startBtn, pauseBtn, resetBtn, nextTickBtn, tickLabel);
     }
 
     private void style(Button btn, String text, String base, String hover) {
