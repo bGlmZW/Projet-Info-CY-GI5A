@@ -4,7 +4,7 @@
 /**
  * 
  */
-module oo {
+module sim {
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
 

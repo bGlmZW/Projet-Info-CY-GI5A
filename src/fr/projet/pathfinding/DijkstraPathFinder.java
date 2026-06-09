@@ -59,9 +59,7 @@ public class DijkstraPathFinder implements IPathFinder {
             }
 
             for (Edge edge : graph.getEdges(current)) {
-
                 Node neighbor = edge.getDestination();
-
                 if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
                 double newDist = distances.get(current) + edge.getDistance();
 

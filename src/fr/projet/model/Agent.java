@@ -46,7 +46,6 @@ public class Agent {
     /** Remaining congestion wait cycles for this agent at its current node */
     private int nodeWaitCycles = 0;
 
-
     /**
      * Creates a new agent.
      *

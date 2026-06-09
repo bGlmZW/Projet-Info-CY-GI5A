@@ -20,6 +20,7 @@ public class SimulationBar extends HBox {
     public final Label  speedLabel  = new Label("Speed: 1.0s/tick");
     
     public final ComboBox<String> arrivalBehaviorBox = new ComboBox<>();
+    public final ComboBox<String> pathFinderBox = new ComboBox<>();
 
     public SimulationBar() {
         setSpacing(10);
@@ -36,6 +37,12 @@ public class SimulationBar extends HBox {
         arrivalBehaviorBox.setValue("Nouvelle destination");
 
         VBox arrivalBox = new VBox(2, new Label("À l'arrivée:"), arrivalBehaviorBox);
+        pathFinderBox.getItems().addAll("Dijkstra", "A*", "Congestion-Aware");
+        pathFinderBox.setValue("Dijkstra");
+
+        VBox pathFinderBoxContainer = new VBox(2, new Label("Algorithme:"), pathFinderBox);
+
+        getChildren().add(pathFinderBoxContainer);
 
         getChildren().addAll(
                 nextTickBtn,

@@ -46,11 +46,8 @@ public class AStarPathFinder implements IPathFinder {
             }
 
             for (Edge edge : graph.getEdges(current)) {
-
                 Node neighbor = edge.getDestination();
-                
-                if (neighbor.isBlocked()) continue; // Skip blocked nodes
-                
+                if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
                 double tentativeG = gScore.get(current) + edge.getDistance();
 
                 if (tentativeG < gScore.get(neighbor)) {
@@ -72,7 +69,9 @@ public class AStarPathFinder implements IPathFinder {
      * Heuristic function (simple version for your project).
      */
     private double heuristic(Node a, Node b) {
-        return Math.abs(a.getId() - b.getId());
+        double dx = a.getX() - b.getX();
+        double dy = a.getY() - b.getY();
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     /**

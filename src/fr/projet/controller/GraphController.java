@@ -1218,74 +1218,47 @@ public class GraphController {
             return;
         	}
         
-        	// Modification d'un nœud sélectionné
-        	if (selectedNode != null) {
-        		
-        		// Name input
-        		TextInputDialog nameDialog = new TextInputDialog(
-        		        selectedNode.getName() == null ? "" : selectedNode.getName()
-        		);
-        		nameDialog.setTitle("Edit Node");
-        		nameDialog.setHeaderText("Edit node name");
-        		nameDialog.setContentText("Name:");
+        // Modification d'un nœud sélectionné
+        if (selectedNode != null) {
 
-        		Optional<String> nameResult = nameDialog.showAndWait();
-        		if (nameResult.isPresent()) {
-        		    selectedNode.setName(nameResult.get());
-        		}
-        		
-        		// Category input
-        		ChoiceDialog<NodeType> categoryDialog = new ChoiceDialog<>(
-        		        selectedNode.getType(),
-        		        java.util.Arrays.asList(NodeType.values())
-        		);
-        		categoryDialog.setTitle("Edit Node");
-        		categoryDialog.setHeaderText("Edit node category");
-        		categoryDialog.setContentText("Category:");
+            // Capacité maximale
+            TextInputDialog capacityDialog = new TextInputDialog(
+                    String.valueOf(selectedNode.getMaxCapacity() == Integer.MAX_VALUE
+                            ? 0 : selectedNode.getMaxCapacity())
+            );
+            capacityDialog.setTitle("Edit Node");
+            capacityDialog.setHeaderText("Edit node max capacity");
+            capacityDialog.setContentText("Max capacity (0 = unlimited):");
 
-        		Optional<NodeType> categoryResult = categoryDialog.showAndWait();
-        		if (categoryResult.isPresent()) {
-        		    selectedNode.setType(categoryResult.get());
-        		}
+            Optional<String> capacityResult = capacityDialog.showAndWait();
+            if (capacityResult.isEmpty()) return;
 
-	            // Capacité maximale
-	            TextInputDialog capacityDialog = new TextInputDialog(
-	                    String.valueOf(selectedNode.getMaxCapacity() == Integer.MAX_VALUE
-	                            ? 0 : selectedNode.getMaxCapacity())
-	            );
-	            capacityDialog.setTitle("Edit Node");
-	            capacityDialog.setHeaderText("Edit node max capacity");
-	            capacityDialog.setContentText("Max capacity (0 = unlimited):");
-	
-	            Optional<String> capacityResult = capacityDialog.showAndWait();
-	            if (capacityResult.isEmpty()) return;
-	
-	            try {
-	                int cap = Integer.parseInt(capacityResult.get().trim());
-	                selectedNode.setMaxCapacity(cap <= 0 ? Integer.MAX_VALUE : cap);
-	            } catch (NumberFormatException e) {
-	                // keep current
-	            }
-	
-	            // Bloqué ou non
-	            ChoiceDialog<String> blockedDialog = new ChoiceDialog<>(
-	                    selectedNode.isBlocked() ? "BLOCKED" : "OPEN",
-	                    "OPEN", "BLOCKED"
-	            );
-	            blockedDialog.setTitle("Edit Node");
-	            blockedDialog.setHeaderText("Node status");
-	            blockedDialog.setContentText("Status:");
-	
-	            Optional<String> blockedResult = blockedDialog.showAndWait();
-	            if (blockedResult.isEmpty()) return;
-	            selectedNode.setBlocked("BLOCKED".equals(blockedResult.get()));
-	
-	            if (view != null) {
-	                view.renderGraph(graph);
-	                if (engine != null) view.renderAgents(engine.getAgents());
-	            }
-	            return;
-        	}
+            try {
+                int cap = Integer.parseInt(capacityResult.get().trim());
+                selectedNode.setMaxCapacity(cap <= 0 ? Integer.MAX_VALUE : cap);
+            } catch (NumberFormatException e) {
+                // keep current
+            }
+
+            // Bloqué ou non
+            ChoiceDialog<String> blockedDialog = new ChoiceDialog<>(
+                    selectedNode.isBlocked() ? "BLOCKED" : "OPEN",
+                    "OPEN", "BLOCKED"
+            );
+            blockedDialog.setTitle("Edit Node");
+            blockedDialog.setHeaderText("Node status");
+            blockedDialog.setContentText("Status:");
+
+            Optional<String> blockedResult = blockedDialog.showAndWait();
+            if (blockedResult.isEmpty()) return;
+            selectedNode.setBlocked("BLOCKED".equals(blockedResult.get()));
+
+            if (view != null) {
+                view.renderGraph(graph);
+                if (engine != null) view.renderAgents(engine.getAgents());
+            }
+            return;
+        }
 
         // Rien de sélectionné
         if (selectedNode == null) {
