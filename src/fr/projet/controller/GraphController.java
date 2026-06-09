@@ -2,7 +2,6 @@ package fr.projet.controller;
 
 import fr.projet.view.GraphView;
 
-
 import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceDialog;
@@ -15,6 +14,7 @@ import java.util.List;
 import fr.projet.model.Edge;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
+import fr.projet.model.NodeType;
 import fr.projet.pathfinding.IPathFinder;
 import fr.projet.pathfinding.PathFinderFactory;
 import fr.projet.pathfinding.PathFinderType;
@@ -110,9 +110,13 @@ public class GraphController {
     Graph graph = new Graph();
 
     Node A = new Node(1);
+    A.setType(NodeType.HOSPITAL);
+    A.setName("Paris Hospital");
     Node B = new Node(2);
     Node C = new Node(3);
     Node D = new Node(4);
+    D.setType(NodeType.ACCIDENT);
+    D.setName("Serious personal injury");
 
     graph.addNode(A);
     graph.addNode(B);
@@ -674,6 +678,30 @@ public class GraphController {
         Node node = new Node(newId);
         node.setX(clickPosition.getX());
         node.setY(clickPosition.getY());
+        
+        // Name input
+        TextInputDialog nameDialog = new TextInputDialog();
+        nameDialog.setTitle("Create Node");
+        nameDialog.setHeaderText("Node name");
+        nameDialog.setContentText("Name (optional):");
+
+        Optional<String> nameResult = nameDialog.showAndWait();
+        if (nameResult.isPresent()) {
+            node.setName(nameResult.get());
+        }
+
+        ChoiceDialog<NodeType> categoryDialog = new ChoiceDialog<>(
+        		NodeType.POINT_OF_INTEREST,
+                java.util.Arrays.asList(NodeType.values())
+        );
+        categoryDialog.setTitle("Create Node");
+        categoryDialog.setHeaderText("Node category");
+        categoryDialog.setContentText("Category:");
+
+        Optional<NodeType> categoryResult = categoryDialog.showAndWait();
+        if (categoryResult.isPresent()) {
+            node.setType(categoryResult.get());
+        }
 
         graph.addNode(node);
         disableNodeCreationMode();
@@ -1196,6 +1224,33 @@ public class GraphController {
         
         	// Modification d'un nœud sélectionné
         	if (selectedNode != null) {
+        		
+        		// Name input
+        		TextInputDialog nameDialog = new TextInputDialog(
+        		        selectedNode.getName() == null ? "" : selectedNode.getName()
+        		);
+        		nameDialog.setTitle("Edit Node");
+        		nameDialog.setHeaderText("Edit node name");
+        		nameDialog.setContentText("Name:");
+
+        		Optional<String> nameResult = nameDialog.showAndWait();
+        		if (nameResult.isPresent()) {
+        		    selectedNode.setName(nameResult.get());
+        		}
+        		
+        		// Category input
+        		ChoiceDialog<NodeType> categoryDialog = new ChoiceDialog<>(
+        		        selectedNode.getType(),
+        		        java.util.Arrays.asList(NodeType.values())
+        		);
+        		categoryDialog.setTitle("Edit Node");
+        		categoryDialog.setHeaderText("Edit node category");
+        		categoryDialog.setContentText("Category:");
+
+        		Optional<NodeType> categoryResult = categoryDialog.showAndWait();
+        		if (categoryResult.isPresent()) {
+        		    selectedNode.setType(categoryResult.get());
+        		}
 
 	            // Capacité maximale
 	            TextInputDialog capacityDialog = new TextInputDialog(

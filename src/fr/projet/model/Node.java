@@ -32,6 +32,9 @@ public class Node {
     
     /** Remaining congestion wait cycles (set to 2 when overcrowded) */
     private int congestionWaitCycles = 0;
+    
+    private String name;
+    private NodeType type;
 
     /**
      * Creates a new node with a given identifier.
@@ -44,6 +47,8 @@ public class Node {
         this.maxCapacity = Integer.MAX_VALUE;
         this.agents = new ArrayList<>();
         this.blocked = false;
+        this.name = null;
+        this.type = NodeType.POINT_OF_INTEREST;
     }
 
     /**
@@ -213,6 +218,26 @@ public class Node {
     public void resetPassStats() {
         passCount = 0;
         passedSpeedSum = 0.0;
+    }
+    
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        if (name == null || name.isBlank()) {
+            this.name = null;
+        } else {
+            this.name = name;
+        }
+    }
+
+    public NodeType getType() {
+        return type;
+    }
+
+    public void setType(NodeType type) {
+        this.type = type;
     }
     
     @Override

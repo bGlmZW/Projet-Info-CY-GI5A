@@ -192,7 +192,7 @@ public class GraphView extends Pane {
                 circle.setStroke(Color.DODGERBLUE);
                 circle.setStrokeWidth(3);
             } else {
-                circle.setFill(Color.LIGHTGRAY);
+            	circle.setFill(getNodeColor(node));
                 circle.setStroke(Color.BLACK);
                 circle.setStrokeWidth(1);
             }
@@ -410,7 +410,7 @@ public class GraphView extends Pane {
                 circle.setStroke(Color.DODGERBLUE);
                 circle.setStrokeWidth(3);
             } else {
-                circle.setFill(Color.LIGHTGRAY);
+            	circle.setFill(getNodeColor(node));
                 circle.setStroke(Color.BLACK);
                 circle.setStrokeWidth(1);
             }
@@ -610,6 +610,24 @@ public class GraphView extends Pane {
 
         arrow.setFill(Color.BLACK);
         return arrow;
+    }
+    
+    /**
+     * Assign a color to a node based on its type.
+     * 
+     * @param node
+     * @return
+     */
+    private Color getNodeColor(Node node) {
+        if (node.getType() == NodeType.HOSPITAL) {
+            return Color.DODGERBLUE;
+        }
+
+        if (node.getType() == NodeType.ACCIDENT) {
+            return Color.CRIMSON;
+        }
+
+        return Color.LIGHTGRAY;
     }
 
 }

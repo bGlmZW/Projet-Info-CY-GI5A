@@ -75,6 +75,12 @@ public class StatsPanel extends VBox {
         int agentCount = node.getAgents().size();
 
         addStat("ID", String.valueOf(node.getId()));
+
+        if (node.getName() != null) {
+            addStat("Name", node.getName());
+        }
+
+        addStat("Category", String.valueOf(node.getType()));
         addStat("Position",
                 "("
                 + String.format(Locale.US, "%.2f", node.getX())
