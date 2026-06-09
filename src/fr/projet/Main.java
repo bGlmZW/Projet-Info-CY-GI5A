@@ -26,10 +26,10 @@ public class Main {
         graph.addNode(C);
         graph.addNode(D);
 
-        graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD));
-        graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD));
-        graph.addEdge(new Edge(A, C, 5, EdgeType.ROAD));
-        graph.addEdge(new Edge(C, D, 1, EdgeType.ROAD));
+        graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD, true));
+        graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD, true));
+        graph.addEdge(new Edge(A, C, 5, EdgeType.ROAD, true));
+        graph.addEdge(new Edge(C, D, 1, EdgeType.ROAD, true));
 
         System.out.println("=================================");
         System.out.println("DIJKSTRA TEST");
@@ -86,9 +86,9 @@ public class Main {
         movementGraph.addNode(C2);
         movementGraph.addNode(D2);
 
-        movementGraph.addEdge(new Edge(A2, B2, 1, EdgeType.ROAD));
-        movementGraph.addEdge(new Edge(B2, C2, 1, EdgeType.ROAD));
-        movementGraph.addEdge(new Edge(C2, D2, 1, EdgeType.ROAD));
+        movementGraph.addEdge(new Edge(A2, B2, 1, EdgeType.ROAD, true));
+        movementGraph.addEdge(new Edge(B2, C2, 1, EdgeType.ROAD, true));
+        movementGraph.addEdge(new Edge(C2, D2, 1, EdgeType.ROAD, true));
 
         IPathFinder movementFinder = new DijkstraPathFinder(movementGraph);
 
