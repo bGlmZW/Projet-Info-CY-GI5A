@@ -218,6 +218,14 @@ public class Edge {
             agents.add(agent);
         }
     }
+    
+    /**
+     * 
+     */
+    public void resetPassStats() {
+        passCount = 0;
+        passedSpeedSum = 0.0;
+    }
 
     /**
      * Removes an agent from this edge.

@@ -188,6 +188,14 @@ public class Node {
         return passedSpeedSum / passCount;
     }
     
+    /**
+     * 
+     */
+    public void resetPassStats() {
+        passCount = 0;
+        passedSpeedSum = 0.0;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

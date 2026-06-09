@@ -271,11 +271,13 @@ public class SimulationEngine {
         currentTick = 0;
         
         for (Node node : graph.getAllNodes()) {
+        	node.resetPassStats();
             node.getAgents().clear();
         }
 
         for (Node node : graph.getAllNodes()) {
             for (Edge edge : graph.getEdges(node)) {
+            	edge.resetPassStats();
                 edge.getAgents().clear();
             }
         }
