@@ -22,6 +22,7 @@ public class SimulationBar extends HBox {
      */
     public SimulationBar() {
         setSpacing(10);
+        setStyle("-fx-background-color: #17202A;");
         getChildren().addAll(
                 nextTickBtn,
                 startBtn,
