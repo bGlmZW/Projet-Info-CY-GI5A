@@ -7,6 +7,7 @@ import fr.projet.controller.SimulationController;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
+import fr.projet.simulation.ArrivalBehavior;
 import fr.projet.view.GraphView;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -95,11 +96,7 @@ public class MainApp extends Application {
         ToolBox toolBox = new ToolBox();
         SimulationBar simulationBar = new SimulationBar();
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            engine.tick();
-            view.renderAgents(engine.getAgents());
-            simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
-
+        Runnable updateStats = () -> {
             if (graphController.getSelectedNode() != null) {
                 statsPanel.showNode(graphController.getSelectedNode(), graph);
             } else if (graphController.getSelectedEdge() != null) {
@@ -109,8 +106,39 @@ public class MainApp extends Application {
             } else {
                 statsPanel.showGraphOverview(graph, engine.getAgents().size());
             }
-        }));
-        timeline.setCycleCount(Animation.INDEFINITE);
+        };
+
+        // Timeline stored in an array so the slider can rebuild it
+        final Timeline[] timelineRef = new Timeline[1];
+
+        Runnable buildTimeline = () -> {
+            double interval = simulationBar.speedSlider.getValue();
+
+            Timeline tl = new Timeline(new KeyFrame(Duration.seconds(interval), e -> {
+                engine.tick();
+                view.renderAgents(engine.getAgents());
+                simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
+                updateStats.run();
+            }));
+
+            tl.setCycleCount(Animation.INDEFINITE);
+            timelineRef[0] = tl;
+        };
+
+        buildTimeline.run();
+
+        simulationBar.speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = Math.round(newVal.doubleValue() * 10.0) / 10.0;
+            simulationBar.speedLabel.setText(String.format("Vitesse: %.1fs/tick", val));
+
+            boolean wasPlaying = timelineRef[0].getStatus() == Animation.Status.RUNNING;
+            timelineRef[0].stop();
+            buildTimeline.run();
+
+            if (wasPlaying) {
+                timelineRef[0].play();
+            }
+        });
 
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
@@ -143,15 +171,23 @@ public class MainApp extends Application {
         	statsPanel.showGraphOverview(graph, engine.getAgents().size());
         });
 
-        simulationBar.startBtn.setOnAction(e -> timeline.play());
-        simulationBar.pauseBtn.setOnAction(e -> timeline.pause());
+        simulationBar.startBtn.setOnAction(e -> timelineRef[0].play());
+        simulationBar.pauseBtn.setOnAction(e -> timelineRef[0].pause());
         simulationBar.resetBtn.setOnAction(e -> {
-            timeline.pause();
+        	timelineRef[0].pause();
             engine.reset();
             view.renderGraph(graph);
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: 0");
-            statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            updateStats.run();
+        });
+        
+        simulationBar.arrivalBehaviorBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if ("Supprimer l'agent".equals(newVal)) {
+                engine.setArrivalBehavior(ArrivalBehavior.REMOVE);
+            } else {
+                engine.setArrivalBehavior(ArrivalBehavior.RANDOM_DESTINATION);
+            }
         });
 
         simulationBar.nextTickBtn.setOnAction(e -> {
