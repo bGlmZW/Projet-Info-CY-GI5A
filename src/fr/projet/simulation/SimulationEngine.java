@@ -10,14 +10,10 @@ import fr.projet.model.*;
 import fr.projet.pathfinding.*;
 import fr.projet.model.AgentType;
 import fr.projet.model.EdgeType;
-
-<<<<<<< HEAD
-=======
 import java.util.HashSet;
 
 
 
->>>>>>> fix/priority-agent
 /**
  * Manages the execution of the simulation.
  * The simulation engine maintains the graph, the agents,
@@ -116,6 +112,7 @@ public class SimulationEngine {
             agent.getCurrentPosition().addAgent(agent);
         }
     }
+
     /**
      * Removes an agent from the simulation entirely.
      * This method removes the agent from the simulation's managed list and 
@@ -127,15 +124,12 @@ public class SimulationEngine {
         agents.remove(agent);
         if (agent == null) return;
 
-        // Remove the agent from the simulation engine's global list
         this.agents.remove(agent);
 
-        // Remove the agent from its current node (WAITING or ARRIVED state)
         if (agent.getCurrentPosition() != null) {
             agent.getCurrentPosition().removeAgent(agent);
         }
 
-        // Remove the agent from the edge it is currently traversing (MOVING state)
         if (agent.getState() == State.MOVING && agent.getNextNode() != null) {
             List<Edge> edges = graph.getEdges(agent.getCurrentPosition());
             if (edges != null) {
@@ -157,7 +151,6 @@ public class SimulationEngine {
      * @param agent the agent to move
      */
     public void moveAgent(Agent agent) {
-    	
 
         if (agent.getState() == State.ARRIVED) {
             return;
@@ -176,25 +169,20 @@ public class SimulationEngine {
                 return;
             }
             
-            // Vérifier la forte congestion du nœud actuel
             Node currentNode = agent.getCurrentPosition();
             if (currentNode.isHeavilyCongested()) {
                 if (agent.getNodeWaitCycles() < 2) {
-                    // L'agent doit encore attendre
                     agent.setNodeWaitCycles(agent.getNodeWaitCycles() + 1);
                     agent.setState(State.WAITING);
                     remaining = 0;
                     break;
                 } else {
-                    // L'agent a attendu 2 cycles, il peut partir
                     agent.setNodeWaitCycles(0);
                 }
             } else {
-                // Nœud normal : reset du compteur au cas où
                 agent.setNodeWaitCycles(0);
             }
 
-            // Use the agent's own pathfinder, fallback to engine's global one
             IPathFinder agentPathFinder = agent.getPathFinder() != null
                     ? agent.getPathFinder()
                     : pathFinder;
@@ -214,22 +202,21 @@ public class SimulationEngine {
 
             Node nextNode = path.get(1);
 
-	         // Si le prochain nœud est bloqué, l'agent attend
-	         if (nextNode.isBlocked()) {
-	             agent.setState(State.WAITING);
-	             remaining = 0;
-	             break;
-	         }
-	
-	         agent.setNextNode(nextNode);
-	
-	         Edge edge = null;
-	         for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
-	                if (e.getDestination().equals(nextNode)) {
-	                    edge = e;
-	                    break;
-	                }
-	         }
+            if (nextNode.isBlocked()) {
+                agent.setState(State.WAITING);
+                remaining = 0;
+                break;
+            }
+
+            agent.setNextNode(nextNode);
+
+            Edge edge = null;
+            for (Edge e : graph.getEdges(agent.getCurrentPosition())) {
+                if (e.getDestination().equals(nextNode)) {
+                    edge = e;
+                    break;
+                }
+            }
 
             if (edge == null) return;
 
@@ -239,13 +226,10 @@ public class SimulationEngine {
                     remaining = 0;
                     break;
                 }
-<<<<<<< HEAD
-
-=======
->>>>>>> fix/priority-agent
                 agent.getCurrentPosition().removeAgent(agent);
                 edge.addAgent(agent);
             }
+
             double multiplier = getEdgeMultiplier(edge.getType(), agent.getAgentType());
             double effectiveDistance = edge.getDistance() / multiplier;
             agent.setCurrentEffectiveDistance(effectiveDistance);
@@ -274,7 +258,6 @@ public class SimulationEngine {
                     : State.MOVING
             );
         }
-
     }
     
     /**
@@ -295,7 +278,6 @@ public class SimulationEngine {
             default:
                 return 1.0;
         }
-
     }
     
     /**
@@ -315,47 +297,41 @@ public class SimulationEngine {
         if (!agent.getCurrentPosition().equals(agent.getDestination())
                 && agent.getState() != State.WAITING) {
             agent.setState(State.MOVING);
-        }    }
+        }
+    }
 
     /**
      * Advances the simulation by one tick.
      */
     public void tick() {
-    	currentTick++;
-    	System.out.println("Tick " + currentTick);
-    	
-    	Set<Agent> alreadyUpdated = new HashSet<>();
+        currentTick++;
+        System.out.println("Tick " + currentTick);
 
-<<<<<<< HEAD
-        for (Agent agent : agents) {
-            updateAgent(agent);
-            System.out.println(agent);
+        Set<Agent> alreadyUpdated = new HashSet<>();
+
+        for (Node node : graph.getAllNodes()) {
+            for (Agent agent : new ArrayList<>(node.getPriorityAgents())) {
+                if (alreadyUpdated.add(agent)) {
+                    updateAgent(agent);
+                    System.out.println(agent);
+                }
+            }
+            for (Agent agent : new ArrayList<>(node.getNoPriorityAgents())) {
+                if (alreadyUpdated.add(agent)) {
+                    updateAgent(agent);
+                    System.out.println("sur noeud > " + agent);
+                }
+            }
         }
-=======
-    	for (Node node : graph.getAllNodes()) {
-    	    for (Agent agent : new ArrayList<>(node.getPriorityAgents())) {
-    	        if (alreadyUpdated.add(agent)) {
-    	            updateAgent(agent);
-    	            System.out.println(agent);
-    	        }
-    	    }
-    	    for (Agent agent : new ArrayList<>(node.getNoPriorityAgents())) {
-    	        if (alreadyUpdated.add(agent)) {
-    	            updateAgent(agent);
-    	            System.out.println("sur noeud > " + agent);
-    	        }
-    	    }
-    	}
 
-    	for (Edge edge : graph.getAllEdges()) {
-    	    for (Agent agent : new ArrayList<>(edge.getAgents())) {
-    	        if (alreadyUpdated.add(agent)) {
-    	            updateAgent(agent);
-    	            System.out.println("sur edge > " + agent);
-    	        }
-    	    }
-    	}
->>>>>>> fix/priority-agent
+        for (Edge edge : graph.getAllEdges()) {
+            for (Agent agent : new ArrayList<>(edge.getAgents())) {
+                if (alreadyUpdated.add(agent)) {
+                    updateAgent(agent);
+                    System.out.println("sur edge > " + agent);
+                }
+            }
+        }
         
         // Traiter les agents arrivés APRÈS l'itération
         if (arrivalBehavior == ArrivalBehavior.REMOVE) {
@@ -363,7 +339,6 @@ public class SimulationEngine {
             while (it.hasNext()) {
                 Agent agent = it.next();
                 if (agent.getState() == State.ARRIVED) {
-                    // Nettoyer la présence de l'agent dans le graphe
                     if (agent.getCurrentPosition() != null) {
                         agent.getCurrentPosition().removeAgent(agent);
                     }
@@ -386,26 +361,26 @@ public class SimulationEngine {
         currentTick = 0;
         
         for (Node node : graph.getAllNodes()) {
-        	node.resetPassStats();
-            node.getAgents().clear();
+            node.resetPassStats();
+            node.getAllAgents().clear();
         }
 
         for (Node node : graph.getAllNodes()) {
             for (Edge edge : graph.getEdges(node)) {
-            	edge.resetPassStats();
+                edge.resetPassStats();
                 edge.getAgents().clear();
             }
         }
 
         for (Agent agent : agents) {
-        	agent.setCurrentPosition(agent.getInitialPosition());
-        	agent.setProgressOnEdge(0.0);
-        	agent.setNextNode(null);
-        	agent.setState(State.WAITING);
+            agent.setCurrentPosition(agent.getInitialPosition());
+            agent.setProgressOnEdge(0.0);
+            agent.setNextNode(null);
+            agent.setState(State.WAITING);
 
-        	if (agent.getCurrentPosition() != null) {
-        	    agent.getCurrentPosition().addAgent(agent);
-        	}
+            if (agent.getCurrentPosition() != null) {
+                agent.getCurrentPosition().addAgent(agent);
+            }
         }
     }
     
@@ -415,12 +390,10 @@ public class SimulationEngine {
      */
     private void handleArrival(Agent agent) {
         if (arrivalBehavior == ArrivalBehavior.REMOVE) {
-            // sera supprimé après l'itération dans tick()
             agent.setState(State.ARRIVED);
             return;
         }
 
-        // RANDOM_DESTINATION : choisir un nouveau nœud différent de la position actuelle
         Set<Node> allNodes = graph.getAllNodes();
         List<Node> candidates = new ArrayList<>();
         for (Node n : allNodes) {

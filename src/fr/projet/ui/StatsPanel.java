@@ -72,9 +72,6 @@ public class StatsPanel extends VBox {
             }
         }
 
-<<<<<<< HEAD
-        int agentCount = node.getAgents().size();
-=======
         int agentCount = 0;
         double totalSpeed = 0.0;
 
@@ -86,7 +83,7 @@ public class StatsPanel extends VBox {
         }
 
         double avgSpeed = agentCount > 0 ? totalSpeed / agentCount : 0.0;
->>>>>>> fix/priority-agent
+
 
         addStat("ID", String.valueOf(node.getId()));
 

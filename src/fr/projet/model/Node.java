@@ -1,8 +1,6 @@
 package fr.projet.model;
 
 import java.util.ArrayList;
-
-
 import java.util.List;
 
 /**
@@ -19,7 +17,7 @@ public class Node {
 
     /** List of priority agents currently located on this node */
     private List<Agent> priorityAgents;
-    
+
     /** List of no-priority agents currently located on this node */
     private List<Agent> noPriorityAgents;
 
@@ -31,13 +29,13 @@ public class Node {
 
     /** Y coordinate used for rendering the node */
     private Double y;
-    
+
     private int passCount = 0;
     private double passedSpeedSum = 0.0;
-    
+
     /** Remaining congestion wait cycles (set to 2 when overcrowded) */
     private int congestionWaitCycles = 0;
-    
+
     private String name;
     private NodeType type;
 
@@ -83,39 +81,62 @@ public class Node {
     public void setMaxCapacity(int maxCapacity) {
         this.maxCapacity = maxCapacity;
     }
-    
-    /**
-     * 
-     * @param agent
-     */
-    public void addAgent(Agent agent) {
-        if (agent != null && !agents.contains(agent)) {
-            agents.add(agent);
-        }
-    }
 
     /**
-     * 
-     * @param agent
-     */
-    public void removeAgent(Agent agent) {
-        agents.remove(agent);
-    }
-
-    /**
-     * Returns the list of agents currently on this node.
+     * Returns the list of all agents currently on this node.
      *
      * @return list of agents
      */
     public List<Agent> getAllAgents() {
-    	List<Agent> allAgents = new ArrayList<>();
-    	allAgents.addAll(priorityAgents);
-    	allAgents.addAll(noPriorityAgents);
-    	return allAgents;
-    	
+        List<Agent> allAgents = new ArrayList<>();
+        allAgents.addAll(priorityAgents);
+        allAgents.addAll(noPriorityAgents);
+        return allAgents;
     }
-       
-    
+
+    /**
+     * Returns whether the given agent is on this node.
+     *
+     * @param agent the agent to check
+     * @return true if the agent is on this node
+     */
+    public boolean containsAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            return priorityAgents.contains(agent);
+        } else {
+            return noPriorityAgents.contains(agent);
+        }
+    }
+
+    /**
+     * Adds an agent to this node if it is not already present.
+     *
+     * @param agent the agent to add
+     */
+    public void addAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            if (!priorityAgents.contains(agent)) {
+                priorityAgents.add(agent);
+            }
+        } else {
+            if (!noPriorityAgents.contains(agent)) {
+                noPriorityAgents.add(agent);
+            }
+        }
+    }
+
+    /**
+     * Removes an agent from this node.
+     *
+     * @param agent the agent to remove
+     */
+    public void removeAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            priorityAgents.remove(agent);
+        } else {
+            noPriorityAgents.remove(agent);
+        }
+    }
 
     /**
      * Returns the list of priority agents currently located on this node.
@@ -153,7 +174,6 @@ public class Node {
         this.noPriorityAgents = noPriorityAgents;
     }
 
-
     /**
      * Returns whether the node is blocked.
      *
@@ -171,8 +191,7 @@ public class Node {
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
     }
-    
-<<<<<<< HEAD
+
     public int getCongestionWaitCycles() {
         return congestionWaitCycles;
     }
@@ -180,51 +199,14 @@ public class Node {
     public void setCongestionWaitCycles(int cycles) {
         this.congestionWaitCycles = cycles;
     }
-    
-    /**
-     * Returns true if this node is currently in heavy congestion mode
-     * @return
-     */
-    public boolean isHeavilyCongested() {
-        return agents.size() > maxCapacity;
-=======
-    public boolean containsAgent(Agent agent) {
-    	if (agent.getAgentType() == AgentType.PRIORITY) {
-    		return priorityAgents.contains(agent);
-        } else {
-            return noPriorityAgents.contains(agent);
-        }
-    }
-    
-    /**
-     * Adds an agent to this node if it is not already present.
-     *
-     * @param agent the agent to add
-     */
-    public void addAgent(Agent agent) {
-        if (agent.getAgentType() == AgentType.PRIORITY) {
-            if (!priorityAgents.contains(agent)) {
-                priorityAgents.add(agent);
-            }
-        } else {
-            if (!noPriorityAgents.contains(agent)) {
-                noPriorityAgents.add(agent);
-            }
-        }
-    }
 
     /**
-     * Removes an agent from this node.
+     * Returns true if this node is currently in heavy congestion mode.
      *
-     * @param agent the agent to remove
+     * @return true if the number of agents exceeds maxCapacity
      */
-    public void removeAgent(Agent agent) {
-        if (agent.getAgentType() == AgentType.PRIORITY) {
-            priorityAgents.remove(agent);
-        } else {
-            noPriorityAgents.remove(agent);
-        }
->>>>>>> fix/priority-agent
+    public boolean isHeavilyCongested() {
+        return getAllAgents().size() > maxCapacity;
     }
 
     /**
@@ -262,10 +244,11 @@ public class Node {
     public void setY(Double y) {
         this.y = y;
     }
-    
+
     /**
-     * 
-     * @param speed
+     * Registers a pass through this node with the given speed.
+     *
+     * @param speed speed of the agent passing through
      */
     public void registerPass(double speed) {
         passCount++;
@@ -273,16 +256,18 @@ public class Node {
     }
 
     /**
-     * 
-     * @return
+     * Returns the number of passes through this node.
+     *
+     * @return pass count
      */
     public int getPassCount() {
         return passCount;
     }
 
     /**
-     * 
-     * @return
+     * Returns the average speed of agents that passed through this node.
+     *
+     * @return average speed, or 0.0 if no passes recorded
      */
     public double getAveragePassedSpeed() {
         if (passCount == 0) {
@@ -290,16 +275,15 @@ public class Node {
         }
         return passedSpeedSum / passCount;
     }
-    
-<<<<<<< HEAD
+
     /**
-     * 
+     * Resets pass statistics for this node.
      */
     public void resetPassStats() {
         passCount = 0;
         passedSpeedSum = 0.0;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -318,13 +302,8 @@ public class Node {
 
     public void setType(NodeType type) {
         this.type = type;
-=======
-    /** Returns true if this node is currently in heavy congestion mode */
-    public boolean isHeavilyCongested() {
-        return getAllAgents().size() > maxCapacity;
->>>>>>> fix/priority-agent
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
