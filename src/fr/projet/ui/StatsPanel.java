@@ -131,7 +131,7 @@ public class StatsPanel extends VBox {
         addStat("To", String.valueOf(edge.getDestination().getId()));
         addStat("Type", String.valueOf(edge.getType()));
         addStat("Distance", String.format(Locale.US, "%.2f", edge.getDistance()));
-        addStat("Capacity", String.valueOf(edge.getCapacity()));
+        addStat("Capacity", edge.getCapacity() == Integer.MAX_VALUE ? "unlimited" : String.valueOf(edge.getCapacity()));
         addStat("Oriented", String.valueOf(edge.isOriented()));
         addStat("Agents on edge", String.valueOf(agentCount));
         addStat("Agents passed", String.valueOf(edge.getPassCount()));
