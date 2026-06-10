@@ -10,21 +10,13 @@ import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-import fr.projet.model.Edge;
-import fr.projet.model.Graph;
-import fr.projet.model.Node;
-import fr.projet.model.NodeType;
 import fr.projet.pathfinding.IPathFinder;
 import fr.projet.pathfinding.PathFinderFactory;
 import fr.projet.pathfinding.PathFinderType;
-import fr.projet.model.Agent;
-import fr.projet.model.AgentFactory;
-import fr.projet.model.AgentType;
 import fr.projet.simulation.SimulationEngine;
-import fr.projet.model.EdgeType;
-import fr.projet.model.State;
-import java.util.Random;
+import fr.projet.model.*;
 
 /**
  * Controller responsible for building and configuring the graph.
@@ -116,6 +108,12 @@ public class GraphController {
     Node F = new Node(5);
     D.setType(NodeType.ACCIDENT);
     D.setName("Serious personal injury");
+
+    Patient patient = new Patient("Jean Serane", 42, 115, 38.2, true, "Injured but conscious");
+
+    Accident accident = new Accident(AccidentType.TRAFFIC_ACCIDENT, "Car crash near the intersection.", patient);
+
+    D.setAccident(accident);
 
     graph.addNode(A);
     graph.addNode(B);

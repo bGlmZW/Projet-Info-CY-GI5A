@@ -50,28 +50,41 @@ public class MainApp extends Application {
         
         StatsPanel statsPanel = new StatsPanel();
         LegendPanel legendPanel = new LegendPanel();
+        PatientPanel patientPanel = new PatientPanel();
         
         graphController.attachView(view);
         graphController.setEngine(engine);
 
+        // COMMENTER CHAQUE BLOC
         view.setBackgroundClickHandler(point -> {
             graphController.handleBackgroundClick(point);
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
         });
         
+        //
         view.setNodeClickHandler(node -> {
             graphController.handleNodeClicked(node);
             statsPanel.showNode(node, graph);
+
+            if (node.getAccident() != null) {
+                patientPanel.showAccident(node.getAccident());
+            } else {
+                patientPanel.clear();
+            }
         });
         
+        //
         view.setNodeDragHandler(node -> {
             if (graphController.getSelectedNode() != null && graphController.getSelectedNode().equals(node)) {
                 statsPanel.showNode(node, graph);
             }
         });
         
+        //
         view.setEdgeClickHandler(edge -> {
             graphController.handleEdgeClicked(edge);
+            patientPanel.clear();
+
             if (graphController.getSelectedEdge() != null) {
                 statsPanel.showEdge(edge);
             } else {
@@ -79,8 +92,11 @@ public class MainApp extends Application {
             }
         });
         
+        //
         view.setAgentClickHandler(agent -> {
             graphController.handleAgentClicked(agent);
+            patientPanel.clear();
+
             if (graphController.getSelectedAgent() != null) {
                 statsPanel.showAgent(agent);
             } else {
@@ -170,6 +186,7 @@ public class MainApp extends Application {
         toolBox.deleteBtn.setOnAction(e -> {
             graphController.deleteSelected();
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            patientPanel.clear();
 
         });
         
@@ -177,6 +194,7 @@ public class MainApp extends Application {
             graphController.clearGraph();
             simulationBar.tickLabel.setText("Tick: 0");
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            patientPanel.clear();
         });
 
         simulationBar.startBtn.setOnAction(e -> timelineRef[0].play());
@@ -188,6 +206,7 @@ public class MainApp extends Application {
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: 0");
             updateStats.run();
+            patientPanel.clear();
         });
         
         simulationBar.arrivalBehaviorBox.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -240,8 +259,8 @@ public class MainApp extends Application {
         // Split StatsPanel and LegendPanel in half
         VBox rightBar = new VBox(12, statsPanel, legendPanel);
         root.setRight(rightBar);
-  
-
+        
+        root.setLeft(patientPanel);
         root.setBottom(bottomBar);
 
         Scene scene = new Scene(root, 1100, 700);

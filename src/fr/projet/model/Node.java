@@ -41,6 +41,9 @@ public class Node implements Serializable {
 
     private String name;
     private NodeType type;
+    
+    /** */
+    private Accident accident;
 
     /**
      * Creates a new node with a given identifier.
@@ -305,6 +308,14 @@ public class Node implements Serializable {
 
     public void setType(NodeType type) {
         this.type = type;
+    }
+    
+    public Accident getAccident() {
+        return accident;
+    }
+
+    public void setAccident(Accident accident) {
+        this.accident = accident;
     }
 
     @Override
