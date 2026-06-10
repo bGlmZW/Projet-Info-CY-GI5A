@@ -585,7 +585,7 @@ public class GraphController {
             return;
         }
         
-     // Clicking on agent cancels node creation mode.
+        // Clicking on agent cancels node creation mode.
         if (nodeCreationMode) {
             selectedNode = null;
             disableNodeCreationMode();

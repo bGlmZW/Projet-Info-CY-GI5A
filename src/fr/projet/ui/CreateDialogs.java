@@ -75,15 +75,24 @@ public class CreateDialogs {
         grid.addRow(0, fieldLabel("Name:"), nameField);
         grid.addRow(1, fieldLabel("Node type:"), typeBox);
 
+        Label accidentTypeLabel = fieldLabel("Accident type:");
+        Label descriptionLabel = fieldLabel("Description:");
+        Label patientNameLabel = fieldLabel("Patient name:");
+        Label ageLabel = fieldLabel("Age:");
+        Label bpmLabel = fieldLabel("BPM:");
+        Label temperatureLabel = fieldLabel("Temperature:");
+        Label stateLabel = fieldLabel("State:");
+        Label conditionLabel = fieldLabel("Condition:");
+
         grid.add(accidentTitle, 0, 2, 2, 1);
-        grid.addRow(3, fieldLabel("Accident type:"), accidentTypeBox);
-        grid.addRow(4, fieldLabel("Description:"), descriptionArea);
-        grid.addRow(5, fieldLabel("Patient name:"), patientNameField);
-        grid.addRow(6, fieldLabel("Age:"), ageField);
-        grid.addRow(7, fieldLabel("BPM:"), bpmField);
-        grid.addRow(8, fieldLabel("Temperature:"), temperatureField);
-        grid.addRow(9, fieldLabel("State:"), consciousBox);
-        grid.addRow(10, fieldLabel("Condition:"), conditionField);
+        grid.addRow(3, accidentTypeLabel, accidentTypeBox);
+        grid.addRow(4, descriptionLabel, descriptionArea);
+        grid.addRow(5, patientNameLabel, patientNameField);
+        grid.addRow(6, ageLabel, ageField);
+        grid.addRow(7, bpmLabel, bpmField);
+        grid.addRow(8, temperatureLabel, temperatureField);
+        grid.addRow(9, stateLabel, consciousBox);
+        grid.addRow(10, conditionLabel, conditionField);
 
         ScrollPane scrollPane = new ScrollPane(grid);
         scrollPane.setFitToWidth(true);
@@ -97,32 +106,31 @@ public class CreateDialogs {
         Runnable updateAccidentFieldsVisibility = () -> {
             boolean isAccident = typeBox.getValue() == NodeType.ACCIDENT;
 
-            accidentTitle.setVisible(isAccident);
-            accidentTitle.setManaged(isAccident);
+            setVisible(accidentTitle, isAccident);
 
-            accidentTypeBox.setVisible(isAccident);
-            accidentTypeBox.setManaged(isAccident);
+            setVisible(accidentTypeLabel, isAccident);
+            setVisible(accidentTypeBox, isAccident);
 
-            descriptionArea.setVisible(isAccident);
-            descriptionArea.setManaged(isAccident);
+            setVisible(descriptionLabel, isAccident);
+            setVisible(descriptionArea, isAccident);
 
-            patientNameField.setVisible(isAccident);
-            patientNameField.setManaged(isAccident);
+            setVisible(patientNameLabel, isAccident);
+            setVisible(patientNameField, isAccident);
 
-            ageField.setVisible(isAccident);
-            ageField.setManaged(isAccident);
+            setVisible(ageLabel, isAccident);
+            setVisible(ageField, isAccident);
 
-            bpmField.setVisible(isAccident);
-            bpmField.setManaged(isAccident);
+            setVisible(bpmLabel, isAccident);
+            setVisible(bpmField, isAccident);
 
-            temperatureField.setVisible(isAccident);
-            temperatureField.setManaged(isAccident);
+            setVisible(temperatureLabel, isAccident);
+            setVisible(temperatureField, isAccident);
 
-            consciousBox.setVisible(isAccident);
-            consciousBox.setManaged(isAccident);
+            setVisible(stateLabel, isAccident);
+            setVisible(consciousBox, isAccident);
 
-            conditionField.setVisible(isAccident);
-            conditionField.setManaged(isAccident);
+            setVisible(conditionLabel, isAccident);
+            setVisible(conditionField, isAccident);
         };
 
         typeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
@@ -219,5 +227,15 @@ public class CreateDialogs {
         } catch (Exception e) {
             return fallback;
         }
+    }
+    
+    /**
+     * 
+     * @param node
+     * @param visible
+     */
+    private static void setVisible(javafx.scene.Node node, boolean visible) {
+        node.setVisible(visible);
+        node.setManaged(visible);
     }
 }
