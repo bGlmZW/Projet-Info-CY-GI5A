@@ -117,13 +117,27 @@ public class MainApp extends Application {
 
         Runnable updateStats = () -> {
             if (graphController.getSelectedNode() != null) {
-                statsPanel.showNode(graphController.getSelectedNode(), graph);
+                Node selectedNode = graphController.getSelectedNode();
+
+                statsPanel.showNode(selectedNode, graph);
+
+                if (selectedNode.getAccident() != null) {
+                    patientPanel.showAccident(selectedNode.getAccident());
+                } else {
+                    patientPanel.clear();
+                }
+
             } else if (graphController.getSelectedEdge() != null) {
                 statsPanel.showEdge(graphController.getSelectedEdge());
+                patientPanel.clear();
+
             } else if (graphController.getSelectedAgent() != null) {
                 statsPanel.showAgent(graphController.getSelectedAgent());
+                patientPanel.clear();
+
             } else {
                 statsPanel.showGraphOverview(graph, engine.getAgents().size());
+                patientPanel.clear();
             }
         };
 
@@ -232,6 +246,7 @@ public class MainApp extends Application {
             engine.tick();
             view.renderAgents(engine.getAgents());
             simulationBar.tickLabel.setText("Tick: " + engine.getCurrentTick());
+            updateStats.run();
 
             if (graphController.getSelectedNode() != null) {
                 statsPanel.showNode(graphController.getSelectedNode(), graph);

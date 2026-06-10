@@ -56,7 +56,7 @@ public class Patient {
     }
 
     public void setAge(int age) {
-        this.age = (age >= 0) ? age : 0;
+        this.age = (age >= 0) ? age : -1;
     }
 
     public int getBpm() {
@@ -64,7 +64,7 @@ public class Patient {
     }
 
     public void setBpm(int bpm) {
-    	this.bpm = (bpm >= 0) ? bpm : 0;
+    	this.bpm = Math.max(30, Math.min(bpm, 220));
     }
 
 
@@ -73,7 +73,7 @@ public class Patient {
     }
 
     public void setBodyTemperature(double bodyTemperature) {
-        this.bodyTemperature = bodyTemperature;
+    	 this.bodyTemperature = Math.max(30.0, Math.min(bodyTemperature, 43.0));
     }
 
     public boolean isConscious() {

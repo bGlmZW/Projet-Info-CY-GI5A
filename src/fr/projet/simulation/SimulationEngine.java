@@ -305,7 +305,8 @@ public class SimulationEngine {
      */
     public void tick() {
         currentTick++;
-        System.out.println("Tick " + currentTick);
+        updatePatients();
+        System.out.println("Tick " + currentTick); // DEBUG
 
         Set<Agent> alreadyUpdated = new HashSet<>();
 
@@ -417,5 +418,29 @@ public class SimulationEngine {
     public void clearAgents() {
         agents.clear();
         currentTick = 0;
+    }
+    
+    /**
+     * Simulates real-time medical information changing at each tick.
+     */
+    private void updatePatients() {
+        for (Node node : graph.getAllNodes()) {
+
+            if (node.getAccident() == null) {
+                continue;
+            }
+
+            Patient patient = node.getAccident().getPatient();
+
+            if (patient == null) {
+                continue;
+            }
+
+            int bpmVariation = random.nextInt(7) - 3; // between -3 and +3
+            double temperatureVariation = (random.nextDouble() - 0.5) * 0.2; // between -0.1 and +0.1
+
+            patient.setBpm(patient.getBpm() + bpmVariation);
+            patient.setBodyTemperature(patient.getBodyTemperature() + temperatureVariation);
+        }
     }
 }
