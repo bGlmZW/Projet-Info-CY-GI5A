@@ -17,6 +17,7 @@ import fr.projet.pathfinding.PathFinderFactory;
 import fr.projet.pathfinding.PathFinderType;
 import fr.projet.simulation.SimulationEngine;
 import fr.projet.model.*;
+import fr.projet.ui.CreateDialogs;
 
 /**
  * Controller responsible for building and configuring the graph.
@@ -630,77 +631,44 @@ public class GraphController {
     /**
      * Handles a click on the empty drawing area and creates a new node.
      *
-     * @param clickPosition click position in the view
+     * @param
      */
-    public void handleBackgroundClick(Point2D clickPosition) {
-
-        if (clickPosition == null) {
-            return;
-        }
-
-        // Disable delete mode if clicking in an empty area
-        if (deleteMode) {
-            disableDeleteMode();
-
-            if (view != null) {
-                view.clearSelection();
-            }
-            return;
-        }
-
-        // Clicking on empty space cancels edge creation mode.
-        if (edgeCreationMode) {
-            selectedNode = null;
-            disableEdgeCreationMode();
-
-            if (view != null) {
-                view.clearSelection();
-            }
-            return;
-        }
-
+    public void handleBackgroundClick(Point2D point) {
         if (!nodeCreationMode) {
+            selectedNode = null;
+            selectedEdge = null;
+            selectedAgent = null;
+
+            if (view != null) {
+                view.clearSelection();
+            }
+
             return;
         }
 
-        // Reset selection so UI does not stay "stuck" on a node
-        selectedNode = null;
+        int newId = graph.getAllNodes().stream()
+                .mapToInt(Node::getId)
+                .max()
+                .orElse(0) + 1;
 
-        if (view != null) {
-            view.clearSelection();
-        }
-
-        int newId = generateNodeId();
         Node node = new Node(newId);
-        node.setX(clickPosition.getX());
-        node.setY(clickPosition.getY());
-        
-        // Name input
-        TextInputDialog nameDialog = new TextInputDialog();
-        nameDialog.setTitle("Create Node");
-        nameDialog.setHeaderText("Node name");
-        nameDialog.setContentText("Name (optional):");
+        node.setX(point.getX());
+        node.setY(point.getY());
 
-        Optional<String> nameResult = nameDialog.showAndWait();
-        if (nameResult.isPresent()) {
-            node.setName(nameResult.get());
+        Optional<CreateDialogs.NodeData> result = CreateDialogs.showNodeDialog();
+
+        if (result.isEmpty()) {
+            return;
         }
 
-        ChoiceDialog<NodeType> categoryDialog = new ChoiceDialog<>(
-        		NodeType.POINT_OF_INTEREST,
-                java.util.Arrays.asList(NodeType.values())
-        );
-        categoryDialog.setTitle("Create Node");
-        categoryDialog.setHeaderText("Node category");
-        categoryDialog.setContentText("Category:");
+        CreateDialogs.NodeData data = result.get();
 
-        Optional<NodeType> categoryResult = categoryDialog.showAndWait();
-        if (categoryResult.isPresent()) {
-            node.setType(categoryResult.get());
-        }
+        node.setName(data.name());
+        node.setType(data.type());
+        node.setAccident(data.accident());
 
         graph.addNode(node);
-        disableNodeCreationMode();
+        disableAllModes();
 
         if (view != null) {
             view.renderGraph(graph);
