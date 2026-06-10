@@ -1,12 +1,15 @@
 package fr.projet.model;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Represents a graph using an adjacency list structure.
  * The graph stores nodes and the edges connecting them.
  */
-public class Graph {
+public class Graph implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /** Adjacency list representation of the graph */
     private Map<Node, List<Edge>> adjacencyList;
@@ -195,37 +198,6 @@ public class Graph {
         return hasEdge(a, b) || hasEdge(b, a);
     }
 
-    /**
-     * Removes an edge between the source node and the destination node.
-     *
-     * @param source starting node
-     * @param destination ending node
-     */
-    public void removeEdge(Node source, Node destination) {
-        if (!adjacencyList.containsKey(source)) {
-            return;
-        }
-
-        // Remove the forward edge
-        List<Edge> sourceEdges = adjacencyList.get(source);
-        
-        // Handle agents on this edge before removing it (e.g., clear them)
-        sourceEdges.removeIf(edge -> {
-            if (edge.getDestination().equals(destination)) {
-                edge.getAgents().clear(); 
-                return true;
-            }
-            return false;
-        });
-
-        // If the graph created a reverse edge (undirected), remove it as well
-        if (adjacencyList.containsKey(destination)) {
-            List<Edge> destEdges = adjacencyList.get(destination);
-            destEdges.removeIf(edge -> 
-                edge.getDestination().equals(source) && !edge.isOriented()
-            );
-        }
-    }
     
     /**
      * Returns all edges in the graph.

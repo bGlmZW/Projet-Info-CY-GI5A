@@ -3,6 +3,7 @@ package fr.projet;
 import fr.projet.model.*;
 import fr.projet.pathfinding.*;
 import fr.projet.simulation.SimulationEngine;
+import fr.projet.utils.SaveManager;
 
 import java.util.List;
 
@@ -110,5 +111,32 @@ public class Main {
         System.out.println();
         System.out.println("Final position: N" + agent.getCurrentPosition().getId());
         System.out.println("Final state: " + agent.getState());
+
+        String fichierTest = "simulation_save.dat";
+
+        System.out.println("[Action] Sauvegarde des donnees...");
+        SaveManager.saveSimulation(movementGraph, engine.getAgents(), fichierTest);
+
+        System.out.println("\n[Action] Lecture et rechargement du fichier...");
+        Object[] donneesChargees = SaveManager.restoreSimulation(fichierTest);
+
+        if (donneesChargees != null) {
+            Graph grapheLu = (Graph) donneesChargees[0];
+            @SuppressWarnings("unchecked")
+            List<Agent> agentsLus = (List<Agent>) donneesChargees[1];
+
+            System.out.println("\n--- Resultat de la lecture ---");
+            System.out.println("Noeuds charges : " + grapheLu.getAllNodes().size());
+            System.out.println("Agents charges : " + agentsLus.size());
+            
+            if (!agentsLus.isEmpty()) {
+                Agent agentLu = agentsLus.get(0);
+                System.out.println("ID agent lu    : " + agentLu.getId() + " (Position: N" + agentLu.getCurrentPosition().getId() + ")");
+            }
+            System.out.println("------------------------------");
+            System.out.println("Le systeme de sauvegarde fonctionne !");
+        } else {
+            System.err.println("Erreur : Impossible de lire le fichier de sauvegarde.");
+        }
     }
 }

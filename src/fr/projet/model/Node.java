@@ -1,5 +1,6 @@
 package fr.projet.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,9 @@ import java.util.List;
  * Represents a node in the graph.
  * A node can contain agents and may be blocked or limited by capacity.
  */
-public class Node {
+public class Node implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /** Unique identifier of the node */
     private int id;

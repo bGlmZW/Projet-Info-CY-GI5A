@@ -1,11 +1,14 @@
 package fr.projet.model;
 
+import java.io.Serializable;
 /**
  * Agent that moves at half the normal speed (0.5).
  * Useful for simulating heavy or cautious entities.
  */
-public class SlowAgent extends Agent {
-
+public class SlowAgent extends Agent implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
+    
     /**
      * Creates a slow agent with speed 0.5.
      *

@@ -2,12 +2,15 @@ package fr.projet.model;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * Represents a directed or undirected connection between two nodes in the graph.
  * Each edge has a distance and may contain agents traveling through it.
  */
-public class Edge {
+public class Edge implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /** Source node of the edge */
     private Node source;
