@@ -1,12 +1,16 @@
 package fr.projet.model;
 
+import java.io.Serializable;
+
 /**
  * Agent carrying cargo whose weight reduces its movement speed.
  *
  * <p>Speed formula: {@code BASE_SPEED / (1.0 + cargoWeight)}, where {@code BASE_SPEED = 1.5}.
  * A weight of 0 gives maximum speed (1.5); heavier loads slow the agent down.</p>
  */
-public class CargoAgent extends Agent {
+public class CargoAgent extends Agent implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     private static final double BASE_SPEED = 1.5;
 

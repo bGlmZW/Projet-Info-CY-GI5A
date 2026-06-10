@@ -1,12 +1,15 @@
 package fr.projet.model;
 
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * Represents a graph using an adjacency list structure.
  * The graph stores nodes and the edges connecting them.
  */
-public class Graph {
+public class Graph implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     /** Adjacency list representation of the graph */
     private Map<Node, List<Edge>> adjacencyList;

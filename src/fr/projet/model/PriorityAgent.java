@@ -7,6 +7,8 @@ package fr.projet.model;
  * Examples: level 1 → 1.5, level 2 → 2.0, level 4 → 3.0.</p>
  */
 public class PriorityAgent extends Agent {
+	
+	private static final long serialVersionUID = 1L;
 
     /** Priority level of this agent (>= 1). */
     private int priorityLevel;

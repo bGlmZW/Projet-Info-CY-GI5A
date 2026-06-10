@@ -1,10 +1,14 @@
 package fr.projet.model;
 
+import java.io.Serializable;
+
 /**
  * A faster variant of the standard Agent.
  * Demonstrates system extensibility.
  */
-public class FastAgent extends Agent {
+public class FastAgent extends Agent implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     /**
      * Creates a fast agent with increased speed.

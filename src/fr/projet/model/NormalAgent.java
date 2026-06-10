@@ -1,9 +1,13 @@
 package fr.projet.model;
 
+import java.io.Serializable;
+
 /**
  * Standard agent moving at default speed (1.0).
  */
-public class NormalAgent extends Agent {
+public class NormalAgent extends Agent implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     /**
      * Creates a normal agent with default speed.

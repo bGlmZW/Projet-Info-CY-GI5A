@@ -26,8 +26,6 @@ import fr.projet.model.EdgeType;
 import fr.projet.model.State;
 import java.util.Random;
 
-import fr.projet.view.*;
-
 /**
  * Controller responsible for building and configuring the graph.
  * Separates graph construction logic from the UI layer.

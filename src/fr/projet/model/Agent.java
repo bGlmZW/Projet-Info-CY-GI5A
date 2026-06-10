@@ -1,11 +1,14 @@
 package fr.projet.model;
 
 import fr.projet.pathfinding.IPathFinder;
+import java.io.Serializable;
 
 /**
  * Represents an agent moving through the graph.
  */
-public class Agent {
+public class Agent implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     /** Unique identifier of the agent */
     private int id;
