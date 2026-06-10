@@ -78,8 +78,7 @@ public class Graph {
 
         // Store the reverse edge too when the connection is considered undirected.
         if (!edge.isOriented()) {
-            Edge reverse = new Edge(destination, source, edge.getDistance());
-            reverse.setOriented(false);
+        	Edge reverse = new Edge(destination,source, edge.getDistance(), edge.getCapacity(), edge.getType(), false);
             adjacencyList.get(destination).add(reverse);
         }
     }
@@ -194,5 +193,59 @@ public class Graph {
      */
     public boolean hasConnection(Node a, Node b) {
         return hasEdge(a, b) || hasEdge(b, a);
+    }
+
+    /**
+     * Removes an edge between the source node and the destination node.
+     *
+     * @param source starting node
+     * @param destination ending node
+     */
+    public void removeEdge(Node source, Node destination) {
+        if (!adjacencyList.containsKey(source)) {
+            return;
+        }
+
+        // Remove the forward edge
+        List<Edge> sourceEdges = adjacencyList.get(source);
+        
+        // Handle agents on this edge before removing it (e.g., clear them)
+        sourceEdges.removeIf(edge -> {
+            if (edge.getDestination().equals(destination)) {
+                edge.getAgents().clear(); 
+                return true;
+            }
+            return false;
+        });
+
+        // If the graph created a reverse edge (undirected), remove it as well
+        if (adjacencyList.containsKey(destination)) {
+            List<Edge> destEdges = adjacencyList.get(destination);
+            destEdges.removeIf(edge -> 
+                edge.getDestination().equals(source) && !edge.isOriented()
+            );
+        }
+    }
+    
+    /**
+     * Returns all edges in the graph.
+     *
+     * @return list of all edges
+     */
+    public List<Edge> getAllEdges() {
+        List<Edge> allEdges = new ArrayList<>();
+        for (List<Edge> edges : adjacencyList.values()) {
+            allEdges.addAll(edges);
+        }
+        return allEdges;
+    }
+    
+    /**
+     * Removes all nodes and edges from the graph.
+     * Since edges are stored inside the adjacency list, clearing the list
+     * removes the whole graph structure.
+     */
+    public void clear() {
+        adjacencyList.clear();
     }
 }

@@ -26,7 +26,12 @@ public class Edge {
 
     /** List of agents currently on this edge */
     private List<Agent> agents;
-
+    
+    private EdgeType type;
+    
+    private int passCount = 0;
+    private double passedSpeedSum = 0.0;
+    
     /**
      * Creates a new edge between two nodes.
      * The edge is undirected by default, with unlimited capacity and no agents.
@@ -35,13 +40,18 @@ public class Edge {
      * @param destination ending node
      * @param distance    cost or distance of the edge
      */
-    public Edge(Node source, Node destination, double distance) {
+    public Edge(Node source, Node destination, double distance, int capacity, EdgeType type, boolean oriented) {
         this.source = source;
         this.destination = destination;
         this.distance = distance;
-        this.oriented = false;
-        this.capacity = Integer.MAX_VALUE;
+        this.oriented = oriented;
+        this.capacity = capacity;
+        this.type = type;
         this.agents = new ArrayList<>();
+    }
+
+    public Edge(Node source, Node destination, double distance, EdgeType type, boolean oriented) {
+    	this(source, destination, distance, Integer.MAX_VALUE, type, oriented);
     }
 
     /**
@@ -133,7 +143,52 @@ public class Edge {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+    
+    /**
+     * 
+     * @return
+     */
+    public EdgeType getType() {
+        return type;
+    }
+    
+    /**
+     * 
+     * @param type
+     */
+    public void setType(EdgeType type) {
+    	this.type = type;
+    }
 
+    
+    /**
+     * 
+     * @param speed
+     */
+    public void registerPass(double speed) {
+        passCount++;
+        passedSpeedSum += speed;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public int getPassCount() {
+        return passCount;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public double getAveragePassedSpeed() {
+        if (passCount == 0) {
+            return 0.0;
+        }
+        return passedSpeedSum / passCount;
+    }
+   
     /**
      * Returns the list of agents currently on this edge.
      *
@@ -150,5 +205,48 @@ public class Edge {
      */
     public void setAgents(List<Agent> agents) {
         this.agents = agents;
+    }
+    
+    /**
+     * Checks whether the given agent is currently on this edge.
+     *
+     * @param agent the agent to check
+     * @return true if the agent is present on this edge, false otherwise
+     */
+    public boolean containsAgent(Agent agent) {
+        return agents.contains(agent);
+    }
+
+    /**
+     * Adds an agent to this edge if it is not already present.
+     *
+     * @param agent the agent to add
+     */
+    public void addAgent(Agent agent) {
+        if (!agents.contains(agent)) {
+            agents.add(agent);
+        }
+    }
+    
+    /**
+     * 
+     */
+    public void resetPassStats() {
+        passCount = 0;
+        passedSpeedSum = 0.0;
+    }
+
+    /**
+     * Removes an agent from this edge.
+     *
+     * @param agent the agent to remove
+     */
+    public void removeAgent(Agent agent) {
+        agents.remove(agent);
+    }
+    
+    @Override
+    public String toString() {
+        return "Edge [" + source.getId() + " ," + destination.getId() + "] -> {Capacity = " + capacity + " ;" +  "Agents = " + agents;
     }
 }

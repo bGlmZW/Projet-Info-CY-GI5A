@@ -15,8 +15,11 @@ public class Node {
     /** Maximum number of agents allowed in this node */
     private int maxCapacity;
 
-    /** List of agents currently located on this node */
-    private List<Agent> agents;
+    /** List of priority agents currently located on this node */
+    private List<Agent> priorityAgents;
+
+    /** List of no-priority agents currently located on this node */
+    private List<Agent> noPriorityAgents;
 
     /** Indicates whether the node is blocked (not accessible) */
     private boolean blocked;
@@ -27,6 +30,15 @@ public class Node {
     /** Y coordinate used for rendering the node */
     private Double y;
 
+    private int passCount = 0;
+    private double passedSpeedSum = 0.0;
+
+    /** Remaining congestion wait cycles (set to 2 when overcrowded) */
+    private int congestionWaitCycles = 0;
+
+    private String name;
+    private NodeType type;
+
     /**
      * Creates a new node with a given identifier.
      * The node is unblocked by default, with unlimited capacity and no agents.
@@ -36,8 +48,11 @@ public class Node {
     public Node(int id) {
         this.id = id;
         this.maxCapacity = Integer.MAX_VALUE;
-        this.agents = new ArrayList<>();
+        this.priorityAgents = new ArrayList<>();
+        this.noPriorityAgents = new ArrayList<>();
         this.blocked = false;
+        this.name = null;
+        this.type = NodeType.POINT_OF_INTEREST;
     }
 
     /**
@@ -68,21 +83,95 @@ public class Node {
     }
 
     /**
-     * Returns the list of agents currently on this node.
+     * Returns the list of all agents currently on this node.
      *
      * @return list of agents
      */
-    public List<Agent> getAgents() {
-        return agents;
+    public List<Agent> getAllAgents() {
+        List<Agent> allAgents = new ArrayList<>();
+        allAgents.addAll(priorityAgents);
+        allAgents.addAll(noPriorityAgents);
+        return allAgents;
     }
 
     /**
-     * Sets the list of agents currently on this node.
+     * Returns whether the given agent is on this node.
      *
-     * @param agents new list of agents
+     * @param agent the agent to check
+     * @return true if the agent is on this node
      */
-    public void setAgents(List<Agent> agents) {
-        this.agents = agents;
+    public boolean containsAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            return priorityAgents.contains(agent);
+        } else {
+            return noPriorityAgents.contains(agent);
+        }
+    }
+
+    /**
+     * Adds an agent to this node if it is not already present.
+     *
+     * @param agent the agent to add
+     */
+    public void addAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            if (!priorityAgents.contains(agent)) {
+                priorityAgents.add(agent);
+            }
+        } else {
+            if (!noPriorityAgents.contains(agent)) {
+                noPriorityAgents.add(agent);
+            }
+        }
+    }
+
+    /**
+     * Removes an agent from this node.
+     *
+     * @param agent the agent to remove
+     */
+    public void removeAgent(Agent agent) {
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            priorityAgents.remove(agent);
+        } else {
+            noPriorityAgents.remove(agent);
+        }
+    }
+
+    /**
+     * Returns the list of priority agents currently located on this node.
+     *
+     * @return list of priority agents
+     */
+    public List<Agent> getPriorityAgents() {
+        return priorityAgents;
+    }
+
+    /**
+     * Sets the list of priority agents currently located on this node.
+     *
+     * @param priorityAgents list of priority agents to set
+     */
+    public void setPriorityAgents(List<Agent> priorityAgents) {
+        this.priorityAgents = priorityAgents;
+    }
+
+    /**
+     * Returns the list of no-priority agents currently located on this node.
+     *
+     * @return list of no-priority agents
+     */
+    public List<Agent> getNoPriorityAgents() {
+        return noPriorityAgents;
+    }
+
+    /**
+     * Sets the list of no-priority agents currently located on this node.
+     *
+     * @param noPriorityAgents list of no-priority agents to set
+     */
+    public void setNoPriorityAgents(List<Agent> noPriorityAgents) {
+        this.noPriorityAgents = noPriorityAgents;
     }
 
     /**
@@ -101,6 +190,23 @@ public class Node {
      */
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
+    }
+
+    public int getCongestionWaitCycles() {
+        return congestionWaitCycles;
+    }
+
+    public void setCongestionWaitCycles(int cycles) {
+        this.congestionWaitCycles = cycles;
+    }
+
+    /**
+     * Returns true if this node is currently in heavy congestion mode.
+     *
+     * @return true if the number of agents exceeds maxCapacity
+     */
+    public boolean isHeavilyCongested() {
+        return getAllAgents().size() > maxCapacity;
     }
 
     /**
@@ -138,7 +244,66 @@ public class Node {
     public void setY(Double y) {
         this.y = y;
     }
-    
+
+    /**
+     * Registers a pass through this node with the given speed.
+     *
+     * @param speed speed of the agent passing through
+     */
+    public void registerPass(double speed) {
+        passCount++;
+        passedSpeedSum += speed;
+    }
+
+    /**
+     * Returns the number of passes through this node.
+     *
+     * @return pass count
+     */
+    public int getPassCount() {
+        return passCount;
+    }
+
+    /**
+     * Returns the average speed of agents that passed through this node.
+     *
+     * @return average speed, or 0.0 if no passes recorded
+     */
+    public double getAveragePassedSpeed() {
+        if (passCount == 0) {
+            return 0.0;
+        }
+        return passedSpeedSum / passCount;
+    }
+
+    /**
+     * Resets pass statistics for this node.
+     */
+    public void resetPassStats() {
+        passCount = 0;
+        passedSpeedSum = 0.0;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        if (name == null || name.isBlank()) {
+            this.name = null;
+        } else {
+            this.name = name;
+        }
+    }
+
+    public NodeType getType() {
+        return type;
+    }
+
+    public void setType(NodeType type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

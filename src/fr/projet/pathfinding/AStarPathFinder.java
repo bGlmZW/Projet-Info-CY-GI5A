@@ -8,7 +8,7 @@ import java.util.*;
  * Implementation of the A* pathfinding algorithm.
  * Uses a simple heuristic based on node id difference.
  */
-public class AStarPathFinder implements PathFinder {
+public class AStarPathFinder implements IPathFinder {
 
     private Graph graph;
 
@@ -46,9 +46,8 @@ public class AStarPathFinder implements PathFinder {
             }
 
             for (Edge edge : graph.getEdges(current)) {
-
                 Node neighbor = edge.getDestination();
-
+                if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
                 double tentativeG = gScore.get(current) + edge.getDistance();
 
                 if (tentativeG < gScore.get(neighbor)) {
@@ -70,7 +69,9 @@ public class AStarPathFinder implements PathFinder {
      * Heuristic function (simple version for your project).
      */
     private double heuristic(Node a, Node b) {
-        return Math.abs(a.getId() - b.getId());
+        double dx = a.getX() - b.getX();
+        double dy = a.getY() - b.getY();
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     /**

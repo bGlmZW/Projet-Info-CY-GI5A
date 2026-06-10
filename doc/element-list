@@ -1,4 +1,4 @@
-module:ProjetGenieLogiciel
+module:oo
 fr.projet
 fr.projet.controller
 fr.projet.model

@@ -8,7 +8,7 @@ import java.util.*;
  * Implementation of the PathFinder interface using Dijkstra's algorithm.
  * Computes the shortest path between two nodes in a graph.
  */
-public class DijkstraPathFinder implements PathFinder {
+public class DijkstraPathFinder implements IPathFinder {
 
     /** Graph used for path computation */
     private Graph graph;
@@ -59,11 +59,9 @@ public class DijkstraPathFinder implements PathFinder {
             }
 
             for (Edge edge : graph.getEdges(current)) {
-
                 Node neighbor = edge.getDestination();
-
-                double newDist =
-                        distances.get(current) + edge.getDistance();
+                if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
+                double newDist = distances.get(current) + edge.getDistance();
 
                 if (newDist < distances.getOrDefault(
                         neighbor,

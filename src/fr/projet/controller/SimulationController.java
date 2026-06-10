@@ -22,18 +22,12 @@ public class SimulationController {
      */
     public static SimulationEngine buildEngine(Graph graph, Node start, Node destination) {
 
-    	PathFinder pathFinder = PathFinderFactory.create(
+    	IPathFinder pathFinder = PathFinderFactory.create(
     	        PathFinderType.DIJKSTRA,
     	        graph
     	);
         SimulationEngine engine = new SimulationEngine(graph, pathFinder);
-
-        Agent fast = new FastAgent(2, start, destination);
-        engine.addAgent(fast);
-
         System.out.println("Tick 0");
-        System.out.println(fast);
-
         return engine;
     }
 }

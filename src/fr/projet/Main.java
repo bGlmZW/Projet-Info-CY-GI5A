@@ -26,16 +26,16 @@ public class Main {
         graph.addNode(C);
         graph.addNode(D);
 
-        graph.addEdge(new Edge(A, B, 1));
-        graph.addEdge(new Edge(B, C, 1));
-        graph.addEdge(new Edge(A, C, 5));
-        graph.addEdge(new Edge(C, D, 1));
+        graph.addEdge(new Edge(A, B, 1, EdgeType.ROAD, true));
+        graph.addEdge(new Edge(B, C, 1, EdgeType.ROAD, true));
+        graph.addEdge(new Edge(A, C, 5, EdgeType.ROAD, true));
+        graph.addEdge(new Edge(C, D, 1, EdgeType.ROAD, true));
 
         System.out.println("=================================");
         System.out.println("DIJKSTRA TEST");
         System.out.println("=================================");
 
-        PathFinder pathFinder = new DijkstraPathFinder(graph);
+        IPathFinder pathFinder = new DijkstraPathFinder(graph);
 
         List<Node> path = pathFinder.findPath(A, D);
 
@@ -52,11 +52,6 @@ public class Main {
 
         System.out.println();
 
-        // Expected:
-        // N1 -> N2 -> N3 -> N4
-
-
-
         // =====================================================
         // NODE REMOVAL TEST
         // =====================================================
@@ -66,14 +61,11 @@ public class Main {
         System.out.println("NODE REMOVAL TEST");
         System.out.println("=================================");
 
-        System.out.println("Neighbors of A before removal: "
-                + graph.getNeighbors(A).size());
+        System.out.println("Neighbors of A before removal: " + graph.getNeighbors(A).size());
 
         graph.removeNode(B);
 
-        System.out.println("Neighbors of A after removal: "
-                + graph.getNeighbors(A).size());
-
+        System.out.println("Neighbors of A after removal: " + graph.getNeighbors(A).size());
 
 
         // =====================================================
@@ -94,22 +86,15 @@ public class Main {
         movementGraph.addNode(C2);
         movementGraph.addNode(D2);
 
-        movementGraph.addEdge(new Edge(A2, B2, 1));
-        movementGraph.addEdge(new Edge(B2, C2, 1));
-        movementGraph.addEdge(new Edge(C2, D2, 1));
+        movementGraph.addEdge(new Edge(A2, B2, 1, EdgeType.ROAD, true));
+        movementGraph.addEdge(new Edge(B2, C2, 1, EdgeType.ROAD, true));
+        movementGraph.addEdge(new Edge(C2, D2, 1, EdgeType.ROAD, true));
 
-        PathFinder movementFinder =
-                new DijkstraPathFinder(movementGraph);
+        IPathFinder movementFinder = new DijkstraPathFinder(movementGraph);
 
-        SimulationEngine engine =
-                new SimulationEngine(movementGraph, movementFinder);
+        SimulationEngine engine = new SimulationEngine(movementGraph, movementFinder);
 
-        Agent agent = new Agent(
-                1,
-                1.0,
-                A2,
-                D2
-        );
+        Agent agent = new Agent(1, 1.0, A2, D2);
 
         engine.addAgent(agent);
 
@@ -123,10 +108,7 @@ public class Main {
         }
 
         System.out.println();
-        System.out.println("Final position: N"
-                + agent.getCurrentPosition().getId());
-
-        System.out.println("Final state: "
-                + agent.getState());
+        System.out.println("Final position: N" + agent.getCurrentPosition().getId());
+        System.out.println("Final state: " + agent.getState());
     }
 }
