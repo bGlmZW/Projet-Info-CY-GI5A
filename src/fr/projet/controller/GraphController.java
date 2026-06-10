@@ -1064,6 +1064,9 @@ public class GraphController {
         }
     }
     
+    /**
+     * 
+     */
     public void editSelected() {
 
     	// Edit a selected agent
@@ -1272,6 +1275,32 @@ public class GraphController {
             alert.setHeaderText("Nothing selected");
             alert.setContentText("Please select a node, an edge or an agent before editing.");
             alert.showAndWait();
+        }
+    }
+    
+    /**
+     * Clears the graph completely so the user can start a new simulation.
+     */
+    public void clearGraph() {
+        if (engine != null) {
+            engine.clearAgents();
+        }
+
+        graph.clear();
+
+        selectedNode = null;
+        selectedEdge = null;
+        selectedAgent = null;
+
+        disableAllModes();
+
+        if (view != null) {
+            view.clearSelection();
+            view.renderGraph(graph);
+
+            if (engine != null) {
+                view.renderAgents(engine.getAgents());
+            }
         }
     }
 }

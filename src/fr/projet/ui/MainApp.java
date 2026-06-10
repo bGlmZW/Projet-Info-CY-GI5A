@@ -87,7 +87,6 @@ public class MainApp extends Application {
                 statsPanel.clear();
             }
         });
-        
 
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
@@ -157,12 +156,6 @@ public class MainApp extends Application {
             }
         });
         
-        toolBox.deleteBtn.setOnAction(e -> {
-            graphController.deleteSelected();
-            statsPanel.showGraphOverview(graph, engine.getAgents().size());
-
-        });
-        
         toolBox.editBtn.setOnAction(e -> graphController.editSelected());
         toolBox.addRandomBtn.setOnAction(e -> {
         	graphController.addRandomNodes(engine);
@@ -172,6 +165,18 @@ public class MainApp extends Application {
         toolBox.addRandomAgentsBtn.setOnAction(e -> {
         	graphController.addRandomAgents(engine);
         	statsPanel.showGraphOverview(graph, engine.getAgents().size());
+        });
+        
+        toolBox.deleteBtn.setOnAction(e -> {
+            graphController.deleteSelected();
+            statsPanel.showGraphOverview(graph, engine.getAgents().size());
+
+        });
+        
+        toolBox.clearGraphBtn.setOnAction(e -> {
+            graphController.clearGraph();
+            simulationBar.tickLabel.setText("Tick: 0");
+            statsPanel.showGraphOverview(graph, engine.getAgents().size());
         });
 
         simulationBar.startBtn.setOnAction(e -> timelineRef[0].play());

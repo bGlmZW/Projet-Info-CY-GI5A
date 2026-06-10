@@ -209,4 +209,13 @@ public class Graph {
         }
         return allEdges;
     }
+    
+    /**
+     * Removes all nodes and edges from the graph.
+     * Since edges are stored inside the adjacency list, clearing the list
+     * removes the whole graph structure.
+     */
+    public void clear() {
+        adjacencyList.clear();
+    }
 }

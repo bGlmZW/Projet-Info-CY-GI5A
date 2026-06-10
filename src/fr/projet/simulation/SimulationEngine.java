@@ -410,4 +410,12 @@ public class SimulationEngine {
         agent.setNextNode(null);
         agent.setState(State.MOVING);
     }
+    
+    /**
+     * Removes all agents from the simulation and resets the simulation tick.
+     */
+    public void clearAgents() {
+        agents.clear();
+        currentTick = 0;
+    }
 }
