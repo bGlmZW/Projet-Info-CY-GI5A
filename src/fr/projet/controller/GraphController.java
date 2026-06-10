@@ -115,6 +115,7 @@ public class GraphController {
     Node B = new Node(2);
     Node C = new Node(3);
     Node D = new Node(4);
+    Node F = new Node(5);
     D.setType(NodeType.ACCIDENT);
     D.setName("Serious personal injury");
 
@@ -122,11 +123,14 @@ public class GraphController {
     graph.addNode(B);
     graph.addNode(C);
     graph.addNode(D);
+    graph.addNode(F);
 
-    graph.addEdge(new Edge(A, B, 1,2, EdgeType.ROAD, true));
-    graph.addEdge(new Edge(A, D, 9,2, EdgeType.ROAD, false));
-    graph.addEdge(new Edge(B, C, 1,2, EdgeType.ROAD, false));
-    graph.addEdge(new Edge(C, D, 3,2, EdgeType.ROAD, true));
+    graph.addEdge(new Edge(A, B, 1, 2, EdgeType.ROAD, true));
+    graph.addEdge(new Edge(A, D, 9, 2, EdgeType.ROAD, false));
+    graph.addEdge(new Edge(B, C, 1, 2, EdgeType.ROAD, false));
+    graph.addEdge(new Edge(C, D, 3, 2, EdgeType.ROAD, true));
+    graph.addEdge(new Edge(B, C, 1, 2, EdgeType.ROAD, false));
+    graph.addEdge(new Edge(A, F, 20, 10, EdgeType.HIGHWAY, false));
     
     return graph;
 	}

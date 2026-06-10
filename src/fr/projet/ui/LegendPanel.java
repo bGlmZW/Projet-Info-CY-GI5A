@@ -34,7 +34,10 @@ public class LegendPanel extends VBox {
                 nodeRow("Selected node", Color.GOLD),
                 blockedNodeRow("Blocked node"),
                 orientedEdgeRow("Oriented edge"),
-                nonOrientedEdgeRow("Non oriented edge")
+                nonOrientedEdgeRow("Non oriented edge"),
+                edgeTypeRow("Road", 2, false),
+                edgeTypeRow("Highway", 5, false),
+                edgeTypeRow("Dirt road", 3, true)
         );
     }
 
@@ -158,6 +161,31 @@ public class LegendPanel extends VBox {
 
         HBox row = new HBox(10, icon, label);
         row.setPadding(new Insets(2, 0, 2, 0));
+        return row;
+    }
+    
+    /**
+     * Builds one row for an edge type legend item.
+     *
+     * @param text label displayed
+     * @param width thickness of the line
+     * @param true if the line should be dashed
+     * @return row containing the edge type icon and its label
+     */
+    private HBox edgeTypeRow(String text, double width, boolean dashed) {
+        Line line = new Line(0, 0, 35, 0);
+        line.setStroke(Color.BLACK);
+        line.setStrokeWidth(width);
+
+        if (dashed) {
+            line.getStrokeDashArray().addAll(10.0, 7.0);
+        }
+
+        Label label = new Label(text);
+
+        HBox row = new HBox(10, line, label);
+        row.setPadding(new Insets(2, 0, 2, 0));
+
         return row;
     }
 }

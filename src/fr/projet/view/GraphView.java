@@ -254,16 +254,15 @@ public class GraphView extends Pane {
                     y2 + offsetY
                 );
 
-                line.setStrokeWidth(2);
+                applyEdgeStyle(line, edge);
                 line.setCursor(Cursor.HAND);
 
                 // Highlight selected edge
                 if (edge.equals(selectedEdge)) {
                     line.setStroke(Color.GOLD);
-
-                    line.setStrokeWidth(4);
+                    line.setStrokeWidth(line.getStrokeWidth() + 2);
                 } else {
-                    line.setStroke(Color.BLACK);
+                    applyEdgeStyle(line, edge);
                 }
 
                 final Edge currentEdge = edge;
@@ -279,13 +278,13 @@ public class GraphView extends Pane {
                     }
                 });
 
-                
                 line.setOnMouseExited(e -> {
                     if (currentEdge.equals(selectedEdge)) {
+                        applyEdgeStyle(line, currentEdge);
                         line.setStroke(Color.GOLD);
-
+                        line.setStrokeWidth(line.getStrokeWidth() + 2);
                     } else {
-                        line.setStroke(Color.BLACK);
+                        applyEdgeStyle(line, currentEdge);
                     }
                 });
 
@@ -439,13 +438,11 @@ public class GraphView extends Pane {
             Line line = entry.getValue();
 
             if (edge.equals(selectedEdge)) {
-
+                applyEdgeStyle(line, edge);
                 line.setStroke(Color.GOLD);
-
-                line.setStrokeWidth(4);
+                line.setStrokeWidth(line.getStrokeWidth() + 2);
             } else {
-                line.setStroke(Color.BLACK);
-                line.setStrokeWidth(2);
+                applyEdgeStyle(line, edge);
             }
         }
     }
@@ -541,19 +538,28 @@ public class GraphView extends Pane {
         }
     }
 
-    
-    
-    /* A UTILISER QUAND ON AURA D'AUTRES TYPES DE EDGES
+    /**
+     * Displays each edge type with a different design to understand better the interface.
      * 
+     * @param line edge modeling
+     * @param edge considered edge
+     */
     private void applyEdgeStyle(Line line, Edge edge) {
-        line.setStrokeLineCap(StrokeLineCap.BUTT);
+        line.setStroke(Color.BLACK);
         line.getStrokeDashArray().clear();
-
-        if (!edge.isOriented()) {
-            line.getStrokeDashArray().addAll(12.0, 10.0);
+        
+        switch (edge.getType()) {
+        	case EdgeType.HIGHWAY:
+        		line.setStrokeWidth(5);
+        		break;
+        	case EdgeType.DIRT_ROAD:
+                line.setStrokeWidth(3);
+                line.getStrokeDashArray().addAll(10.0, 7.0);
+                break;
+        	default:
+        		line.setStrokeWidth(2);
         }
-    }*/
-
+    }
 
     /**
      * Returns a stable color for an agent based on its id.
