@@ -82,6 +82,7 @@ public class PatientPanel extends VBox {
     private void addStat(String label, String value) {
         Label stat = new Label(label + ": " + value);
         stat.setWrapText(true);
+        stat.setMaxWidth(230);
         getChildren().add(stat);
     }
 }

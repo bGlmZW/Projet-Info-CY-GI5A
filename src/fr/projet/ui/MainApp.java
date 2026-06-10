@@ -59,6 +59,7 @@ public class MainApp extends Application {
         view.setBackgroundClickHandler(point -> {
             graphController.handleBackgroundClick(point);
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
+            patientPanel.clear();
         });
         
         //
