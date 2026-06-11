@@ -240,13 +240,15 @@ public class GraphView extends Pane {
                 double offsetX = 0;
                 double offsetY = 0;
 
-                if (!edge.isOriented() && length > 0) {
-                    double offset = 8.0;
+                // Appliquer un offset si l'arête est non orientée OU s'il existe une arête dans le sens inverse
+                boolean hasReverseEdge = graph.hasEdge(edge.getDestination(), edge.getSource());
 
+                if ((!edge.isOriented() || hasReverseEdge) && length > 0) {
+                    double offset = 8.0;
                     offsetX = -dy / length * offset;
                     offsetY = dx / length * offset;
                 }
-
+                
                 Line line = new Line(
                     x1 + offsetX,
                     y1 + offsetY,

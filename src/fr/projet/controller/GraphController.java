@@ -1145,13 +1145,7 @@ public class GraphController {
             try {
                 double newWeight = Double.parseDouble(weightResult.get().trim());
                 selectedEdge.setDistance(newWeight);
-             // Mettre à jour l'arête inverse si elle existe
-                for (Edge e : graph.getEdges(selectedEdge.getDestination())) {
-                    if (e.getDestination().equals(selectedEdge.getSource())) {
-                        e.setDistance(newWeight);
-                        break;
-                    }
-                }
+             
                 
             } catch (NumberFormatException e) {
                 // keep current weight

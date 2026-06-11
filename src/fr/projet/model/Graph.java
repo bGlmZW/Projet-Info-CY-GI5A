@@ -165,7 +165,7 @@ public class Graph implements Serializable {
      * @return true if a connection already exists between the two nodes
      */
     public boolean hasConnection(Node a, Node b) {
-        return hasEdge(a, b) || hasEdge(b, a);
+        return hasEdge(a, b);
     }
 
     /**
@@ -175,26 +175,26 @@ public class Graph implements Serializable {
      * @param destination ending node
      */
     public void removeEdge(Node source, Node destination) {
-        if (!adjacencyList.containsKey(source)) {
-            return;
-        }
+        if (!adjacencyList.containsKey(source)) return;
 
-        // Remove the forward edge
         List<Edge> sourceEdges = adjacencyList.get(source);
-        
-        // Handle agents on this edge before removing it (e.g., clear them)
+
+        // Retrouver l'arête à supprimer pour savoir si elle était orientée
+        final boolean[] wasOriented = {true};
         sourceEdges.removeIf(edge -> {
             if (edge.getDestination().equals(destination)) {
-                edge.getAgents().clear(); 
+                edge.getAgents().clear();
+                wasOriented[0] = edge.isOriented();
                 return true;
             }
             return false;
         });
 
-        // If the graph created a reverse edge (undirected), remove it as well
-        if (adjacencyList.containsKey(destination)) {
+        // Supprimer l'arête retour UNIQUEMENT si l'arête était non orientée
+        // (= arête retour créée automatiquement par addEdge)
+        if (!wasOriented[0] && adjacencyList.containsKey(destination)) {
             List<Edge> destEdges = adjacencyList.get(destination);
-            destEdges.removeIf(edge -> 
+            destEdges.removeIf(edge ->
                 edge.getDestination().equals(source) && !edge.isOriented()
             );
         }
