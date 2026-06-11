@@ -566,10 +566,10 @@ public class GraphView extends Pane {
         line.getStrokeDashArray().clear();
         
         switch (edge.getType()) {
-        	case EdgeType.HIGHWAY:
+        	case HIGHWAY:
         		line.setStrokeWidth(5);
         		break;
-        	case EdgeType.DIRT_ROAD:
+        	case DIRT_ROAD:
                 line.setStrokeWidth(3);
                 line.getStrokeDashArray().addAll(10.0, 7.0);
                 break;

@@ -28,7 +28,7 @@ public class ToolBox extends HBox {
 
         style(addNodeBtn,        "+ Node",          "#2471A3", "#1A5276");
         style(addEdgeBtn,        "+ Edge",         "#1E8449", "#196F3D");
-        style(addAgentBtn,       "Add Ambulance",       "#922B21", "#7B241C");
+        style(addAgentBtn,       "+ Add Ambulance",       "#922B21", "#7B241C");
         style(addRandomBtn,      "~ Random Expansion",  "#5D4037", "#4E342E");
         style(addRandomAgentsBtn,"~ Random Agents", "#6C3483", "#5B2C6F");
         style(editBtn,           "/ Edit Selection",          "#B7950B", "#9A7D0A");

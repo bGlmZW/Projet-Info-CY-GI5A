@@ -1,7 +1,5 @@
 package fr.projet.ui;
 
-// import fr.projet.ui.HelpDialog;
-
 import fr.projet.controller.GraphController;
 import fr.projet.controller.SimulationController;
 import fr.projet.model.Agent;
@@ -288,9 +286,11 @@ public class MainApp extends Application {
                     timelineRef[0].pause();
 
                     Graph loadedGraph = (Graph) data[0];
+                    
+                    @SuppressWarnings("unchecked")
                     java.util.List<Agent> loadedAgents = (java.util.List<Agent>) data[1];
                     
-                 // DEBUG
+                    // DEBUG
                     System.out.println("Noeuds chargés: " + loadedGraph.getAllNodes().size());
                     System.out.println("Agents chargés: " + loadedAgents.size());
                     for (Agent a : loadedAgents) {
