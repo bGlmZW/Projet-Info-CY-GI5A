@@ -336,6 +336,9 @@ public class GraphView extends Pane {
             }
         }
 
+     // Forcer la recréation des cercles agents après un renderGraph
+        agentViews.values().forEach(getChildren()::remove);
+        agentViews.clear();
         redrawAgents();
     }
 
@@ -744,6 +747,10 @@ public class GraphView extends Pane {
     private Point2D clampPoint(Point2D point) {
         return new Point2D(clampX(point.getX()), clampY(point.getY())
         );
+    }
+    
+    public void setGraph(Graph graph) {
+        this.graph = graph;
     }
 
 }

@@ -18,6 +18,8 @@ public class ToolBox extends HBox {
     public final Button deleteBtn          = new Button();
     public final Button clearGraphBtn      = new Button();
     public final Button helpBtn            = new Button();
+    public final Button saveBtn            = new Button();
+    public final Button loadBtn            = new Button();
     
     public ToolBox() {
         setSpacing(8);
@@ -33,11 +35,14 @@ public class ToolBox extends HBox {
         style(deleteBtn,         "X Delete Selection",        "#626567", "#515A5A");
         style(clearGraphBtn,      "Clear All",          "#A93226", "#922B21");
         style(helpBtn,           "? Help",          "#2C3E50", "#1A252F");
+        style(saveBtn, "💾 Save", "#1A6E8E", "#155570");
+        style(loadBtn, "📂 Load", "#1A6E8E", "#155570");
 
         getChildren().addAll(
             addNodeBtn, addEdgeBtn, addAgentBtn,
             addRandomBtn, addRandomAgentsBtn,
-            editBtn, deleteBtn, clearGraphBtn, helpBtn
+            editBtn, deleteBtn, clearGraphBtn, helpBtn,
+            saveBtn, loadBtn
         );
     }
 

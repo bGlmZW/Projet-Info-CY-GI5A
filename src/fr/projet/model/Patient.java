@@ -1,9 +1,11 @@
 package fr.projet.model;
 
+import java.io.Serializable;
+
 /**
  * Represents a patient involved in a medical accident displayed when clicking on an accident node.
  */
-public class Patient {
+public class Patient implements Serializable{
 
     private String name;
     private int age;

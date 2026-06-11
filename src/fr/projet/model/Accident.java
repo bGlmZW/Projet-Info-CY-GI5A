@@ -1,9 +1,10 @@
 package fr.projet.model;
+import java.io.Serializable;
 
 /**
  * Represents a medical accident associated with a patient.
  */
-public class Accident {
+public class Accident implements Serializable{
 
     private AccidentType type;
     private String description;

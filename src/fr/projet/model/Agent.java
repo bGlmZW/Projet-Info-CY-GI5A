@@ -40,7 +40,7 @@ public class Agent implements Serializable {
     /** Index of the next node to reach in the current path */
     private int pathIndex = 0;
 
-    private IPathFinder pathFinder;
+    private transient IPathFinder pathFinder;
 
     private AgentType agentType;
     

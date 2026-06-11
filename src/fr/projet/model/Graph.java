@@ -221,4 +221,9 @@ public class Graph implements Serializable {
     public void clear() {
         adjacencyList.clear();
     }
+    
+    public void replaceWith(Graph other) {
+        this.adjacencyList.clear();
+        this.adjacencyList.putAll(other.adjacencyList);
+    }
 }

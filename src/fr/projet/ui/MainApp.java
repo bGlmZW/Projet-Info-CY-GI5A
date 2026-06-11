@@ -4,6 +4,7 @@ package fr.projet.ui;
 
 import fr.projet.controller.GraphController;
 import fr.projet.controller.SimulationController;
+import fr.projet.model.Agent;
 import fr.projet.model.Graph;
 import fr.projet.model.Node;
 import fr.projet.simulation.SimulationEngine;
@@ -22,6 +23,10 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+
+import fr.projet.io.SaveManager;
+import javafx.stage.FileChooser;
+import java.io.File;
 
 public class MainApp extends Application {
 
@@ -260,6 +265,85 @@ public class MainApp extends Application {
         });
 
         toolBox.helpBtn.setOnAction(e -> HelpDialog.show());
+        
+        toolBox.saveBtn.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Simulation");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Simulation files", "*.dat")
+            );
+            fileChooser.setInitialFileName("simulation.dat");
+            File file = fileChooser.showSaveDialog(stage);
+            if (file != null) {
+                SaveManager.saveSimulation(graph, engine.getAgents(), file.getAbsolutePath());
+            }
+        });
+
+        toolBox.loadBtn.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Load Simulation");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Simulation files", "*.dat")
+            );
+            File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                Object[] data = SaveManager.restoreSimulation(file.getAbsolutePath());
+                
+                
+                
+                
+                if (data != null) {
+                    timelineRef[0].pause();
+
+                    Graph loadedGraph = (Graph) data[0];
+                    java.util.List<Agent> loadedAgents = (java.util.List<Agent>) data[1];
+                    
+                 // DEBUG
+                    System.out.println("Noeuds chargés: " + loadedGraph.getAllNodes().size());
+                    System.out.println("Agents chargés: " + loadedAgents.size());
+                    for (Agent a : loadedAgents) {
+                        System.out.println("Agent " + a.getId() + " position: " + 
+                            (a.getCurrentPosition() != null ? a.getCurrentPosition().getId() : "NULL"));
+                    }
+
+                    graph.replaceWith(loadedGraph);
+
+                    engine.clearAgents();
+                    for (Agent a : loadedAgents) {
+                        // Remapper currentPosition vers le nœud correspondant dans le graphe actuel
+                        if (a.getCurrentPosition() != null) {
+                            Node mapped = graph.getNodeById(a.getCurrentPosition().getId());
+                            if (mapped != null) a.setCurrentPosition(mapped);
+                        }
+                        // Remapper destination
+                        if (a.getDestination() != null) {
+                            Node mapped = graph.getNodeById(a.getDestination().getId());
+                            if (mapped != null) a.setDestination(mapped);
+                        }
+                        // Remapper initialPosition
+                        if (a.getInitialPosition() != null) {
+                            Node mapped = graph.getNodeById(a.getInitialPosition().getId());
+                            if (mapped != null) a.setInitialPosition(mapped);
+                        }
+                        // Recréer le pathfinder
+                        if (a.getPathFinder() == null) {
+                            a.setPathFinder(PathFinderFactory.create(PathFinderType.DIJKSTRA, graph));
+                        }
+                        // Réenregistrer l'agent sur son nœud
+                        if (a.getCurrentPosition() != null) {
+                            a.getCurrentPosition().addAgent(a);
+                        }
+                        engine.addAgent(a);
+                    }
+
+                    view.setGraph(graph);
+                    view.renderGraph(graph);
+                    view.renderAgents(engine.getAgents());
+                    simulationBar.tickLabel.setText("Tick: 0");
+                    statsPanel.showGraphOverview(graph, engine.getAgents().size());
+                }
+            }
+        });
 
 
         // =========================

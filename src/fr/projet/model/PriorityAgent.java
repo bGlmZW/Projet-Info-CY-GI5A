@@ -1,12 +1,14 @@
 package fr.projet.model;
 
+import java.io.Serializable;
+
 /**
  * High-priority agent whose movement speed scales with its priority level.
  *
  * <p>Speed formula: {@code 1.0 + priorityLevel * 0.5}.
  * Examples: level 1 → 1.5, level 2 → 2.0, level 4 → 3.0.</p>
  */
-public class PriorityAgent extends Agent {
+public class PriorityAgent extends Agent implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 
