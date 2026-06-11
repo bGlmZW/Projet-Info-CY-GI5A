@@ -22,34 +22,52 @@ public class HelpDialog {
 
         Label title = new Label("LifeLine GPS Manual");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
+        
         Label content = new Label(
                 """
-                This software is a GPS system for ambulances designed to meet the needs of healthcare providers.
+                LifeLine GPS is an emergency simulation tool for ambulance routing.
 
-                The system automatically chooses between A* and Dijkstra depending on the situation.
+                Principle:
+                • Nodes represent places such as points of interest, hospitals, or accidents.
+                • Edges represent roads between nodes.
+                • Agents represent emergency vehicles moving through the network.
+                • The simulation updates agents and accident patient information at each tick.
 
-                How to use the interface:
+                Node creation:
+                • Click + Node, then click on the map.
+                • Choose a node type.
+                • If the type is ACCIDENT, fill in accident and patient information in the same form.
+                • Accident nodes can display live patient data such as BPM, temperature, consciousness, and condition.
 
-                Add Node:
-                • Click the Add Node button.
-                • Click on the drawing area to place a new node.
+                Edge creation:
+                • Click + Edge.
+                • Click a first node, then a second node.
+                • Choose the distance, capacity, road type, and orientation.
 
-                Add Edge:
-                • Click the Add Edge button.
-                • Click on one node, then another different node.
-                • Enter the edge length
-                (Click in the empty area to cancel edge creation)
+                Agent creation:
+                • Select a start node.
+                • Click Add Ambulance.
+                • Choose the destination, agent type, speed option, and pathfinding algorithm.
+                • If no specific algorithm is selected, the default algorithm is used.
 
-                Add Agent:
-                • Select a node first.
-                • Click Add Agent.
-                • Enter the destination id and the speed.
+                Selection:
+                • Click a node to view its information.
+                • Click an accident node to display the patient panel on the left.
+                • Click an edge to view distance, capacity, type, and traffic information.
+                • Click an agent to view its state, position, destination, and remaining route.
 
                 Simulation controls:
-                • Start: launches the simulation automatically, one tick per second.
+                • Start: runs the simulation automatically.
                 • Pause: stops the simulation.
-                • Reset: returns agents to their initial positions.
+                • Next Tick: advances the simulation manually.
+                • Reset: sends agents back to their initial positions.
+                • The speed slider changes the delay between ticks.
+
+                Extra tools:
+                • Random Expansion adds random nodes and edges to the graph.
+                • Random Agents creates several agents automatically.
+                • Delete Selection removes the selected node, edge, or agent.
+                • Clear All removes every node, edge, and agent from the simulation.
                 """
         );
         content.setWrapText(true);
