@@ -237,15 +237,7 @@ public class MainApp extends Application {
             }
         });
         
-        simulationBar.pathFinderBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            PathFinderType type;
-            switch (newVal) {
-                case "A*":               type = PathFinderType.ASTAR;            break;
-                case "Congestion-Aware": type = PathFinderType.CONGESTION_AWARE; break;
-                default:                 type = PathFinderType.DIJKSTRA;         break;
-            }
-            engine.setDefaultPathFinder(PathFinderFactory.create(type, graph));
-        });
+        
 
         simulationBar.nextTickBtn.setOnAction(e -> {
             engine.tick();
