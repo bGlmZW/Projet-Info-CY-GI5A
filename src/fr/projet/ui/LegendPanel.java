@@ -28,6 +28,7 @@ public class LegendPanel extends VBox {
 
         getChildren().addAll(
                 title,
+                agentRow("Ambulance"),
                 nodeRow("Point of interest", Color.LIGHTGRAY),
                 nodeRow("Hospital", Color.DODGERBLUE),
                 nodeRow("Accident", Color.CRIMSON),
@@ -42,10 +43,11 @@ public class LegendPanel extends VBox {
     }
 
     /**
+     * Builds one legend row for a node type.
      * 
-     * @param text
-     * @param color
-     * @return
+     * @param text label displayed next to the icon
+     * @param color color of the icon
+     * @return row containing the node icon and its label
      */
     private HBox nodeRow(String text, Color color) {
         Circle circle = new Circle(7);
@@ -60,9 +62,10 @@ public class LegendPanel extends VBox {
     }
 
     /**
+     * Builds one legend row for an oriented edge.
      * 
-     * @param text
-     * @return
+     * @param text label displayed next to the icon
+     * @return row containing the oriented edge icon and its label
      */
     private HBox orientedEdgeRow(String text) {
         Pane icon = new Pane();
@@ -88,9 +91,10 @@ public class LegendPanel extends VBox {
     }
 
     /**
+     * Builds one legend row for a non-oriented edge.
      * 
-     * @param text
-     * @return
+     * @param text label displayed next to the icon
+     * @return row containing the non-oriented edge icon and its label
      */
     private HBox nonOrientedEdgeRow(String text) {
         Pane icon = new Pane();
@@ -130,7 +134,6 @@ public class LegendPanel extends VBox {
     
     /**
      * Builds one legend row for a blocked node.
-     * The icon is a normal node circle with a red cross drawn over it.
      *
      * @param text label displayed next to the icon
      * @return row containing the blocked node icon and its label
@@ -167,7 +170,7 @@ public class LegendPanel extends VBox {
     /**
      * Builds one row for an edge type legend item.
      *
-     * @param text label displayed
+     * @param text label displayed next to the icon
      * @param width thickness of the line
      * @param true if the line should be dashed
      * @return row containing the edge type icon and its label
@@ -184,6 +187,25 @@ public class LegendPanel extends VBox {
         Label label = new Label(text);
 
         HBox row = new HBox(10, line, label);
+        row.setPadding(new Insets(2, 0, 2, 0));
+
+        return row;
+    }
+    
+    /**
+     * Builds one legend row for an ambulance agent.
+     *
+     * @param text label displayed next to the icon
+     * @return row containing the ambulance icon and its label
+     */
+    private HBox agentRow(String text) {
+        Circle circle = new Circle(5);
+        circle.setFill(Color.DARKRED);
+        circle.setStroke(Color.BLACK);
+
+        Label label = new Label(text);
+
+        HBox row = new HBox(10, circle, label);
         row.setPadding(new Insets(2, 0, 2, 0));
 
         return row;
