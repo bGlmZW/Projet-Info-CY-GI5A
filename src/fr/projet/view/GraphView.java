@@ -453,25 +453,41 @@ public class GraphView extends Pane {
     private void redrawAgents() {
         positionCounts.clear();
 
-        agentViews.values().forEach(getChildren()::remove);
-        agentViews.clear();
+        // Supprimer uniquement les cercles des agents qui ne sont plus dans la liste
+        Set<Agent> currentSet = new HashSet<>(currentAgents);
+        List<Agent> toRemove = new ArrayList<>();
+        for (Agent agent : agentViews.keySet()) {
+            if (!currentSet.contains(agent)) {
+                toRemove.add(agent);
+            }
+        }
+        for (Agent agent : toRemove) {
+            getChildren().remove(agentViews.get(agent));
+            agentViews.remove(agent);
+        }
 
         for (Agent agent : currentAgents) {
 
-            Circle agentCircle = new Circle(10);
-            agentCircle.setFill(getAgentColor(agent));
-            agentCircle.setStroke(Color.BLACK);
-            if (agent.equals(selectedAgent)) {
-                agentCircle.setStroke(Color.RED);
-                agentCircle.setStrokeWidth(3);
+            // Réutiliser le cercle existant ou en créer un nouveau
+            Circle agentCircle = agentViews.get(agent);
+            if (agentCircle == null) {
+                agentCircle = new Circle(10);
+                agentCircle.setMouseTransparent(false);
+                final Agent currentAgent = agent;
+                agentCircle.setOnMouseClicked(e -> {
+                    agentClickHandler.accept(currentAgent);
+                    e.consume();
+                });
+                agentViews.put(agent, agentCircle);
+                getChildren().add(agentCircle);
             }
-            agentCircle.setMouseTransparent(false);
-            final Agent currentAgent = agent;
-            agentCircle.setOnMouseClicked(e -> {
-                agentClickHandler.accept(currentAgent);
-                e.consume();
-            });
 
+            // Mettre à jour la couleur et le contour
+            agentCircle.setFill(getAgentColor(agent));
+            agentCircle.setStroke(agent.equals(selectedAgent) ? Color.RED : Color.BLACK);
+            agentCircle.setStrokeWidth(agent.equals(selectedAgent) ? 3 : 1);
+
+            // Calculer la position
             double x;
             double y;
 
@@ -481,10 +497,10 @@ public class GraphView extends Pane {
                 continue;
             }
 
-            if (graph != null && agent.getNextNode() != null && !agent.getCurrentPosition().equals(agent.getNextNode())) {
+            if (graph != null && agent.getNextNode() != null
+                    && !agent.getCurrentPosition().equals(agent.getNextNode())) {
 
                 Edge currentEdge = null;
-
                 for (Edge edge : graph.getEdges(agent.getCurrentPosition())) {
                     if (edge.getDestination().equals(agent.getNextNode())) {
                         currentEdge = edge;
@@ -494,18 +510,17 @@ public class GraphView extends Pane {
 
                 if (currentEdge != null) {
                     Circle nextNodeCircle = nodeViews.get(agent.getNextNode());
-
                     if (nextNodeCircle != null) {
-
-                    	double effectiveDist = agent.getCurrentEffectiveDistance() > 0
-                    	        ? agent.getCurrentEffectiveDistance()
-                    	        : currentEdge.getDistance();
-                    	double ratio = agent.getProgressOnEdge() / effectiveDist;
-
+                        double effectiveDist = agent.getCurrentEffectiveDistance() > 0
+                                ? agent.getCurrentEffectiveDistance()
+                                : currentEdge.getDistance();
+                        double ratio = agent.getProgressOnEdge() / effectiveDist;
                         ratio = Math.max(0.0, Math.min(ratio, 1.0));
 
-                        x = currentNodeCircle.getCenterX() + (nextNodeCircle.getCenterX() - currentNodeCircle.getCenterX()) * ratio;
-                        y = currentNodeCircle.getCenterY() + (nextNodeCircle.getCenterY() - currentNodeCircle.getCenterY()) * ratio;
+                        x = currentNodeCircle.getCenterX()
+                                + (nextNodeCircle.getCenterX() - currentNodeCircle.getCenterX()) * ratio;
+                        y = currentNodeCircle.getCenterY()
+                                + (nextNodeCircle.getCenterY() - currentNodeCircle.getCenterY()) * ratio;
                     } else {
                         x = currentNodeCircle.getCenterX();
                         y = currentNodeCircle.getCenterY();
@@ -514,27 +529,24 @@ public class GraphView extends Pane {
                     x = currentNodeCircle.getCenterX();
                     y = currentNodeCircle.getCenterY();
                 }
-
             } else {
                 x = currentNodeCircle.getCenterX();
                 y = currentNodeCircle.getCenterY();
             }
 
+            // Offset si plusieurs agents au même endroit
             String key = Math.round(x) + ":" + Math.round(y);
             int index = positionCounts.getOrDefault(key, 0);
             positionCounts.put(key, index + 1);
 
             double offset = 8.0;
             double angle = index * (Math.PI / 3);
-
             x += Math.cos(angle) * offset;
             y += Math.sin(angle) * offset;
 
             agentCircle.setCenterX(x);
             agentCircle.setCenterY(y);
-
-            agentViews.put(agent, agentCircle);
-            getChildren().add(agentCircle);
+            agentCircle.toFront();
         }
     }
 
