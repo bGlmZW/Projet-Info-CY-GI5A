@@ -1190,40 +1190,17 @@ public class GraphController {
             return;
         	}
         
-        // Modification d'un nœud sélectionné
+     // Modification d'un nœud sélectionné
         if (selectedNode != null) {
+            Optional<CreateDialogs.EditNodeData> result = CreateDialogs.showEditNodeDialog(selectedNode);
+            if (result.isEmpty()) return;
 
-            // Capacité maximale
-            TextInputDialog capacityDialog = new TextInputDialog(
-                    String.valueOf(selectedNode.getMaxCapacity() == Integer.MAX_VALUE
-                            ? 0 : selectedNode.getMaxCapacity())
-            );
-            capacityDialog.setTitle("Edit Node");
-            capacityDialog.setHeaderText("Edit node max capacity");
-            capacityDialog.setContentText("Max capacity (0 = unlimited):");
-
-            Optional<String> capacityResult = capacityDialog.showAndWait();
-            if (capacityResult.isEmpty()) return;
-
-            try {
-                int cap = Integer.parseInt(capacityResult.get().trim());
-                selectedNode.setMaxCapacity(cap <= 0 ? Integer.MAX_VALUE : cap);
-            } catch (NumberFormatException e) {
-                // keep current
-            }
-
-            // Bloqué ou non
-            ChoiceDialog<String> blockedDialog = new ChoiceDialog<>(
-                    selectedNode.isBlocked() ? "BLOCKED" : "OPEN",
-                    "OPEN", "BLOCKED"
-            );
-            blockedDialog.setTitle("Edit Node");
-            blockedDialog.setHeaderText("Node status");
-            blockedDialog.setContentText("Status:");
-
-            Optional<String> blockedResult = blockedDialog.showAndWait();
-            if (blockedResult.isEmpty()) return;
-            selectedNode.setBlocked("BLOCKED".equals(blockedResult.get()));
+            CreateDialogs.EditNodeData data = result.get();
+            selectedNode.setName(data.name());
+            selectedNode.setType(data.type());
+            selectedNode.setAccident(data.accident());
+            selectedNode.setMaxCapacity(data.maxCapacity());
+            selectedNode.setBlocked(data.blocked());
 
             if (view != null) {
                 view.renderGraph(graph);
