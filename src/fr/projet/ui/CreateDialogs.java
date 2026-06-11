@@ -6,6 +6,12 @@ import fr.projet.model.AccidentType;
 import fr.projet.model.NodeType;
 import fr.projet.model.Patient;
 
+import fr.projet.model.AgentType;
+import fr.projet.model.EdgeType;
+import fr.projet.pathfinding.PathFinderType;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -30,6 +36,10 @@ public class CreateDialogs {
     public record NodeData(String name, NodeType type, Accident accident) {}
     
     public record EditNodeData(String name, NodeType type, Accident accident, int maxCapacity, boolean blocked) {}
+    
+    public record AgentData(int destinationId, AgentType type, double speed, PathFinderType algo) {}
+
+public record EdgeData(double weight, EdgeType type, boolean oriented, int capacity) {}
 
     /**
      * Shows the node creation dialog.
@@ -319,6 +329,104 @@ public class CreateDialogs {
 
         return dialog.showAndWait();
     }
+    
+    public static Optional<AgentData> showAgentDialog(java.util.Set<Integer> availableNodeIds) {
+        Dialog<AgentData> dialog = new Dialog<>();
+        dialog.setTitle("Create Agent");
+        dialog.setHeaderText("Agent properties");
+
+        // Destination
+        TextField destinationField = new TextField();
+        destinationField.setPromptText("Node ID");
+
+        // Type
+        ComboBox<AgentType> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll(AgentType.values());
+        typeBox.setValue(AgentType.NORMAL);
+
+        // Speed
+        Spinner<Double> speedSpinner = new Spinner<>();
+        speedSpinner.setValueFactory(
+            new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.1)
+        );
+        speedSpinner.setEditable(true);
+        speedSpinner.setPrefWidth(100);
+
+        // Algo
+        ComboBox<PathFinderType> algoBox = new ComboBox<>();
+        algoBox.getItems().addAll(PathFinderType.values());
+        algoBox.setValue(PathFinderType.DIJKSTRA);
+
+        GridPane grid = createGrid();
+        grid.addRow(0, fieldLabel("Destination node ID:"), destinationField);
+        grid.addRow(1, fieldLabel("Agent type:"),          typeBox);
+        grid.addRow(2, fieldLabel("Speed:"),               speedSpinner);
+        grid.addRow(3, fieldLabel("Algorithm:"),           algoBox);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setMinWidth(400);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(button -> {
+            if (button != ButtonType.OK) return null;
+            int destId = parseInt(destinationField.getText(), -1);
+            if (destId < 0) return null;
+            return new AgentData(destId, typeBox.getValue(),
+                    speedSpinner.getValue(), algoBox.getValue());
+        });
+
+        return dialog.showAndWait();
+    }
+    
+    public static Optional<EdgeData> showEdgeDialog() {
+        Dialog<EdgeData> dialog = new Dialog<>();
+        dialog.setTitle("Create Edge");
+        dialog.setHeaderText("Edge properties");
+
+        // Poids
+        Spinner<Double> weightSpinner = new Spinner<>();
+        weightSpinner.setValueFactory(
+            new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 100.0, 1.0, 0.5)
+        );
+        weightSpinner.setEditable(true);
+        weightSpinner.setPrefWidth(100);
+
+        // Type
+        ComboBox<EdgeType> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll(EdgeType.values());
+        typeBox.setValue(EdgeType.ROAD);
+
+        // Orientation
+        CheckBox orientedBox = new CheckBox("Oriented (one way)");
+        orientedBox.setSelected(false);
+
+        // Capacité
+        Spinner<Integer> capacitySpinner = new Spinner<>();
+        capacitySpinner.setValueFactory(
+            new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 2)
+        );
+        capacitySpinner.setEditable(true);
+        capacitySpinner.setPrefWidth(100);
+
+        GridPane grid = createGrid();
+        grid.addRow(0, fieldLabel("Weight:"),    weightSpinner);
+        grid.addRow(1, fieldLabel("Type:"),      typeBox);
+        grid.addRow(2, fieldLabel("Capacity:"),  capacitySpinner);
+        grid.addRow(3, fieldLabel(""),           orientedBox);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setMinWidth(400);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(button -> {
+            if (button != ButtonType.OK) return null;
+            return new EdgeData(weightSpinner.getValue(), typeBox.getValue(),
+                    orientedBox.isSelected(), capacitySpinner.getValue());
+        });
+
+        return dialog.showAndWait();
+    }
+    
     
     /**
      * 

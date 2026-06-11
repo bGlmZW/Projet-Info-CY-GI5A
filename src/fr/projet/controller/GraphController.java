@@ -369,162 +369,94 @@ public class GraphController {
      *
      * @param clickedNode node clicked by the user
      */
-    public void handleNodeClicked(Node clickedNode) {
-    	// Clicking on node cancels node creation mode.
-    	if (clickedNode == null) {
-    	    return;
-    	}
-        
-        selectedAgent = null;
-        if (view != null) {
-            view.clearSelection();
-        }
-        selectedEdge = null;
-        if (view != null) {
-            view.clearSelection();
-        }
+	public void handleNodeClicked(Node clickedNode) {
+	    if (clickedNode == null) {
+	        return;
+	    }
 
-        if (deleteMode) {
-            graph.removeNode(clickedNode);
-            selectedNode = null;
-            disableDeleteMode();
+	    selectedAgent = null;
+	    if (view != null) {
+	        view.clearSelection();
+	    }
+	    selectedEdge = null;
+	    if (view != null) {
+	        view.clearSelection();
+	    }
 
-            if (view != null) {
-                view.clearSelection();
-                view.renderGraph(graph);
-            }
-            return;
-        }
+	    if (deleteMode) {
+	        graph.removeNode(clickedNode);
+	        selectedNode = null;
+	        disableDeleteMode();
 
-        if (nodeCreationMode) {
-            return;
-        }
+	        if (view != null) {
+	            view.clearSelection();
+	            view.renderGraph(graph);
+	        }
+	        return;
+	    }
 
-        // Normal selection outside edge mode
-        if (!edgeCreationMode) {
-            if (selectedNode != null && selectedNode.equals(clickedNode)) {
-                selectedNode = null;
+	    if (nodeCreationMode) {
+	        return;
+	    }
 
-                if (view != null) {
-                    view.clearSelection();
-                }
-                return;
-            }
+	    // Normal selection outside edge mode
+	    if (!edgeCreationMode) {
+	        if (selectedNode != null && selectedNode.equals(clickedNode)) {
+	            selectedNode = null;
+	            if (view != null) {
+	                view.clearSelection();
+	            }
+	            return;
+	        }
 
-            selectedNode = clickedNode;
+	        selectedNode = clickedNode;
+	        if (view != null) {
+	            view.setSelectedNode(clickedNode);
+	        }
+	        return;
+	    }
 
-            if (view != null) {
-                view.setSelectedNode(clickedNode);
-            }
-            return;
-        }
+	    // First click in edge mode: select the source node
+	    if (selectedNode == null) {
+	        selectedNode = clickedNode;
+	        if (view != null) {
+	            view.setSelectedNode(clickedNode);
+	        }
+	        return;
+	    }
 
-        // First click in edge mode: select the source node
-        if (selectedNode == null) {
-            selectedNode = clickedNode;
+	    // Clicking the same node does not create an edge
+	    if (selectedNode.equals(clickedNode)) {
+	        selectedNode = null;
+	        if (view != null) {
+	            view.setSelectedNode(clickedNode);
+	        }
+	        return;
+	    }
 
-            if (view != null) {
-                view.setSelectedNode(clickedNode);
-            }
-            return;
-        }
+	    // Formulaire unique pour créer une arête
+	    Optional<CreateDialogs.EdgeData> edgeResult = CreateDialogs.showEdgeDialog();
+	    if (edgeResult.isEmpty()) {
+	        return;
+	    }
 
-        // Clicking the same node does not create an edge
-        if (selectedNode.equals(clickedNode)) {
-            selectedNode = null;
+	    CreateDialogs.EdgeData edgeData = edgeResult.get();
 
-            if (view != null) {
-                view.setSelectedNode(clickedNode);
-            }
-            return;
-        }
+	    if (!graph.hasConnection(selectedNode, clickedNode)) {
+	        Edge newEdge = new Edge(selectedNode, clickedNode,
+	                edgeData.weight(), edgeData.capacity(),
+	                edgeData.type(), edgeData.oriented());
+	        graph.addEdge(newEdge);
+	    }
 
-        // Let the user choose the weight of the edge
-        TextInputDialog dialog = new TextInputDialog("1");
-        dialog.setTitle("Edge weight");
-        dialog.setHeaderText("Enter edge weight");
-        dialog.setContentText("Weight:");
+	    selectedNode = null;
+	    disableEdgeCreationMode();
 
-        Optional<String> result = dialog.showAndWait();
-
-        double weight = 1.0;
-
-        if (result.isPresent()) {
-            try {
-                weight = Double.parseDouble(result.get());
-            } catch (NumberFormatException e) {
-                weight = 1.0; // fallback if user enters invalid value
-            }
-        }
-
-
-     // Edge type input
-
-        ChoiceDialog<EdgeType> typeDialog = new ChoiceDialog<>(
-                EdgeType.ROAD,
-                java.util.Arrays.asList(EdgeType.values())
-        );
-        typeDialog.setTitle("Edge type");
-        typeDialog.setHeaderText("Choose edge type");
-        typeDialog.setContentText("Type:");
-
-        Optional<EdgeType> typeResult = typeDialog.showAndWait();
-        if (typeResult.isEmpty()) {
-            return;
-        }
-
-        
-        // Edge orientation input
-        ChoiceDialog<String> orientationDialog = new ChoiceDialog<>(
-                "Non oriented",
-                "Oriented",
-                "Non oriented"
-        );
-        orientationDialog.setTitle("Edge orientation");
-        orientationDialog.setHeaderText("Choose edge orientation");
-        orientationDialog.setContentText("Orientation:");
-
-        Optional<String> orientationResult = orientationDialog.showAndWait();
-        if (orientationResult.isEmpty()) {
-            return;
-        }
-
-        boolean oriented = "Oriented".equals(orientationResult.get());
-
-
-        EdgeType edgeType = typeResult.get();
-
-        // Capacity input
-        TextInputDialog capacityDialog = new TextInputDialog("1");
-        capacityDialog.setTitle("Edge capacity");
-        capacityDialog.setHeaderText("Enter edge capacity");
-        capacityDialog.setContentText("Capacity:");
-
-        Optional<String> capacityResult = capacityDialog.showAndWait();
-
-        int capacity = Integer.MAX_VALUE;
-        if (capacityResult.isPresent()) {
-            try {
-                capacity = Integer.parseInt(capacityResult.get());
-            } catch (NumberFormatException e) {
-                capacity = Integer.MAX_VALUE;
-            }
-        }
-
-        // Create edge only if it does not already exist
-        if (!graph.hasConnection(selectedNode, clickedNode)) {
-            Edge newEdge = new Edge(selectedNode, clickedNode, weight, capacity, edgeType, oriented);
-            graph.addEdge(newEdge);
-        }
-
-        selectedNode = null;
-        disableEdgeCreationMode();
-
-        if (view != null) {
-            view.clearSelection();
-            view.renderGraph(graph);
-        }
-    }
+	    if (view != null) {
+	        view.clearSelection();
+	        view.renderGraph(graph);
+	    }
+	}
 
     /**
      * Handles a click on an edge and removes it when deletion mode is active.
@@ -692,10 +624,7 @@ public class GraphController {
      * @param engine simulation engine used to store the new agent
      */
     public void createAgentAtSelectedNode(SimulationEngine engine) {
-
-        if (engine == null) {
-            return;
-        }
+        if (engine == null) return;
 
         if (selectedNode == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -706,120 +635,36 @@ public class GraphController {
             return;
         }
 
-        // Destination input
-        TextInputDialog destDialog = new TextInputDialog();
-        destDialog.setTitle("Create Agent");
-        destDialog.setHeaderText("Enter destination node id");
-        destDialog.setContentText("Destination:");
-
-        Optional<String> destResult = destDialog.showAndWait();
-        if (destResult.isEmpty()) {
-            return;
+        // Récupérer les IDs disponibles pour la destination
+        java.util.Set<Integer> nodeIds = new java.util.HashSet<>();
+        for (Node n : graph.getAllNodes()) {
+            if (!n.equals(selectedNode)) nodeIds.add(n.getId());
         }
 
-        int destinationId;
-        try {
-            destinationId = Integer.parseInt(destResult.get().trim());
-        } catch (NumberFormatException e) {
-            return;
-        }
+        Optional<CreateDialogs.AgentData> result = CreateDialogs.showAgentDialog(nodeIds);
+        if (result.isEmpty()) return;
 
-        Node destination = graph.getNodeById(destinationId);
+        CreateDialogs.AgentData data = result.get();
+
+        Node destination = graph.getNodeById(data.destinationId());
         if (destination == null || destination.equals(selectedNode)) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Create Agent");
+            alert.setHeaderText("Invalid destination");
+            alert.setContentText("Please enter a valid destination node ID.");
+            alert.showAndWait();
             return;
         }
 
-        // Agent type selection
-        ChoiceDialog<AgentType> typeDialog = new ChoiceDialog<>(
-                AgentType.NORMAL,
-                java.util.Arrays.asList(AgentType.values())
-        );
-        typeDialog.setTitle("Create Agent");
-        typeDialog.setHeaderText("Choose agent type");
-        typeDialog.setContentText("Type:");
-
-        Optional<AgentType> typeResult = typeDialog.showAndWait();
-        if (typeResult.isEmpty()) {
-            return;
-        }
-
-        AgentType agentType = typeResult.get();
-
-        // Custom speed input only for CUSTOM SPEED choice
-        double customSpeed = 1.0;
-        boolean useCustomSpeed = false;
-
-        // If you want a custom speed option, keep this small extra dialog
-        ChoiceDialog<String> speedModeDialog = new ChoiceDialog<>(
-                "DEFAULT",
-                "DEFAULT",
-                "CUSTOM SPEED"
-        );
-        speedModeDialog.setTitle("Create Agent");
-        speedModeDialog.setHeaderText("Speed mode");
-        speedModeDialog.setContentText("Speed:");
-
-        Optional<String> speedModeResult = speedModeDialog.showAndWait();
-        if (speedModeResult.isEmpty()) {
-            return;
-        }
-
-        if ("CUSTOM SPEED".equals(speedModeResult.get())) {
-            TextInputDialog speedDialog = new TextInputDialog("1.0");
-            speedDialog.setTitle("Create Agent");
-            speedDialog.setHeaderText("Enter agent speed");
-            speedDialog.setContentText("Speed:");
-
-            Optional<String> speedResult = speedDialog.showAndWait();
-            if (speedResult.isEmpty()) {
-                return;
-            }
-
-            try {
-                customSpeed = Double.parseDouble(speedResult.get().trim());
-                useCustomSpeed = true;
-            } catch (NumberFormatException e) {
-                customSpeed = 1.0;
-                useCustomSpeed = true;
-            }
-        }
-
-        // Algorithm selection
-        ChoiceDialog<PathFinderType> algoDialog = new ChoiceDialog<>(
-                PathFinderType.DIJKSTRA,
-                java.util.Arrays.asList(PathFinderType.values())
-        );
-        algoDialog.setTitle("Create Agent");
-        algoDialog.setHeaderText("Choose pathfinding algorithm");
-        algoDialog.setContentText("Algorithm:");
-
-        Optional<PathFinderType> algoResult = algoDialog.showAndWait();
-        if (algoResult.isEmpty()) {
-            return;
-        }
-
-        PathFinderType algoType = algoResult.get();
-        IPathFinder agentPathFinder = PathFinderFactory.create(algoType, graph);
-
-        // ID generation
         int newId = engine.getAgents().stream()
                 .mapToInt(Agent::getId)
                 .max()
                 .orElse(0) + 1;
 
-        Agent agent;
+        Agent agent = AgentFactory.create(data.type(), newId, selectedNode, destination);
+        agent.setSpeed(data.speed());
+        agent.setPathFinder(PathFinderFactory.create(data.algo(), graph));
 
-        if (useCustomSpeed) {
-
-        	agent = new Agent(newId, customSpeed, selectedNode, destination);
-        	agent.setAgentType(agentType);
-
-        } else {
-            agent = AgentFactory.create(agentType, newId, selectedNode, destination);
-        }
-
-        agent.setPathFinder(agentPathFinder);
-        
         engine.addAgent(agent);
         selectedNode.addAgent(agent);
 
