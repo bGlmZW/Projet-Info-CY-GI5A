@@ -4,7 +4,7 @@
 /**
  * 
  */
-module yyy {
+module ddq {
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
 
