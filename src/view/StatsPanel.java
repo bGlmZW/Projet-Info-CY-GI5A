@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class StatsPanel extends VBox {
 
-    private final Label titleLabel = new Label("Stats dashboard");
+    private final Label titleLabel = new Label("Stats Dashboard");
     private final VBox contentBox = new VBox(8);
 
     /**

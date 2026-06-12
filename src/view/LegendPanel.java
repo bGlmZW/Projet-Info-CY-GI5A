@@ -19,7 +19,7 @@ public class LegendPanel extends VBox {
 
     public LegendPanel() {
         setSpacing(8);
-        setPrefWidth(320);
+        setPrefWidth(230);
         setPadding(new Insets(12));
         setStyle("-fx-background-color: #fafafa; -fx-border-color: #d0d0d0;");
 
@@ -36,8 +36,8 @@ public class LegendPanel extends VBox {
                 nodeRow("Point of interest", Color.LIGHTGRAY),
                 nodeRow("Hospital", Color.DODGERBLUE),
                 nodeRow("Accident", Color.CRIMSON),
-                nodeRow("Selected node", Color.GOLD),
                 blockedNodeRow("Blocked node"),
+                nodeRow("Selected node", Color.GOLD),
 
                 categoryTitle("Edges"),
                 orientedEdgeRow("Oriented edge"),

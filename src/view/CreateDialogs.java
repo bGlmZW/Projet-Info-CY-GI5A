@@ -31,40 +31,28 @@ public class CreateDialogs {
 
 	/**
 	 * Data returned by the node creation dialog.
-	 * @param name optional node name
-	 * @param type node type
-	 * @param accident accident details, or null if not an accident node
 	 */
     public record NodeData(String name, NodeType type, Accident accident) {}
     
     /**
      * Data returned by the node edit dialog.
-     * @param name optional node name
-     * @param type node type
-     * @param accident accident details, or null if not an accident node
-     * @param maxCapacity maximum number of agents allowed on the node
-     * @param blocked whether the node is blocked
      */
     public record EditNodeData(String name, NodeType type, Accident accident, int maxCapacity, boolean blocked) {}
     
     /**
      * Data returned by the agent creation dialog.
-     * @param destinationId ID of the destination node
-     * @param type agent type
-     * @param speed maximum movement speed
-     * @param algo pathfinding algorithm to use
      */
     public record AgentData(int destinationId, AgentType type, double speed, PathFinderType algo) {}
     
     /**
      * Data returned by the edge creation dialog.
-     * @param weight edge weight/distance
-     * @param type edge type
-     * @param oriented whether the edge is directed
-     * @param capacity maximum number of agents allowed on the edge
      */
     public record EdgeData(double weight, EdgeType type, boolean oriented, int capacity) {}
     
+    /**
+     * Data returned by the random agents dialog.
+     */
+    public record RandomAgentsData(int count, AgentType type) {}
 
     /**
      * Shows the node creation dialog.
@@ -466,6 +454,62 @@ public class CreateDialogs {
 
         return dialog.showAndWait();
     }
+    
+    /**
+     * Displays a dialog to create random agents.
+     *
+     * @return an Optional containing the random agents data, or empty if cancelled
+     */
+    public static Optional<RandomAgentsData> showRandomAgentsDialog() {
+        Dialog<RandomAgentsData> dialog = new Dialog<>();
+        dialog.setTitle("Add Random Agents");
+        dialog.setHeaderText("Random agents properties");
+
+        Spinner<Integer> countSpinner = new Spinner<>();
+        countSpinner.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 5)
+        );
+        countSpinner.setEditable(true);
+        countSpinner.setPrefWidth(100);
+
+        ComboBox<String> typeBox = new ComboBox<>();
+        typeBox.getItems().add("RANDOM");
+
+        for (AgentType type : AgentType.values()) {
+            typeBox.getItems().add(type.name());
+        }
+
+        typeBox.setValue("RANDOM");
+
+        GridPane grid = createGrid();
+        grid.addRow(0, fieldLabel("Number of agents:"), countSpinner);
+        grid.addRow(1, fieldLabel("Agent type:"), typeBox);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setMinWidth(400);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(button -> {
+            if (button != ButtonType.OK) {
+                return null;
+            }
+
+            AgentType selectedType = null;
+
+            if (!"RANDOM".equals(typeBox.getValue())) {
+                selectedType = AgentType.valueOf(typeBox.getValue());
+            }
+
+            return new RandomAgentsData(
+                    countSpinner.getValue(),
+                    selectedType
+            );
+        });
+
+        return dialog.showAndWait();
+    }
+    
+
     
     
     /**

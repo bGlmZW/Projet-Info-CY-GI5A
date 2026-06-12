@@ -360,13 +360,13 @@ public class MainApp extends Application {
         root.setCenter(view);
 
         
-        // Split StatsPanel and LegendPanel in half
-        VBox rightBar = new VBox(12, statsPanel, legendPanel);
+        // Split StatsPanel and PatientPanel in half
+        VBox rightBar = new VBox(12, statsPanel, patientPanel);
         root.setRight(rightBar);
-        
-        root.setLeft(patientPanel);
-        root.setBottom(bottomBar);
 
+        root.setLeft(legendPanel);
+        root.setBottom(bottomBar);
+        
         Scene scene = new Scene(root, 1100, 700);
         stage.setMinWidth(900);
         stage.setMinHeight(600);

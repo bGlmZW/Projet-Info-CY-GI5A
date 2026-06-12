@@ -3,8 +3,10 @@ package view;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+
 import model.accident.Accident;
 import model.agent.Patient;
 
@@ -29,7 +31,7 @@ public class PatientPanel extends VBox {
     public void clear() {
         getChildren().clear();
 
-        Label title = new Label("Patient");
+        Label title = new Label("Patient Information");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
         Label empty = new Label("No accident selected");
@@ -79,9 +81,16 @@ public class PatientPanel extends VBox {
      * @param value information value
      */
     private void addStat(String label, String value) {
-        Label stat = new Label(label + ": " + value);
-        stat.setWrapText(true);
-        stat.setMaxWidth(230);
-        getChildren().add(stat);
+        Label nameLabel = new Label(label + ": ");
+        nameLabel.setFont(Font.font("System", FontWeight.BOLD, 12));
+
+        Label valueLabel = new Label(value);
+        valueLabel.setWrapText(true);
+        valueLabel.setMaxWidth(250);
+
+        HBox row = new HBox(nameLabel, valueLabel);
+        row.setSpacing(2);
+
+        getChildren().add(row);
     }
 }
