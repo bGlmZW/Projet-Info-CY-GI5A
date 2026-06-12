@@ -11,7 +11,6 @@ module ProjetGenieLogicel3 {
     exports model.graph;
     exports pathfinding;
     exports simulation;
-    exports ui;
     exports controller;
     exports view;
     exports io;

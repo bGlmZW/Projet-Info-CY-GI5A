@@ -1,14 +1,14 @@
-package ui;
+package view;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.Agent;
-import model.Edge;
-import model.Graph;
-import model.Node;
+import model.agent.Agent;
+import model.graph.Edge;
+import model.graph.Graph;
+import model.graph.Node;
 
 import java.util.HashSet;
 import java.util.List;

@@ -10,6 +10,11 @@ import javafx.scene.shape.Polygon;
 
 import javafx.scene.text.Text;
 import model.*;
+import model.agent.Agent;
+import model.graph.Edge;
+import model.graph.Graph;
+import model.graph.Node;
+import model.graph.NodeType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
 import javafx.geometry.Point2D;

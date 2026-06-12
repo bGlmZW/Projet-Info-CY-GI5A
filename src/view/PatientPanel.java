@@ -1,12 +1,12 @@
-package ui;
+package view;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.Accident;
-import model.Patient;
+import model.accident.Accident;
+import model.agent.Patient;
 
 /**
  * Panel displaying real-time medical information about a patient.

@@ -1,4 +1,4 @@
-package ui;
+package view;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -10,20 +10,19 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-import model.Agent;
-import model.Graph;
-import model.Node;
+import model.agent.Agent;
+import model.graph.Graph;
+import model.graph.Node;
 import pathfinding.PathFinderType;
 import simulation.ArrivalBehavior;
 import simulation.SimulationEngine;
-import view.GraphView;
 import javafx.stage.FileChooser;
 import java.io.File;
 
 import controller.GraphController;
 import controller.PathFinderFactory;
 import controller.SimulationController;
-import io.SaveManager;
+import io.GraphStorageManager;
 
 
 /**
@@ -278,7 +277,7 @@ public class MainApp extends Application {
             fileChooser.setInitialFileName("simulation.dat");
             File file = fileChooser.showSaveDialog(stage);
             if (file != null) {
-                SaveManager.saveSimulation(graph, engine.getAgents(), file.getAbsolutePath());
+                GraphStorageManager.saveSimulation(graph, engine.getAgents(), file.getAbsolutePath());
             }
         });
 
@@ -290,7 +289,7 @@ public class MainApp extends Application {
             );
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
-                Object[] data = SaveManager.restoreSimulation(file.getAbsolutePath());
+                Object[] data = GraphStorageManager.restoreSimulation(file.getAbsolutePath());
                 
                 
                 

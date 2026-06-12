@@ -1,4 +1,4 @@
-package ui;
+package view;
 
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -13,13 +13,13 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
-import model.Accident;
-import model.AccidentType;
-import model.AgentType;
-import model.EdgeType;
-import model.Node;
-import model.NodeType;
-import model.Patient;
+import model.accident.Accident;
+import model.accident.AccidentType;
+import model.agent.AgentType;
+import model.agent.Patient;
+import model.graph.EdgeType;
+import model.graph.Node;
+import model.graph.NodeType;
 import pathfinding.PathFinderType;
 
 import java.util.Optional;
