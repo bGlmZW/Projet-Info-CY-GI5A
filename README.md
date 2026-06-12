@@ -81,7 +81,7 @@ Replace `/path/to/javafx-sdk-21` with the actual JavaFX SDK path on your machine
    - Select all `.jar` inside the `lib/` folder of the downloaded JavaFX SDK
    - **Apply and Close**
 
-4. Update the `src/module-info.java` file — Eclipse generates an empty one when creating the project. Replace its content with:
+4. Update the `src/module-info.java` file. Eclipse generates an empty one when creating the project. Replace its content with:
 ```java
    module <project_name> {
    	requires transitive javafx.controls;
