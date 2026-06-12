@@ -1,9 +1,8 @@
 package view;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-
-import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -13,16 +12,17 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
+
+import java.util.Optional;
+
 import model.accident.Accident;
 import model.accident.AccidentType;
+import model.accident.Patient;
 import model.agent.AgentType;
-import model.agent.Patient;
 import model.graph.EdgeType;
 import model.graph.Node;
 import model.graph.NodeType;
 import pathfinding.PathFinderType;
-
-import java.util.Optional;
 
 /**
  * Contains creation dialogs used by the application.
@@ -58,7 +58,7 @@ public class CreateDialogs {
      * Shows the node creation dialog.
      * If the selected node type is ACCIDENT, accident and patient fields are displayed.
      *
-     * @return node data if the user clicks OK
+     * @return node data if the user clicks "OK"
      */
     public static Optional<NodeData> showNodeDialog() {
         Dialog<NodeData> dialog = new Dialog<>();
@@ -129,6 +129,7 @@ public class CreateDialogs {
         dialog.getDialogPane().setPrefHeight(650);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
+        // Shows accident fields only when the ACCIDENT node type is selected
         Runnable updateAccidentFieldsVisibility = () -> {
             boolean isAccident = typeBox.getValue() == NodeType.ACCIDENT;
 
@@ -201,9 +202,9 @@ public class CreateDialogs {
         return dialog.showAndWait();
     }
     
-    
     /**
      * Displays a dialog to edit an existing node.
+     * 
      * @param node the node to edit
      * @return an Optional containing the updated node data, or empty if cancelled
      */
@@ -212,7 +213,7 @@ public class CreateDialogs {
         dialog.setTitle("Edit Node");
         dialog.setHeaderText("Edit node properties");
 
-        // Nom
+        // Name
         TextField nameField = new TextField(node.getName() != null ? node.getName() : "");
         nameField.setPromptText("Optional name");
 
@@ -221,15 +222,15 @@ public class CreateDialogs {
         typeBox.getItems().addAll(NodeType.values());
         typeBox.setValue(node.getType() != null ? node.getType() : NodeType.POINT_OF_INTEREST);
 
-        // Capacité
+        // Capacity
         int currentCap = node.getMaxCapacity() == Integer.MAX_VALUE ? 0 : node.getMaxCapacity();
         TextField capacityField = new TextField(String.valueOf(currentCap));
 
-        // Bloqué
+        // Blocked
         CheckBox blockedBox = new CheckBox("Blocked");
         blockedBox.setSelected(node.isBlocked());
 
-        // Accident fields (pré-remplis si existant)
+        // Accident fields
         Accident existingAccident = node.getAccident();
 
         Label accidentTitle = new Label("Accident information");
@@ -263,28 +264,28 @@ public class CreateDialogs {
 
         // Labels
         Label accidentTypeLabel = fieldLabel("Accident type:");
-        Label descriptionLabel  = fieldLabel("Description:");
-        Label patientNameLabel  = fieldLabel("Patient name:");
-        Label ageLabel          = fieldLabel("Age:");
-        Label bpmLabel          = fieldLabel("BPM:");
-        Label temperatureLabel  = fieldLabel("Temperature:");
-        Label stateLabel        = fieldLabel("State:");
-        Label conditionLabel    = fieldLabel("Condition:");
+        Label descriptionLabel = fieldLabel("Description:");
+        Label patientNameLabel = fieldLabel("Patient name:");
+        Label ageLabel = fieldLabel("Age:");
+        Label bpmLabel = fieldLabel("BPM:");
+        Label temperatureLabel = fieldLabel("Temperature:");
+        Label stateLabel = fieldLabel("State:");
+        Label conditionLabel = fieldLabel("Condition:");
 
         GridPane grid = createGrid();
-        grid.addRow(0, fieldLabel("Name:"),         nameField);
-        grid.addRow(1, fieldLabel("Node type:"),    typeBox);
+        grid.addRow(0, fieldLabel("Name:"), nameField);
+        grid.addRow(1, fieldLabel("Node type:"), typeBox);
         grid.addRow(2, fieldLabel("Max capacity:"), capacityField);
-        grid.addRow(3, fieldLabel("Blocked:"),      blockedBox);
+        grid.addRow(3, fieldLabel("Blocked:"), blockedBox);
         grid.add(accidentTitle, 0, 4, 2, 1);
-        grid.addRow(5, accidentTypeLabel,  accidentTypeBox);
-        grid.addRow(6, descriptionLabel,   descriptionArea);
-        grid.addRow(7, patientNameLabel,   patientNameField);
-        grid.addRow(8, ageLabel,           ageField);
-        grid.addRow(9, bpmLabel,           bpmField);
-        grid.addRow(10, temperatureLabel,  temperatureField);
-        grid.addRow(11, stateLabel,        consciousBox);
-        grid.addRow(12, conditionLabel,    conditionField);
+        grid.addRow(5, accidentTypeLabel,accidentTypeBox);
+        grid.addRow(6, descriptionLabel, descriptionArea);
+        grid.addRow(7, patientNameLabel, patientNameField);
+        grid.addRow(8, ageLabel,ageField);
+        grid.addRow(9, bpmLabel, bpmField);
+        grid.addRow(10, temperatureLabel, temperatureField);
+        grid.addRow(11, stateLabel, consciousBox);
+        grid.addRow(12, conditionLabel, conditionField);
 
         ScrollPane scrollPane = new ScrollPane(grid);
         scrollPane.setFitToWidth(true);
@@ -295,26 +296,26 @@ public class CreateDialogs {
         dialog.getDialogPane().setPrefHeight(700);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        // Afficher/masquer les champs accident selon le type
+        // Show and hide accident fields based on type
         Runnable updateVisibility = () -> {
             boolean isAccident = typeBox.getValue() == NodeType.ACCIDENT;
-            setVisible(accidentTitle,      isAccident);
-            setVisible(accidentTypeLabel,  isAccident);
-            setVisible(accidentTypeBox,    isAccident);
-            setVisible(descriptionLabel,   isAccident);
-            setVisible(descriptionArea,    isAccident);
-            setVisible(patientNameLabel,   isAccident);
-            setVisible(patientNameField,   isAccident);
-            setVisible(ageLabel,           isAccident);
-            setVisible(ageField,           isAccident);
-            setVisible(bpmLabel,           isAccident);
-            setVisible(bpmField,           isAccident);
-            setVisible(temperatureLabel,   isAccident);
-            setVisible(temperatureField,   isAccident);
-            setVisible(stateLabel,         isAccident);
-            setVisible(consciousBox,       isAccident);
-            setVisible(conditionLabel,     isAccident);
-            setVisible(conditionField,     isAccident);
+            setVisible(accidentTitle,isAccident);
+            setVisible(accidentTypeLabel, isAccident);
+            setVisible(accidentTypeBox, isAccident);
+            setVisible(descriptionLabel, isAccident);
+            setVisible(descriptionArea, isAccident);
+            setVisible(patientNameLabel, isAccident);
+            setVisible(patientNameField, isAccident);
+            setVisible(ageLabel, isAccident);
+            setVisible(ageField, isAccident);
+            setVisible(bpmLabel, isAccident);
+            setVisible(bpmField, isAccident);
+            setVisible(temperatureLabel, isAccident);
+            setVisible(temperatureField, isAccident);
+            setVisible(stateLabel, isAccident);
+            setVisible(consciousBox, isAccident);
+            setVisible(conditionLabel, isAccident);
+            setVisible(conditionField, isAccident);
         };
 
         typeBox.valueProperty().addListener((obs, o, n) -> updateVisibility.run());
@@ -351,6 +352,7 @@ public class CreateDialogs {
     
     /**
      * Displays a dialog to create a new agent.
+     * *
      * @param availableNodeIds set of valid destination node IDs
      * @return an Optional containing the agent data, or empty if cancelled
      */
@@ -376,7 +378,7 @@ public class CreateDialogs {
         speedSpinner.setEditable(true);
         speedSpinner.setPrefWidth(100);
 
-        // Algo
+        // Algorithm
         ComboBox<PathFinderType> algoBox = new ComboBox<>();
         algoBox.getItems().addAll(PathFinderType.values());
         algoBox.setValue(PathFinderType.DIJKSTRA);
@@ -404,6 +406,7 @@ public class CreateDialogs {
     
     /**
      * Displays a dialog to create a new edge.
+     * 
      * @return an Optional containing the edge data, or empty if cancelled
      */
     public static Optional<EdgeData> showEdgeDialog() {
@@ -411,7 +414,7 @@ public class CreateDialogs {
         dialog.setTitle("Create Edge");
         dialog.setHeaderText("Edge properties");
 
-        // Poids
+        // Weight
         Spinner<Double> weightSpinner = new Spinner<>();
         weightSpinner.setValueFactory(
             new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 100.0, 1.0, 0.5)
@@ -428,7 +431,7 @@ public class CreateDialogs {
         CheckBox orientedBox = new CheckBox("Oriented (one way)");
         orientedBox.setSelected(false);
 
-        // Capacité
+        // Capacity
         Spinner<Integer> capacitySpinner = new Spinner<>();
         capacitySpinner.setValueFactory(
             new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 2)
@@ -509,13 +512,11 @@ public class CreateDialogs {
         return dialog.showAndWait();
     }
     
-
-    
-    
     /**
-     * 
-     * @param text
-     * @return
+     * Creates labels with a consistent width so form fields stay aligned.
+     *
+     * @param text label text
+     * @return configured label
      */
     private static Label fieldLabel(String text) {
         Label label = new Label(text);
@@ -524,7 +525,7 @@ public class CreateDialogs {
     }
 
     /**
-     * Creates the grid used by the dialog.
+     * Creates a common layout used by creation dialogs to keep a consistent appearance.
      *
      * @return configured grid
      */
@@ -537,10 +538,10 @@ public class CreateDialogs {
     }
 
     /**
-     * Converts text to int.
+     * Prevents invalid user input from interrupting dialog processing.
      *
-     * @param value text value
-     * @param fallback default value if conversion fails
+     * @param value entered text
+     * @param fallback value used when parsing fails
      * @return parsed value or fallback
      */
     private static int parseInt(String value, int fallback) {
@@ -552,10 +553,10 @@ public class CreateDialogs {
     }
 
     /**
-     * Converts text to double.
+     * Prevents invalid user input from interrupting dialog processing.
      *
-     * @param value text value
-     * @param fallback default value if conversion fails
+     * @param value entered text
+     * @param fallback value used when parsing fails
      * @return parsed value or fallback
      */
     private static double parseDouble(String value, double fallback) {
@@ -567,9 +568,10 @@ public class CreateDialogs {
     }
     
     /**
-     * 
-     * @param node
-     * @param visible
+     * Shows or hides form elements while preserving the dialog layout.
+     *
+     * @param node element to update
+     * @param visible true to display the element
      */
     private static void setVisible(javafx.scene.Node node, boolean visible) {
         node.setVisible(visible);

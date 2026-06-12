@@ -6,24 +6,21 @@ import model.graph.Node;
 
 /**
  * High-priority agent whose movement speed scales with its priority level.
- *
- * <p>Speed formula: {@code 1.0 + priorityLevel * 0.5}.
- * Examples: level 1 → 1.5, level 2 → 2.0, level 4 → 3.0.</p>
  */
-public class PriorityAgent extends Agent implements Serializable{
+public class PriorityAgent extends Agent implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-    /** Priority level of this agent (>= 1). */
+    /** Priority level of this agent */
     private int priorityLevel;
 
     /**
      * Creates a priority agent with the given priority level.
      *
-     * @param id              unique identifier
+     * @param id unique identifier
      * @param currentPosition starting node
-     * @param destination     target node
-     * @param priorityLevel   priority level (>= 1; higher means faster)
+     * @param destination target node
+     * @param priorityLevel priority level
      */
     public PriorityAgent(int id, Node currentPosition, Node destination, int priorityLevel) {
         super(id, computeSpeed(priorityLevel), currentPosition, destination);
@@ -46,7 +43,7 @@ public class PriorityAgent extends Agent implements Serializable{
     /**
      * Returns the type of this agent.
      *
-     * @return {@link AgentType#PRIORITY}
+     * @return agent type
      */
     public AgentType getType() {
         return AgentType.PRIORITY;

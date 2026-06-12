@@ -6,19 +6,20 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+
+import java.io.File;
+
 import model.agent.Agent;
 import model.graph.Graph;
 import model.graph.Node;
 import pathfinding.PathFinderType;
 import simulation.ArrivalBehavior;
 import simulation.SimulationEngine;
-import javafx.stage.FileChooser;
-import java.io.File;
-
 import controller.GraphController;
 import controller.PathFinderFactory;
 import controller.SimulationController;
@@ -26,13 +27,12 @@ import io.GraphStorageManager;
 
 
 /**
- * Main JavaFX application entry point for the LifeLine GPS Emergency Simulation.
+ * Main JavaFX application entry point for the simulation.
  * Initializes the graph, simulation engine, UI components, and event handlers.
  * Manages the simulation timeline and user interactions.
  */
 public class MainApp extends Application {
 
-    @Override
     
     /**
      * Initializes and displays the main application window.
@@ -41,25 +41,28 @@ public class MainApp extends Application {
      *
      * @param stage the primary JavaFX stage provided by the platform
      */
+	@Override
     public void start(Stage stage) {
 
         // =========================
         // GRAPH SETUP
         // =========================
-        Graph graph = GraphController.buildGraph();
+		
+        Graph graph = GraphController.buildExampleGraph();
         Node start = graph.getNodeById(1);
         Node destination = graph.getNodeById(4);
 
         // =========================
         // ENGINE
         // =========================
+        
         SimulationEngine engine = SimulationController.buildEngine(graph, start, destination);
 
         // =========================
         // VIEW
         // =========================
+        
         GraphController graphController = new GraphController(graph);
-
 
         GraphView view = new GraphView();
         
@@ -67,17 +70,18 @@ public class MainApp extends Application {
         LegendPanel legendPanel = new LegendPanel();
         PatientPanel patientPanel = new PatientPanel();
         
+        // Connect the controller with the view and the simulation engine
         graphController.attachView(view);
         graphController.setEngine(engine);
-
-        // COMMENTER CHAQUE BLOC
+        
+        // Clicking on the background clears the current selection or creates a node
         view.setBackgroundClickHandler(point -> {
             graphController.handleBackgroundClick(point);
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
             patientPanel.clear();
         });
         
-        //
+        // Clicking a node displays its information and patient data if it is an accident
         view.setNodeClickHandler(node -> {
             graphController.handleNodeClicked(node);
             statsPanel.showNode(node, graph);
@@ -89,14 +93,14 @@ public class MainApp extends Application {
             }
         });
         
-        //
+        // Keep the stats panel updated while a selected node is being moved
         view.setNodeDragHandler(node -> {
             if (graphController.getSelectedNode() != null && graphController.getSelectedNode().equals(node)) {
                 statsPanel.showNode(node, graph);
             }
         });
         
-        //
+        // Clicking an edge displays its properties and clears patient information
         view.setEdgeClickHandler(edge -> {
             graphController.handleEdgeClicked(edge);
             patientPanel.clear();
@@ -108,7 +112,7 @@ public class MainApp extends Application {
             }
         });
         
-        //
+        // Clicking an agent displays its current simulation state
         view.setAgentClickHandler(agent -> {
             graphController.handleAgentClicked(agent);
             patientPanel.clear();
@@ -119,7 +123,8 @@ public class MainApp extends Application {
                 statsPanel.clear();
             }
         });
-
+        
+        // Initial display shown when the application starts.
         view.renderGraph(graph);
         view.renderAgents(engine.getAgents());
         statsPanel.showGraphOverview(graph, engine.getAgents().size());
@@ -127,9 +132,11 @@ public class MainApp extends Application {
         // =========================
         // UI
         // =========================
+        
         ToolBox toolBox = new ToolBox();
         SimulationBar simulationBar = new SimulationBar();
 
+        // Refresh the right panels according to the current selection
         Runnable updateStats = () -> {
             if (graphController.getSelectedNode() != null) {
                 Node selectedNode = graphController.getSelectedNode();
@@ -159,6 +166,7 @@ public class MainApp extends Application {
         // Timeline stored in an array so the slider can rebuild it
         final Timeline[] timelineRef = new Timeline[1];
 
+        // Builds the automatic tick loop used by the simulation
         Runnable buildTimeline = () -> {
             double interval = simulationBar.speedSlider.getValue();
 
@@ -175,6 +183,7 @@ public class MainApp extends Application {
 
         buildTimeline.run();
 
+        // Rebuild the timeline when the user changes the simulation speed
         simulationBar.speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             double val = Math.round(newVal.doubleValue() * 10.0) / 10.0;
             simulationBar.speedLabel.setText(String.format("Vitesse: %.1fs/tick", val));
@@ -188,6 +197,7 @@ public class MainApp extends Application {
             }
         });
 
+        // Graph editing actions
         toolBox.addNodeBtn.setOnAction(e ->graphController.enableNodeCreationMode());
         toolBox.addEdgeBtn.setOnAction(e ->graphController.enableEdgeCreationMode());
         
@@ -203,6 +213,7 @@ public class MainApp extends Application {
         });
         
         toolBox.editBtn.setOnAction(e -> graphController.editSelected());
+        
         toolBox.addRandomBtn.setOnAction(e -> {
         	graphController.addRandomNodes(engine);
         	statsPanel.showGraphOverview(graph, engine.getAgents().size());
@@ -226,7 +237,8 @@ public class MainApp extends Application {
             statsPanel.showGraphOverview(graph, engine.getAgents().size());
             patientPanel.clear();
         });
-
+        
+        // Simulation playback controls
         simulationBar.startBtn.setOnAction(e -> timelineRef[0].play());
         simulationBar.pauseBtn.setOnAction(e -> timelineRef[0].pause());
         simulationBar.resetBtn.setOnAction(e -> {
@@ -239,16 +251,16 @@ public class MainApp extends Application {
             patientPanel.clear();
         });
         
+        // Choose what happens when an agent reaches its destination
         simulationBar.arrivalBehaviorBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if ("Supprimer l'agent".equals(newVal)) {
+            if ("Delete agent".equals(newVal)) {
                 engine.setArrivalBehavior(ArrivalBehavior.REMOVE);
             } else {
                 engine.setArrivalBehavior(ArrivalBehavior.RANDOM_DESTINATION);
             }
         });
         
-        
-
+        // Manual tick used to advance the simulation step by step
         simulationBar.nextTickBtn.setOnAction(e -> {
             engine.tick();
             view.renderAgents(engine.getAgents());
@@ -266,8 +278,10 @@ public class MainApp extends Application {
             }
         });
 
+        // Open the user manual
         toolBox.helpBtn.setOnAction(e -> HelpDialog.show());
         
+        // Save the current graph and agents to a file
         toolBox.saveBtn.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Simulation");
@@ -281,6 +295,7 @@ public class MainApp extends Application {
             }
         });
 
+        // Restore a saved simulation and reconnect loaded agents to the current graph
         toolBox.loadBtn.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Load Simulation");
@@ -290,56 +305,58 @@ public class MainApp extends Application {
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
                 Object[] data = GraphStorageManager.restoreSimulation(file.getAbsolutePath());
-                
-                
-                
-                
+            
                 if (data != null) {
                     timelineRef[0].pause();
 
+                    // Loaded data contains the graph first, then the saved agents
                     Graph loadedGraph = (Graph) data[0];
                     
-                    @SuppressWarnings("unchecked")
+                    // Safe cast because saved simulation data stores agents as a List<Agent>
+                    @SuppressWarnings("unchecked") 
                     java.util.List<Agent> loadedAgents = (java.util.List<Agent>) data[1];
                     
                     // DEBUG
-                    System.out.println("Noeuds chargés: " + loadedGraph.getAllNodes().size());
-                    System.out.println("Agents chargés: " + loadedAgents.size());
+                    System.out.println("Node loaded: " + loadedGraph.getAllNodes().size());
+                    System.out.println("Agents loaded: " + loadedAgents.size());
                     for (Agent a : loadedAgents) {
                         System.out.println("Agent " + a.getId() + " position: " + 
                             (a.getCurrentPosition() != null ? a.getCurrentPosition().getId() : "NULL"));
                     }
-
+                    
+                    // Replace the current graph content without changing the graph reference used by the UI
                     graph.replaceWith(loadedGraph);
-
                     engine.clearAgents();
+                    
+                    // Reconnect loaded agents to nodes from the restored graph
                     for (Agent a : loadedAgents) {
-                        // Remapper currentPosition vers le nœud correspondant dans le graphe actuel
+                    	// Remap currentPosition to the corresponding node in the current graph
                         if (a.getCurrentPosition() != null) {
                             Node mapped = graph.getNodeById(a.getCurrentPosition().getId());
                             if (mapped != null) a.setCurrentPosition(mapped);
                         }
-                        // Remapper destination
+                        // Remap destination
                         if (a.getDestination() != null) {
                             Node mapped = graph.getNodeById(a.getDestination().getId());
                             if (mapped != null) a.setDestination(mapped);
                         }
-                        // Remapper initialPosition
+                        // Remap initialPosition
                         if (a.getInitialPosition() != null) {
                             Node mapped = graph.getNodeById(a.getInitialPosition().getId());
                             if (mapped != null) a.setInitialPosition(mapped);
                         }
-                        // Recréer le pathfinder
+                        // Recreate pathfinder
                         if (a.getPathFinder() == null) {
                             a.setPathFinder(PathFinderFactory.create(PathFinderType.DIJKSTRA, graph));
                         }
-                        // Réenregistrer l'agent sur son nœud
+                        // Re-register the agent on its node
                         if (a.getCurrentPosition() != null) {
                             a.getCurrentPosition().addAgent(a);
                         }
                         engine.addAgent(a);
                     }
-
+                    
+                    // Refresh the interface after loading the saved simulation
                     view.setGraph(graph);
                     view.renderGraph(graph);
                     view.renderAgents(engine.getAgents());
@@ -349,18 +366,17 @@ public class MainApp extends Application {
             }
         });
 
-
         // =========================
         // LAYOUT
         // =========================
+        
         HBox bottomBar = simulationBar;
 
         BorderPane root = new BorderPane();
         root.setTop(toolBox);
         root.setCenter(view);
-
         
-        // Split StatsPanel and PatientPanel in half
+        // Right side contains stats dashboard and patient information
         VBox rightBar = new VBox(12, statsPanel, patientPanel);
         root.setRight(rightBar);
 
@@ -374,7 +390,6 @@ public class MainApp extends Application {
         stage.setScene(scene);
         stage.show();
     }
-    
     
     /**
      * Application entry point. Launches the JavaFX runtime.

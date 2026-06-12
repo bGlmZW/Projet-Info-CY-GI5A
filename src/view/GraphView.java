@@ -4,24 +4,27 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-
-// import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.Polygon;
-
+import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+import javafx.geometry.Point2D;
+import java.util.function.Consumer;
 import javafx.scene.text.Text;
+
+import java.util.*;
+
 import model.agent.Agent;
 import model.agent.AgentType;
 import model.graph.Edge;
 import model.graph.Graph;
 import model.graph.Node;
 import model.graph.NodeType;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.Cursor;
-import javafx.geometry.Point2D;
-import java.util.function.Consumer;
 
-import java.util.*;
-
+/**
+ * Visual representation of the graph used by the simulation.
+ * This class allows users to inspect, edit, and interact with nodes,
+ * edges, and agents directly from the interface.
+ */
 public class GraphView extends Pane {
 	
 	/** Constants used to define the rendering limits of the graph */
@@ -33,16 +36,30 @@ public class GraphView extends Pane {
 
     /** Currently selected edge for visual highlighting */
     private Edge selectedEdge;
+    
+    /** Tracks the currently selected agent for inspection and editing */
+    private Agent selectedAgent;
 
     /** Callback invoked when a node is clicked */
     private Consumer<Node> nodeClickHandler = node -> {};
 
+    /** Stores node shapes to update their appearance without rebuilding the view */
     private final Map<Node, Circle> nodeViews = new HashMap<>();
+    
+    /** Stores agent shapes to animate movements efficiently */
     private final Map<Agent, Circle> agentViews = new HashMap<>();
+    
+    /** Stores edge shapes to update their style and selection state */
     private final Map<Edge, Line> edgeViews = new HashMap<>();
 
     /** Coordinates of the user's click on a point in the interface */
     private Consumer<Point2D> backgroundClickHandler = point -> {};
+    
+    /** Callback invoked when an edge is clicked */
+    private Consumer<Edge> edgeClickHandler = edge -> {};
+    
+    /** Callback invoked when an agent is clicked */
+    private Consumer<Agent> agentClickHandler = agent -> {};
 
     /** Agents currently displayed on the graph*/
     private List<Agent> currentAgents = Collections.emptyList();
@@ -53,20 +70,16 @@ public class GraphView extends Pane {
     /** Stores how many agents are displayed at the same visual position */
     private final Map<String, Integer> positionCounts = new HashMap<>();
 
-    /** Callback invoked when an edge is clicked */
-    private Consumer<Edge> edgeClickHandler = edge -> {};
-    
-    private Agent selectedAgent;
-    private Consumer<Agent> agentClickHandler = agent -> {};
-
+    /** Node currently being dragged by the user */
     private Node draggedNode;
+    
+    /** Prevents a drag operation from being interpreted as a click */
     private boolean nodeWasDragged;
     private double dragOffsetX;
     private double dragOffsetY;
     
-    /**Handler to display the node's new coordinates after dragging it */
+    /** Handler to display the node's new coordinates after dragging it */
     private Consumer<Node> nodeDragHandler = node -> {};
-
 
     /**
      * Creates the view and prepares background click handling.
@@ -92,8 +105,9 @@ public class GraphView extends Pane {
     }
     
     /**
-     * 
-     * @param handler
+     * Allows external components to react when a node is repositioned.
+     *
+     * @param handler node drag callback
      */
     public void setNodeDragHandler(Consumer<Node> handler) {
         this.nodeDragHandler = (handler != null) ? handler : node -> {};
@@ -245,7 +259,7 @@ public class GraphView extends Pane {
                 double offsetX = 0;
                 double offsetY = 0;
 
-                // Appliquer un offset si l'arête est non orientée OU s'il existe une arête dans le sens inverse
+                // Apply an offset if the edge is unoriented orR if there is an edge in the opposite direction
                 boolean hasReverseEdge = graph.hasEdge(edge.getDestination(), edge.getSource());
 
                 if ((!edge.isOriented() || hasReverseEdge) && length > 0) {
@@ -341,14 +355,16 @@ public class GraphView extends Pane {
             }
         }
 
-     // Forcer la recréation des cercles agents après un renderGraph
+        // Force the recreation of agent circles after a renderGraph
         agentViews.values().forEach(getChildren()::remove);
         agentViews.clear();
         redrawAgents();
     }
 
     /**
-     * @param agents
+     * Updates the list of agents displayed on the graph (without rebuilding the graph).
+     *
+     * @param agents agents to display
      */
     public void renderAgents(List<Agent> agents) {
         currentAgents = (agents != null) ? new ArrayList<>(agents) : Collections.emptyList();
@@ -475,7 +491,7 @@ public class GraphView extends Pane {
     private void redrawAgents() {
         positionCounts.clear();
 
-        // Supprimer uniquement les cercles des agents qui ne sont plus dans la liste
+        // Remove only the circles of agents who are no longer on the list
         Set<Agent> currentSet = new HashSet<>(currentAgents);
         List<Agent> toRemove = new ArrayList<>();
         for (Agent agent : agentViews.keySet()) {
@@ -490,7 +506,7 @@ public class GraphView extends Pane {
 
         for (Agent agent : currentAgents) {
 
-            // Réutiliser le cercle existant ou en créer un nouveau
+        	// Reuse the existing circle or create a new one
             Circle agentCircle = agentViews.get(agent);
             if (agentCircle == null) {
                 agentCircle = new Circle(10);
@@ -504,12 +520,12 @@ public class GraphView extends Pane {
                 getChildren().add(agentCircle);
             }
 
-            // Mettre à jour la couleur et le contour
+            // Reuse the existing circle or create a new one
             agentCircle.setFill(getAgentColor(agent));
             agentCircle.setStroke(agent.equals(selectedAgent) ? Color.RED : Color.BLACK);
             agentCircle.setStrokeWidth(agent.equals(selectedAgent) ? 3 : 1);
 
-            // Calculer la position
+            // Calculate the position
             double x;
             double y;
 
@@ -556,7 +572,7 @@ public class GraphView extends Pane {
                 y = currentNodeCircle.getCenterY();
             }
 
-            // Offset si plusieurs agents au même endroit
+            // Offset if there are multiple agents at the same location
             String key = Math.round(x) + ":" + Math.round(y);
             int index = positionCounts.getOrDefault(key, 0);
             positionCounts.put(key, index + 1);
@@ -573,10 +589,10 @@ public class GraphView extends Pane {
     }
 
     /**
-     * Displays each edge type with a different design to understand better the interface.
-     * 
-     * @param line edge modeling
-     * @param edge considered edge
+     * Uses visual differences to help users distinguish road categories.
+     *
+     * @param line displayed edge
+     * @param edge represented edge
      */
     private void applyEdgeStyle(Line line, Edge edge) {
         line.setStroke(Color.BLACK);
@@ -596,10 +612,10 @@ public class GraphView extends Pane {
     }
 
     /**
-     * Returns the display color associated with an agent type.
+     * Uses colors to help users quickly identify the role of each agent.
      *
-     * @param agent agent to display
-     * @return color used to draw the agent
+     * @param agent displayed agent
+     * @return color associated with the agent type
      */
     private Color getAgentColor(Agent agent) {
         if (agent.getAgentType() == AgentType.FAST) {
@@ -687,10 +703,10 @@ public class GraphView extends Pane {
     }
     
     /**
-     * Assign a color to a node based on its type.
-     * 
-     * @param node
-     * @return
+     * Uses colors to help users quickly identify the role of each node.
+     *
+     * @param node displayed node
+     * @return color associated with the node type
      */
     private Color getNodeColor(Node node) {
         if (node.getType() == NodeType.HOSPITAL) {
@@ -772,18 +788,22 @@ public class GraphView extends Pane {
     }
 
     /**
-     * Limits a complete point, meaning both x and y at the same time.
-     * 
-     * @param point
-     * @return a new corrected point
+     * Ensures user interactions stay inside the visible graph area.
+     *
+     * @param point original position
+     * @return corrected position inside the view bounds
      */
     private Point2D clampPoint(Point2D point) {
         return new Point2D(clampX(point.getX()), clampY(point.getY())
         );
     }
     
+    /**
+     * Stores the graph reference used for rendering and agent positioning.
+     *
+     * @param graph displayed graph
+     */
     public void setGraph(Graph graph) {
         this.graph = graph;
     }
-
 }

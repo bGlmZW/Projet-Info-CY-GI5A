@@ -1,11 +1,10 @@
 package model.graph;
 
 import java.util.List;
-
-import model.agent.Agent;
-
 import java.util.ArrayList;
 import java.io.Serializable;
+
+import model.agent.Agent;
 
 /**
  * Represents a directed or undirected connection between two nodes in the graph.
@@ -13,6 +12,7 @@ import java.io.Serializable;
  */
 public class Edge implements Serializable {
 	
+	/** Serialization identifier used when saving and loading edges */
 	private static final long serialVersionUID = 1L;
 
     /** Source node of the edge */
@@ -33,18 +33,22 @@ public class Edge implements Serializable {
     /** List of agents currently on this edge */
     private List<Agent> agents;
     
+    /** Road type used to determine movement speed on this edge */
     private EdgeType type;
     
+    /** Number of agents that have completed this edge */
     private int passCount = 0;
+    
+    /** Sum of speeds of agents that completed this edge */
     private double passedSpeedSum = 0.0;
     
     /**
      * Creates a new edge between two nodes.
      * The edge is undirected by default, with unlimited capacity and no agents.
      *
-     * @param source      starting node
+     * @param source starting node
      * @param destination ending node
-     * @param distance    cost or distance of the edge
+     * @param distance cost or distance of the edge
      */
     public Edge(Node source, Node destination, double distance, int capacity, EdgeType type, boolean oriented) {
         this.source = source;
@@ -56,6 +60,15 @@ public class Edge implements Serializable {
         this.agents = new ArrayList<>();
     }
 
+    /**
+     * Creates an edge with unlimited capacity.
+     *
+     * @param source starting node
+     * @param destination ending node
+     * @param distance cost or distance of the edge
+     * @param type road type of the edge
+     * @param oriented true if the edge is one-way
+     */
     public Edge(Node source, Node destination, double distance, EdgeType type, boolean oriented) {
     	this(source, destination, distance, Integer.MAX_VALUE, type, oriented);
     }
@@ -151,42 +164,36 @@ public class Edge implements Serializable {
     }
     
     /**
-     * 
-     * @return
+     * Returns the road type of this edge.
+     *
+     * @return edge road type
      */
     public EdgeType getType() {
         return type;
     }
     
     /**
-     * 
-     * @param type
+     * Sets the road type of this edge.
+     *
+     * @param type new road type
      */
     public void setType(EdgeType type) {
     	this.type = type;
     }
 
-    
     /**
-     * 
-     * @param speed
-     */
-    public void registerPass(double speed) {
-        passCount++;
-        passedSpeedSum += speed;
-    }
-
-    /**
-     * 
-     * @return
+     * Returns how many agents have completed this edge.
+     *
+     * @return number of completed passes
      */
     public int getPassCount() {
         return passCount;
     }
 
     /**
-     * 
-     * @return
+     * Returns the average speed of agents that completed this edge.
+     *
+     * @return average passed speed, or 0 if no agent has passed
      */
     public double getAveragePassedSpeed() {
         if (passCount == 0) {
@@ -214,6 +221,17 @@ public class Edge implements Serializable {
     }
     
     /**
+     * Registers that an agent has completed this edge.
+     * The speed is stored to compute traffic statistics.
+     *
+     * @param speed speed of the agent that passed the edge
+     */
+    public void registerPass(double speed) {
+        passCount++;
+        passedSpeedSum += speed;
+    }
+    
+    /**
      * Checks whether the given agent is currently on this edge.
      *
      * @param agent the agent to check
@@ -235,7 +253,7 @@ public class Edge implements Serializable {
     }
     
     /**
-     * 
+     * Resets traffic statistics collected on this edge.
      */
     public void resetPassStats() {
         passCount = 0;

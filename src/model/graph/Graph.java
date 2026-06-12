@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public class Graph implements Serializable {
 	
+	/** Serialization identifier used when saving and loading graphs */
 	private static final long serialVersionUID = 1L;
 
     /** Adjacency list representation of the graph */
@@ -120,10 +121,10 @@ public class Graph implements Serializable {
     }
     
     /**
-     * 
-     * 
-     * @param id
-     * @return
+     * Finds a node from its identifier.
+     *
+     * @param id identifier of the node
+     * @return matching node, or null if no node has this identifier
      */
     public Node getNodeById(int id) {
         for (Node node : getAllNodes()) {
@@ -179,7 +180,7 @@ public class Graph implements Serializable {
 
         List<Edge> sourceEdges = adjacencyList.get(source);
 
-        // Retrouver l'arête à supprimer pour savoir si elle était orientée
+        // Find the edge to be deleted to determine whether it was oriented
         final boolean[] wasOriented = {true};
         sourceEdges.removeIf(edge -> {
             if (edge.getDestination().equals(destination)) {
@@ -190,8 +191,8 @@ public class Graph implements Serializable {
             return false;
         });
 
-        // Supprimer l'arête retour UNIQUEMENT si l'arête était non orientée
-        // (= arête retour créée automatiquement par addEdge)
+        // Remove the return edge ONLY if the edge was undirected
+        // (= return edge created automatically by addEdge)
         if (!wasOriented[0] && adjacencyList.containsKey(destination)) {
             List<Edge> destEdges = adjacencyList.get(destination);
             destEdges.removeIf(edge ->
@@ -222,6 +223,11 @@ public class Graph implements Serializable {
         adjacencyList.clear();
     }
     
+    /**
+     * Replaces the current graph data with another graph.
+     *
+     * @param other graph to copy
+     */
     public void replaceWith(Graph other) {
         this.adjacencyList.clear();
         this.adjacencyList.putAll(other.adjacencyList);

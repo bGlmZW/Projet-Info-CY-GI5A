@@ -10,6 +10,7 @@ import pathfinding.IPathFinder;
  */
 public class Agent implements Serializable {
 	
+	/** Serialization identifier used when saving and loading agents */
 	private static final long serialVersionUID = 1L;
 
     /** Unique identifier of the agent */
@@ -54,10 +55,10 @@ public class Agent implements Serializable {
     /**
      * Creates a new agent.
      *
-     * @param id              unique identifier
-     * @param speed           maximum movement speed
+     * @param id unique identifier
+     * @param speed maximum movement speed
      * @param currentPosition starting node
-     * @param destination     target node
+     * @param destination target node
      */
     public Agent(int id, double speed, Node currentPosition, Node destination) {
         this.id = id;
@@ -71,7 +72,6 @@ public class Agent implements Serializable {
         this.currentPath = null;
         this.pathIndex = 0;
     }
-   
 
     /**
      * Returns the unique identifier of the agent.
@@ -271,27 +271,57 @@ public class Agent implements Serializable {
         this.pathIndex = pathIndex;
     }
 
-    
+    /**
+     * Returns the type of this agent.
+     *
+     * @return agent type
+     */
     public AgentType getAgentType() {
         return agentType;
     }
 
+    /**
+     * Sets the type of this agent.
+     *
+     * @param agentType new agent type
+     */
     public void setAgentType(AgentType agentType) {
         this.agentType = agentType;
     }
     
+    /**
+     * Returns the effective distance of the edge currently used by the agent.
+     *
+     * @return current effective distance
+     */
     public double getCurrentEffectiveDistance() {
         return currentEffectiveDistance;
     }
 
+    /**
+     * Sets the effective distance of the current edge.
+     * This value can differ from the real edge distance depending on road and agent type.
+     *
+     * @param currentEffectiveDistance new effective distance
+     */
     public void setCurrentEffectiveDistance(double currentEffectiveDistance) {
         this.currentEffectiveDistance = currentEffectiveDistance;
     }
     
+    /**
+     * Returns how many ticks the agent has waited on a congested node.
+     *
+     * @return number of waiting cycles on the current node
+     */
     public int getNodeWaitCycles() {
         return nodeWaitCycles;
     }
 
+    /**
+     * Sets how many ticks the agent has waited on a congested node.
+     *
+     * @param cycles number of waiting cycles
+     */
     public void setNodeWaitCycles(int cycles) {
         this.nodeWaitCycles = cycles;
     }

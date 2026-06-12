@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.HashSet;
 
+import model.accident.Patient;
 import model.agent.Agent;
 import model.agent.AgentType;
-import model.agent.Patient;
 import model.agent.State;
 import model.graph.Edge;
 import model.graph.EdgeType;
@@ -16,14 +17,9 @@ import model.graph.Graph;
 import model.graph.Node;
 import pathfinding.*;
 
-import java.util.HashSet;
-
-
-
 /**
  * Manages the execution of the simulation.
- * The simulation engine maintains the graph, the agents,
- * and the current simulation tick.
+ * The simulation engine maintains the graph, the agents, and the current simulation tick.
  */
 public class SimulationEngine {
 
@@ -89,16 +85,18 @@ public class SimulationEngine {
     }
     
     /**
-     * 
-     * @param behavior
+     * Defines what should happen when an agent reaches its destination.
+     *
+     * @param behavior arrival behavior to apply
      */
     public void setArrivalBehavior(ArrivalBehavior behavior) {
         this.arrivalBehavior = behavior;
     }
     
     /**
-     * 
-     * @param pathFinder
+     * Sets the default routing algorithm used by agents without a custom pathfinder.
+     *
+     * @param pathFinder default pathfinding strategy
      */
     public void setDefaultPathFinder(IPathFinder pathFinder) {
         this.pathFinder = pathFinder;
@@ -269,10 +267,12 @@ public class SimulationEngine {
     }
     
     /**
-     * 
-     * @param edgeType
-     * @param agentType
-     * @return
+     * Returns the movement factor associated with a road type and an agent type.
+     * Faster roads reduce travel time while difficult roads increase it.
+     *
+     * @param edgeType road type
+     * @param agentType agent type
+     * @return movement multiplier applied on the edge
      */
     private double getEdgeMultiplier(EdgeType edgeType, AgentType agentType) {
         if (edgeType == null) return 1.0;
@@ -342,7 +342,7 @@ public class SimulationEngine {
             }
         }
         
-        // Traiter les agents arrivés APRÈS l'itération
+        // Process agents that arrived after the iteration
         if (arrivalBehavior == ArrivalBehavior.REMOVE) {
             Iterator<Agent> it = agents.iterator();
             while (it.hasNext()) {
@@ -394,8 +394,10 @@ public class SimulationEngine {
     }
     
     /**
-     * 
-     * @param agent
+     * Handles an agent after reaching its destination in order to remove it or
+     * assign it to a new destination.
+     *
+     * @param agent arrived agent
      */
     private void handleArrival(Agent agent) {
         if (arrivalBehavior == ArrivalBehavior.REMOVE) {
@@ -444,8 +446,8 @@ public class SimulationEngine {
                 continue;
             }
 
-            int bpmVariation = random.nextInt(7) - 3; // between -3 and +3
-            double temperatureVariation = (random.nextDouble() - 0.5) * 0.2; // between -0.1 and +0.1
+            int bpmVariation = random.nextInt(7) - 3; // Between -3 and +3
+            double temperatureVariation = (random.nextDouble() - 0.5) * 0.2; // Between -0.1 and +0.1
 
             patient.setBpm(patient.getBpm() + bpmVariation);
             patient.setBodyTemperature(patient.getBodyTemperature() + temperatureVariation);

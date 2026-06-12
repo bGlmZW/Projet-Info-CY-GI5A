@@ -13,7 +13,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 /**
- * Small legend panel displayed under the stats dashboard to help the user understand the interface.
+ * Legend panel displayed to help the user understand the interface.
  */
 public class LegendPanel extends VBox {
 

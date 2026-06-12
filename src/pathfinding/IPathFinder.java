@@ -5,8 +5,7 @@ import java.util.List;
 import model.graph.Node;
 
 /**
- * Defines a pathfinding strategy capable of computing
- * a path between two nodes.
+ * Defines a pathfinding strategy capable of computing a path between two nodes.
  */
 public interface IPathFinder {
 

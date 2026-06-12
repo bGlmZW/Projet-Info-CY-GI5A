@@ -6,26 +6,24 @@ import model.graph.Node;
 
 /**
  * Agent carrying cargo whose weight reduces its movement speed.
- *
- * <p>Speed formula: {@code BASE_SPEED / (1.0 + cargoWeight)}, where {@code BASE_SPEED = 1.5}.
- * A weight of 0 gives maximum speed (1.5); heavier loads slow the agent down.</p>
  */
 public class CargoAgent extends Agent implements Serializable {
 	
+	/** Serialization identifier used when saving and loading agents */
 	private static final long serialVersionUID = 1L;
 
     private static final double BASE_SPEED = 1.5;
 
-    /** Weight of the cargo carried by this agent (>= 0). */
+    /** Weight of the cargo carried by this agent */
     private double cargoWeight;
 
     /**
      * Creates a cargo agent with the given load weight.
      *
-     * @param id              unique identifier
+     * @param id unique identifier
      * @param currentPosition starting node
-     * @param destination     target node
-     * @param cargoWeight     cargo weight (must be >= 0; clamped otherwise)
+     * @param destination target node
+     * @param cargoWeight cargo weight
      */
     public CargoAgent(int id, Node currentPosition, Node destination, double cargoWeight) {
         super(id, computeSpeed(cargoWeight), currentPosition, destination);
@@ -58,7 +56,7 @@ public class CargoAgent extends Agent implements Serializable {
     /**
      * Returns the type of this agent.
      *
-     * @return {@link AgentType#CARGO}
+     * @return agent type
      */
     public AgentType getType() {
         return AgentType.CARGO;

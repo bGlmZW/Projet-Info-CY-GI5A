@@ -15,6 +15,7 @@ import java.io.Serializable;
  */
 public class Node implements Serializable {
 	
+	/** Serialization identifier used when saving and loading nodes */
 	private static final long serialVersionUID = 1L;
 
     /** Unique identifier of the node */

@@ -1,11 +1,14 @@
-package model.agent;
+package model.accident;
 
 import java.io.Serializable;
 
 /**
  * Represents a patient involved in a medical accident displayed when clicking on an accident node.
  */
-public class Patient implements Serializable{
+public class Patient implements Serializable {
+	
+	/** Serialization identifier used when saving and loading agents */
+	private static final long serialVersionUID = 1L;
 
     private String name;
     private int age;

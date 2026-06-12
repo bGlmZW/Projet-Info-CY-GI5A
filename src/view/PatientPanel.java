@@ -8,7 +8,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import model.accident.Accident;
-import model.agent.Patient;
+import model.accident.Patient;
 
 /**
  * Panel displaying real-time medical information about a patient.

@@ -21,7 +21,7 @@ public class AStarPathFinder implements IPathFinder {
     @Override
     public List<Node> findPath(Node start, Node destination) {
 
-        Map<Node, Double> gScore = new HashMap<>(); // cost from start
+        Map<Node, Double> gScore = new HashMap<>(); // Cost from start
         Map<Node, Double> fScore = new HashMap<>(); // g + heuristic
         Map<Node, Node> cameFrom = new HashMap<>();
 
@@ -49,7 +49,7 @@ public class AStarPathFinder implements IPathFinder {
 
             for (Edge edge : graph.getEdges(current)) {
                 Node neighbor = edge.getDestination();
-                if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
+                if (neighbor.isBlocked()) continue; // Skip blocked nodes
                 double tentativeG = gScore.get(current) + edge.getDistance();
 
                 if (tentativeG < gScore.get(neighbor)) {
@@ -68,7 +68,11 @@ public class AStarPathFinder implements IPathFinder {
     }
 
     /**
-     * Heuristic function (simple version for your project).
+     * Estimates the remaining distance between two nodes.
+     *
+     * @param a current node
+     * @param b destination node
+     * @return estimated distance between the two nodes
      */
     private double heuristic(Node a, Node b) {
         double dx = a.getX() - b.getX();

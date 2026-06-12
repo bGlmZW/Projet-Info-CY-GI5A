@@ -16,10 +16,10 @@ public class SimulationController {
      * Creates a pathfinder using Dijkstra's algorithm, initializes the engine,
      * and adds a single agent traveling from the start node to the destination node.
      *
-     * @param graph       the graph on which the simulation runs
-     * @param start       the starting node of the agent
+     * @param graph the graph on which the simulation runs
+     * @param start the starting node of the agent
      * @param destination the target node of the agent
-     * @return a fully configured {@link SimulationEngine} instance
+     * @return a fully configured SimulationEngine instance
      */
     public static SimulationEngine buildEngine(Graph graph, Node start, Node destination) {
 

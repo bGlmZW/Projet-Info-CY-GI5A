@@ -8,9 +8,8 @@ import model.graph.Graph;
 import model.graph.Node;
 
 /**
- * Pathfinder qui tient compte de la congestion des arêtes.
- * Le coût d'une arête est pondéré par le type de route ET le taux d'occupation.
- * Plus une arête est chargée, plus elle coûte cher → l'agent préfère un détour moins encombré.
+ * A pathfinder that takes edge congestion into account.
+ * The cost of an edge is weighted by both the road type AND the traffic volume.
  */
 public class CongestionAwarePathFinder implements IPathFinder {
 
@@ -20,6 +19,13 @@ public class CongestionAwarePathFinder implements IPathFinder {
         this.graph = graph;
     }
 
+    /**
+     * Computes the best route between two nodes while considering road types and congestion.
+     *
+     * @param start starting node
+     * @param destination destination node
+     * @return ordered list of nodes forming the path, or an empty list if unreachable
+     */
     @Override
     public List<Node> findPath(Node start, Node destination) {
 
@@ -45,7 +51,7 @@ public class CongestionAwarePathFinder implements IPathFinder {
 
             for (Edge edge : graph.getEdges(current)) {
                 Node neighbor = edge.getDestination();
-                if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
+                if (neighbor.isBlocked()) continue; // Skip blocked nodes
                 double cost = computeCost(edge);
                 double newDist = distances.get(current) + cost;
 
@@ -58,12 +64,12 @@ public class CongestionAwarePathFinder implements IPathFinder {
             }
         }
 
-        // Reconstruction du chemin
+        // Reconstruct the path
         List<Node> path = new ArrayList<>();
         Node step = destination;
 
         if (!previous.containsKey(step) && !step.equals(start)) {
-            return path; // pas de chemin trouvé
+            return path; // No path found
         }
 
         while (step != null) {
@@ -76,37 +82,46 @@ public class CongestionAwarePathFinder implements IPathFinder {
     }
 
     /**
-     * Calcule le coût effectif d'une arête en tenant compte
-     * du type de route et du taux de congestion actuel.
+     * Computes the effective traversal cost of an edge.
+     * Road type and congestion increase or decrease the attractiveness of the route.
+     *
+     * @param edge edge to evaluate
+     * @return effective edge cost
      */
     private double computeCost(Edge edge) {
 
-        // Multiplicateur selon le type d'arête (moyenne tous agents confondus)
+    	// Multiplier based on edge type (average across all agents)
         double multiplier = getTypeMultiplier(edge.getType());
 
-        // Facteur de congestion : entre 0.1 (arête pleine) et 1.0 (arête vide)
+        // Congestion factor: between 0.1 (full edge) and 1.0 (empty edge)
         double congestion = 1.0;
         if (edge.getCapacity() > 0) {
             double load = (double) edge.getAgents().size() / edge.getCapacity();
             congestion = Math.max(0.1, 1.0 - load);
         }
 
-        // Coût = distance / (multiplicateur × congestion)
-        // Plus c'est lent/encombré, plus c'est cher
+        // Cost = distance / (multiplier x congestion)
+        // The slower/more cumbersome it is, the more expensive it is
         return edge.getDistance() / (multiplier * congestion);
     }
 
     /**
-     * Multiplicateur moyen par type d'arête (sans tenir compte du type d'agent,
-     * car le pathfinder est global — on utilise une valeur moyenne).
+     * Returns the average speed factor associated with a road type.
+     * Higher values make an edge more attractive for pathfinding.
+     *
+     * @param type road type
+     * @return speed multiplier applied to the edge
      */
     private double getTypeMultiplier(EdgeType type) {
         if (type == null) return 1.0;
         switch (type) {
-            case HIGHWAY:   return 1.4; // moyenne entre CARGO(1.2) et autres(1.5)
-            case DIRT_ROAD: return 0.6; // moyenne entre CARGO(0.5) et autres(0.7)
+            case HIGHWAY:
+            	return 1.4; // average between CARGO (1.2) and others (1.5)
+            case DIRT_ROAD:
+            	return 0.6; // average between CARGO (0.5) and others (0.7)
             case ROAD:
-            default:        return 1.0;
+            default:
+            	return 1.0;
         }
     }
 }

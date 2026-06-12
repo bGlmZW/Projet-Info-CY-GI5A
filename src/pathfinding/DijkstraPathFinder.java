@@ -30,7 +30,6 @@ public class DijkstraPathFinder implements IPathFinder {
      * @param start starting node
      * @param destination target node
      * @return ordered list of nodes representing the shortest path.
-     *         Returns an empty list if no path exists.
      */
     @Override
     public List<Node> findPath(Node start, Node destination) {
@@ -62,7 +61,7 @@ public class DijkstraPathFinder implements IPathFinder {
 
             for (Edge edge : graph.getEdges(current)) {
                 Node neighbor = edge.getDestination();
-                if (neighbor.isBlocked()) continue; // ignorer les nœuds bloqués
+                if (neighbor.isBlocked()) continue; // Skip blocked nodes
                 double newDist = distances.get(current) + edge.getDistance();
 
                 if (newDist < distances.getOrDefault(

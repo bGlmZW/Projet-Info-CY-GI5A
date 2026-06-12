@@ -5,16 +5,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.agent.Agent;
-import model.graph.Edge;
-import model.graph.Graph;
-import model.graph.Node;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import model.agent.Agent;
+import model.graph.Edge;
+import model.graph.Graph;
+import model.graph.Node;
+import model.graph.NodeType;
 
 /**
  * Right-side dashboard showing statistics about the selected graph element.
@@ -92,7 +94,7 @@ public class StatsPanel extends VBox {
                 node.getMaxCapacity() == Integer.MAX_VALUE
                         ? "unlimited"
                         : String.valueOf(node.getMaxCapacity()));
-        addStat("Congestion", node.isHeavilyCongested() ? "⚠ HEAVY" : "normal");
+        addStat("Congestion", node.isHeavilyCongested() ? "HEAVY" : "normal");
         addStat("Blocked", node.isBlocked() ? "YES" : "no");
         addStat("Agents on node", String.valueOf(agentCount));
         addStat("Agents passed", String.valueOf(node.getPassCount()));
@@ -252,9 +254,15 @@ public class StatsPanel extends VBox {
         addStat("Nodes", String.valueOf(nodeCount));
         addStat("Routes / edges", String.valueOf(edgeCount));
         addStat("Agents", String.valueOf(agentCount));
+        long hospitalCount = graph.getAllNodes().stream()
+                .filter(node -> node.getType() == NodeType.HOSPITAL)
+                .count();
 
-        // Placeholder pour quand on aura les types de noeuds
-        addStat("Hospital nodes", "0");
-        addStat("Accident nodes", "0");
+        long accidentCount = graph.getAllNodes().stream()
+                .filter(node -> node.getType() == NodeType.ACCIDENT)
+                .count();
+
+        addStat("Hospital nodes", String.valueOf(hospitalCount));
+        addStat("Accident nodes", String.valueOf(accidentCount));
     }
 }

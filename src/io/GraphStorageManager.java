@@ -15,8 +15,8 @@ public class GraphStorageManager {
     /**
      * Saves the graph and the agents into a binary file.
      *
-     * @param graph    the simulation graph structure to save
-     * @param agents   the list of agents to save
+     * @param graph the simulation graph structure to save
+     * @param agents the list of agents to save
      * @param filepath the destination file path
      */
     public static void saveSimulation(Graph graph, List<Agent> agents, String filepath) {
@@ -38,10 +38,10 @@ public class GraphStorageManager {
      * Loads a simulation state from a binary file.
      *
      * @param filepath the source file path to read from
-     * @return an Object array containing the elements [Graph, List&lt;Agent&gt;],
+     * @return an Object array containing the elements,
      * or null if an error occurs.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // Suppresses the warning caused by casting loaded data to List<Agent>
     public static Object[] restoreSimulation(String filepath) {
         try (FileInputStream fis = new FileInputStream(filepath);
              ObjectInputStream ois = new ObjectInputStream(fis)) {

@@ -12,10 +12,17 @@ import pathfinding.PathFinderType;
  */
 public class PathFinderFactory {
 
+	/**
+	 * Creates the routing algorithm selected by the user.
+	 * This factory isolates algorithm selection from the simulation logic.
+	 *
+	 * @param type pathfinding strategy to use
+	 * @param graph graph on which routes are computed
+	 * @return corresponding pathfinder implementation
+	 */
     public static IPathFinder create(PathFinderType type, Graph graph) {
 
         switch (type) {
-
             case DIJKSTRA:
                 return new DijkstraPathFinder(graph);
 

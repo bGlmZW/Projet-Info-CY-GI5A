@@ -32,6 +32,12 @@ public class GraphController {
 
     /** Currently selected node, used to create an edge with a second click */
     private Node selectedNode;
+    
+    /** Currently selected edge in the graph view */
+    private Edge selectedEdge;
+    
+    /** Currently selected agent in the graph view */
+    private Agent selectedAgent;
 
     /** Indicates whether the controller is waiting for a click to create a node */
     private boolean nodeCreationMode;
@@ -42,11 +48,8 @@ public class GraphController {
     /** Indicates whether the controller is waiting for a deletion click */
     private boolean deleteMode;
     
+    /** Engine used to keep graph actions synchronized with the simulation. */
     private SimulationEngine engine;
-    
-    private Edge selectedEdge;
-    
-    private Agent selectedAgent;
 
     /**
      * Creates a controller bound to a graph instance.
@@ -58,82 +61,87 @@ public class GraphController {
     }
     
     /**
-     * 
-     * @param engine
+     * Sets the simulation engine used by the controller.
+     *
+     * @param engine simulation engine linked to the graph
      */
     public void setEngine(SimulationEngine engine) {
         this.engine = engine;
     }
     
     /**
-     * 
-     * @return
+     * Returns the currently selected edge.
+     *
+     * @return selected edge, or null if no edge is selected
      */
     public Edge getSelectedEdge() {
         return selectedEdge;
     }
 
     /**
-     * 
-     * @return
+     * Returns the currently selected agent.
+     *
+     * @return selected agent, or null if no agent is selected
      */
     public Agent getSelectedAgent() {
         return selectedAgent;
     }
     
     /**
-     * 
-     * @return
+     * Returns the currently selected node.
+     *
+     * @return selected node, or null if no node is selected
      */
     public Node getSelectedNode() {
         return selectedNode;
     }
 
 	/**
-     * Builds and returns a configured graph with nodes and edges.
+     * Builds and returns a pre-configured graph with nodes and edges.
      * The graph contains 4 nodes (1 to 4) connected by weighted edges.
      *
-     * @return a fully configured {@link Graph} instance
+     * @return a fully configured instance
      */
-	public static Graph buildGraph() {
+	public static Graph buildExampleGraph() {
 	
-    Graph graph = new Graph();
-
-    Node A = new Node(1);
-    A.setType(NodeType.HOSPITAL);
-    A.setName("Paris Hospital");
-    Node B = new Node(2);
-    Node C = new Node(3);
-    Node D = new Node(4);
-    Node F = new Node(5);
-    D.setType(NodeType.ACCIDENT);
-    D.setName("Serious personal injury");
-
-    Patient patient = new Patient("Jean Serane", 42, 115, 38.2, true, "Injured but conscious");
-
-    Accident accident = new Accident(AccidentType.TRAFFIC_ACCIDENT, "Car crash near the intersection.", patient);
-
-    D.setAccident(accident);
-
-    graph.addNode(A);
-    graph.addNode(B);
-    graph.addNode(C);
-    graph.addNode(D);
-    graph.addNode(F);
-
-    graph.addEdge(new Edge(A, B, 1, 2, EdgeType.ROAD, true));
-    graph.addEdge(new Edge(A, D, 9, 2, EdgeType.ROAD, false));
-    graph.addEdge(new Edge(B, C, 1, 2, EdgeType.ROAD, false));
-    graph.addEdge(new Edge(C, D, 3, 2, EdgeType.ROAD, true));
-    graph.addEdge(new Edge(B, C, 1, 2, EdgeType.ROAD, false));
-    graph.addEdge(new Edge(A, F, 20, 10, EdgeType.HIGHWAY, false));
-    
-    return graph;
+	    Graph graph = new Graph();
+	
+	    Node A = new Node(1);
+	    A.setType(NodeType.HOSPITAL);
+	    A.setName("Paris Hospital");
+	    Node B = new Node(2);
+	    Node C = new Node(3);
+	    Node D = new Node(4);
+	    Node F = new Node(5);
+	    D.setType(NodeType.ACCIDENT);
+	    D.setName("Serious personal injury");
+	
+	    Patient patient = new Patient("Jean Serane", 42, 115, 38.2, true, "Injured but conscious");
+	
+	    Accident accident = new Accident(AccidentType.TRAFFIC_ACCIDENT, "Car crash near the intersection.", patient);
+	
+	    D.setAccident(accident);
+	
+	    graph.addNode(A);
+	    graph.addNode(B);
+	    graph.addNode(C);
+	    graph.addNode(D);
+	    graph.addNode(F);
+	
+	    graph.addEdge(new Edge(A, B, 1, 2, EdgeType.ROAD, true));
+	    graph.addEdge(new Edge(A, D, 9, 2, EdgeType.ROAD, false));
+	    graph.addEdge(new Edge(B, C, 1, 2, EdgeType.ROAD, false));
+	    graph.addEdge(new Edge(C, D, 3, 2, EdgeType.ROAD, true));
+	    graph.addEdge(new Edge(B, C, 1, 2, EdgeType.ROAD, false));
+	    graph.addEdge(new Edge(A, F, 20, 10, EdgeType.HIGHWAY, false));
+	    
+	    return graph;
 	}
 	
 	/**
-	 * 
-	 * @param engine
+	 * Adds random nodes to quickly build a larger graph for testing.
+	 *
+	 * @param engine simulation engine refreshed after the graph update
 	 */
 	public void addRandomNodes(SimulationEngine engine) {
 
@@ -156,7 +164,7 @@ public class GraphController {
 	    Random random = new Random();
 	    List<Node> newNodes = new ArrayList<>();
 
-	    // Créer les nœuds avec des positions aléatoires
+	    // Create nodes with random positions
 	    for (int i = 0; i < count; i++) {
 	        int newId = graph.getAllNodes().stream()
 	                .mapToInt(Node::getId)
@@ -170,11 +178,11 @@ public class GraphController {
 	        newNodes.add(node);
 	    }
 
-	    // Connecter chaque nouveau nœud à au moins un nœud existant
+	    // Connect each new node to at least one existing node
 	    List<Node> allNodes = new ArrayList<>(graph.getAllNodes());
 
 	    for (Node newNode : newNodes) {
-	        // Choisir un nœud existant aléatoire (différent du nouveau)
+	    	// Select a random existing node (other than the new one)
 	        List<Node> candidates = new ArrayList<>(allNodes);
 	        candidates.remove(newNode);
 
@@ -200,8 +208,9 @@ public class GraphController {
 	}
 	
 	/**
-	 * 
-	 * @param engine
+	 * Adds random agents to test the simulation with more traffic and congestion.
+	 *
+	 * @param engine simulation engine receiving the generated agents
 	 */
 	public void addRandomAgents(SimulationEngine engine) {
 	    if (engine == null || graph.getAllNodes().size() < 2) {
@@ -258,7 +267,7 @@ public class GraphController {
     // =====================================================
 
     /**
-     * Handles a node click.
+     * Handles a node click to manipulate the graph.
      * The first click selects a node, the second click on another node creates an edge.
      * Clicking the same node twice cancels the selection.
      *
@@ -329,7 +338,7 @@ public class GraphController {
 	        return;
 	    }
 
-	    // Formulaire unique pour créer une arête
+	    // Form for creating an edge
 	    Optional<CreateDialogs.EdgeData> edgeResult = CreateDialogs.showEdgeDialog();
 	    if (edgeResult.isEmpty()) {
 	        return;
@@ -522,10 +531,12 @@ public class GraphController {
             return;
         }
 
-        // Récupérer les IDs disponibles pour la destination
+        // Retrieve the available IDs for the destination
         java.util.Set<Integer> nodeIds = new java.util.HashSet<>();
         for (Node n : graph.getAllNodes()) {
-            if (!n.equals(selectedNode)) nodeIds.add(n.getId());
+            if (!n.equals(selectedNode)) {
+            	nodeIds.add(n.getId());
+            }
         }
 
         Optional<CreateDialogs.AgentData> result = CreateDialogs.showAgentDialog(nodeIds);
@@ -562,7 +573,7 @@ public class GraphController {
     }
     
     /**
-     * 
+     * Cancels all interaction modes to return the interface to normal selection mode.
      */
     public void disableAllModes() {
         disableEdgeCreationMode();
@@ -666,6 +677,9 @@ public class GraphController {
         }
     }
     
+    /**
+     * Deletes the selected element so the user can modify the graph interactively.
+     */
     public void deleteSelected() {
     	
     	// Delete a selected agent
@@ -761,7 +775,7 @@ public class GraphController {
     }
     
     /**
-     * 
+     * Opens the correct edit workflow depending on the selected element.
      */
     public void editSelected() {
 
@@ -846,7 +860,7 @@ public class GraphController {
     	        Node newDest = graph.getNodeById(destId);
     	        if (newDest != null && !newDest.equals(selectedAgent.getCurrentPosition())) {
     	            selectedAgent.setDestination(newDest);
-    	            // Ne pas réinitialiser la progression si l'agent est en mouvement
+    	            // Do not reset progress if the agent is moving
     	            if (selectedAgent.getState() != State.MOVING) {
     	                selectedAgent.setProgressOnEdge(0.0);
     	                selectedAgent.setNextNode(null);
@@ -861,7 +875,7 @@ public class GraphController {
     	    return;
     	}
 
-        // Modification d'une arête sélectionnée
+    	// Modifying a selected edge
         if (selectedEdge != null) {
 
             TextInputDialog weightDialog = new TextInputDialog(
@@ -880,7 +894,7 @@ public class GraphController {
              
                 
             } catch (NumberFormatException e) {
-                // keep current weight
+                // Keep current weight
             }
 
             ChoiceDialog<EdgeType> typeDialog = new ChoiceDialog<>(
@@ -909,14 +923,14 @@ public class GraphController {
                 int newCapacity = Integer.parseInt(capacityResult.get().trim());
                 selectedEdge.setCapacity(newCapacity);
             } catch (NumberFormatException e) {
-                // keep current capacity
+                // Keep current capacity
             }
 
             if (view != null) view.renderGraph(graph);
             return;
         	}
         
-     // Modification d'un nœud sélectionné
+       // Modifying a selected node
         if (selectedNode != null) {
             Optional<CreateDialogs.EditNodeData> result = CreateDialogs.showEditNodeDialog(selectedNode);
             if (result.isEmpty()) return;
@@ -935,7 +949,7 @@ public class GraphController {
             return;
         }
 
-        // Rien de sélectionné
+        // Nothing selected
         if (selectedNode == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Edit");

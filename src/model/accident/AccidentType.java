@@ -34,7 +34,7 @@ public enum AccidentType {
 	/**
 	 * Returns the readable name when the enum is displayed as text.
 	 * 
-	 * @return 
+	 * @return accident title
 	 */
 	@Override
 	public String toString() {
