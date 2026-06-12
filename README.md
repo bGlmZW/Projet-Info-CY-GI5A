@@ -24,14 +24,14 @@ JavaFX application used to visualize ambulance movement in a weighted graph. Amb
 
 ### Command Line
 
-Replace `/path/to/javafx-sdk-21` with the actual JavaFX SDK path on your machine.
-
 **Linux / macOS**
 
-Clone the repository:
+1. Clone the repository:
 ```bash
    git clone https://github.com/bGlmZW/Projet-Info-CY-GI5A ProjetGenieLogiciel
 ```
+
+2. Next, type these commands to compile and run the application
 
 ```bash
 # Compile
@@ -60,6 +60,8 @@ java --module-path "C:\path\to\javafx-sdk-21\lib" `
      --add-modules javafx.controls,javafx.graphics `
      -cp bin view.MainApp
 ```
+
+Replace `/path/to/javafx-sdk-21` with the actual JavaFX SDK path on your machine.
 
 ### With Eclipse
 
