@@ -40,13 +40,14 @@ Application JavaFX permettant de visualiser le déplacement d'agents dans un gra
        requires transitive javafx.controls;
        requires transitive javafx.graphics;
 
-       exports fr.projet;
-       exports fr.projet.model;
-       exports fr.projet.pathfinding;
-       exports fr.projet.simulation;
-       exports fr.projet.ui;
-       exports fr.projet.controller;
-       exports fr.projet.view;
+    	exports model.accident;
+    	exports model.agent;
+    	exports model.graph;
+    	exports pathfinding;
+    	exports simulation;
+    	exports controller;
+    	exports view;
+    	exports io;
    }
 ```
    En remplaçant `<nom_du_projet>` par le nom généré par Eclipse (visible en haut du fichier).
@@ -71,7 +72,7 @@ javac --module-path /chemin/vers/javafx-sdk-21/lib \
 # Lancer
 java --module-path /chemin/vers/javafx-sdk-21/lib \
      --add-modules javafx.controls,javafx.graphics \
-     -cp bin fr.projet.ui.MainApp
+     -cp bin view.MainApp
 ```
 
 **Windows (PowerShell)**
@@ -125,40 +126,57 @@ Lors de la création d'un agent, deux algorithmes de pathfinding sont proposés 
 ## Structure du projet
 
 ```
-src/
-└── fr/projet/
-    ├── Main.java                  # Point d'entrée console (tests)
-    ├── controller/
-    │   ├── GraphController.java   # Gestion des interactions sur le graphe
-    │   └── SimulationController.java
-    ├── model/
-    │   ├── Agent.java             # Agent de base
-    │   ├── AgentFactory.java      # Fabrique d'agents
-    │   ├── AgentType.java         # Types d'agents disponibles
-    │   ├── FastAgent.java         # Agent rapide
-    │   ├── NormalAgent.java       # Agent normal
-    │   ├── SlowAgent.java         # Agent lent
-    │   ├── CargoAgent.java        # Agent cargo
-    │   ├── PriorityAgent.java     # Agent prioritaire
-    │   ├── Edge.java              # Arête du graphe
-    │   ├── Graph.java             # Structure du graphe
-    │   ├── Node.java              # Nœud du graphe
-    │   └── State.java             # États possibles d'un agent
-    ├── pathfinding/
-    │   ├── PathFinder.java        # Interface commune
-    │   ├── DijkstraPathFinder.java
-    │   ├── AStarPathFinder.java
-    │   ├── PathFinderFactory.java
-    │   └── PathFinderType.java
-    ├── simulation/
-    │   └── SimulationEngine.java  # Moteur de simulation tick-based
-    ├── ui/
-    │   ├── MainApp.java           # Point d'entrée JavaFX
-    │   ├── ToolBox.java
-    │   ├── SimulationBar.java
-    │   └── HelpDialog.java
-    └── view/
-        └── GraphView.java         # Rendu visuel du graphe
+├── README.md
+├── UML_UseCase_Diagram_Projet_info_GIA.pdf
+├── simulation_save.dat
+└── src
+    ├── controller
+    │   ├── AgentFactory.java
+    │   ├── GraphController.java
+    │   ├── PathFinderFactory.java
+    │   └── SimulationController.java
+    ├── io
+    │   └── GraphStorageManager.java
+    ├── model
+    │   ├── accident
+    │   │   ├── Accident.java
+    │   │   └── AccidentType.java
+    │   ├── agent
+    │   │   ├── Agent.java
+    │   │   ├── AgentType.java
+    │   │   ├── CargoAgent.java
+    │   │   ├── FastAgent.java
+    │   │   ├── NormalAgent.java
+    │   │   ├── Patient.java
+    │   │   ├── PriorityAgent.java
+    │   │   ├── SlowAgent.java
+    │   │   └── State.java
+    │   └── graph
+    │       ├── Edge.java
+    │       ├── EdgeType.java
+    │       ├── Graph.java
+    │       ├── Node.java
+    │       └── NodeType.java
+    ├── module-info.java
+    ├── pathfinding
+    │   ├── AStarPathFinder.java
+    │   ├── CongestionAwarePathFinder.java
+    │   ├── DijkstraPathFinder.java
+    │   ├── IPathFinder.java
+    │   └── PathFinderType.java
+    ├── simulation
+    │   ├── ArrivalBehavior.java
+    │   └── SimulationEngine.java
+    └── view
+        ├── CreateDialogs.java
+        ├── GraphView.java
+        ├── HelpDialog.java
+        ├── LegendPanel.java
+        ├── MainApp.java
+        ├── PatientPanel.java
+        ├── SimulationBar.java
+        ├── StatsPanel.java
+        └── ToolBox.java
 ```
 
 ---
