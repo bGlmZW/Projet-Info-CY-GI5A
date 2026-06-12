@@ -204,10 +204,21 @@ public class Node implements Serializable {
         this.blocked = blocked;
     }
 
+    /**
+     * Returns how many ticks this element has waited because of congestion.
+     *
+     * @return number of congestion waiting cycles
+     */
     public int getCongestionWaitCycles() {
         return congestionWaitCycles;
     }
 
+    /**
+     * Updates the waiting time caused by congestion.
+     * This helps the simulation decide when movement can resume.
+     *
+     * @param cycles number of congestion waiting cycles
+     */
     public void setCongestionWaitCycles(int cycles) {
         this.congestionWaitCycles = cycles;
     }
@@ -296,10 +307,20 @@ public class Node implements Serializable {
         passedSpeedSum = 0.0;
     }
 
+	/**
+	 * Returns the display name used to identify the node in the interface.
+	 *
+	 * @return node name, or null if no name is defined
+	 */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the display name of the node.
+     *
+     * @param name new node name
+     */
     public void setName(String name) {
         if (name == null || name.isBlank()) {
             this.name = null;
@@ -308,18 +329,39 @@ public class Node implements Serializable {
         }
     }
 
+    /**
+     * Returns the role of the node in the simulation.
+     *
+     * @return node type
+     */
     public NodeType getType() {
         return type;
     }
 
+    /**
+     * Sets the role of the node in the simulation.
+     *
+     * @param type new node type
+     */
     public void setType(NodeType type) {
         this.type = type;
     }
     
+    /**
+     * Returns the accident associated with this node.
+     *
+     * @return accident linked to the node, or null if none exists
+     */
     public Accident getAccident() {
         return accident;
     }
 
+    /**
+     * Links an accident to this node.
+     * This is mainly used for accident nodes that need patient information.
+     *
+     * @param accident accident associated with the node
+     */
     public void setAccident(Accident accident) {
         this.accident = accident;
     }

@@ -48,52 +48,111 @@ public class Patient implements Serializable {
         this.condition = condition;
     }
 
+    /**
+     * Return the patient's name used in the accident information panel.
+     *
+     * @return patient name, or null if no name is defined
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the patient's name.
+     *
+     * @param name new patient name
+     */
     public void setName(String name) {
         this.name = (name == null || name.isBlank()) ? null : name;
     }
 
+    /**
+     * Returns the patient's age used to describe the emergency situation.
+     *
+     * @return patient age, or -1 if unknown
+     */
     public int getAge() {
         return age;
     }
 
+    /**
+     * Sets the patient's age.
+     *
+     * @param age new patient age
+     */
     public void setAge(int age) {
         this.age = (age >= 0) ? age : -1;
     }
 
+    /**
+     * Returns the patient's heart rate.
+     *
+     * @return heart rate in beats per minute
+     */
     public int getBpm() {
         return bpm;
     }
 
+    /**
+     * Updates the patient's heart rate while keeping it in a realistic range.
+     *
+     * @param bpm new heart rate
+     */
     public void setBpm(int bpm) {
     	this.bpm = Math.max(30, Math.min(bpm, 220));
     }
 
-
+    /**
+     * Returns the patient's body temperature.
+     *
+     * @return body temperature
+     */
     public double getBodyTemperature() {
         return bodyTemperature;
     }
-
+    
+    /**
+     * Updates the patient's body temperature while keeping it in a realistic range.
+     *
+     * @param bodyTemperature new body temperature
+     */
     public void setBodyTemperature(double bodyTemperature) {
     	 this.bodyTemperature = Math.max(30.0, Math.min(bodyTemperature, 43.0));
     }
 
+    /**
+     * Indicates whether the patient is conscious.
+     *
+     * @return true if the patient is conscious
+     */
     public boolean isConscious() {
         return conscious;
     }
 
+    /**
+     * Updates the patient's consciousness state.
+     *
+     * @param conscious true if the patient is conscious
+     */
     public void setConscious(boolean conscious) {
         this.conscious = conscious;
     }
 
+    /**
+     * Returns the patient's medical condition displayed in the interface.
+     *
+     * @return patient condition
+     */
     public String getCondition() {
         return condition;
     }
 
+    /**
+     * Sets the patient's medical condition.
+     *
+     * @param condition new patient condition
+     */
     public void setCondition(String condition) {
-        this.condition = (condition == null || condition.isBlank()) ? "Unknown" : condition;
+        this.condition = (condition == null || condition.isBlank()) ? "Unknown" : condition; // Empty values are "Unknown" to keep the medical panel readable
     }
 }
