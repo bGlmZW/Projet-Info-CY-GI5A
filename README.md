@@ -24,7 +24,7 @@ JavaFX application used to visualize ambulance movement in a weighted graph. Amb
 
 ### Command Line
 
-> Replace `/path/to/javafx-sdk-21` with the actual JavaFX SDK path on your machine.
+Replace `/path/to/javafx-sdk-21` with the actual JavaFX SDK path on your machine.
 
 **Linux / macOS**
 
