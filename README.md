@@ -1,6 +1,6 @@
 # Projet Génie Logiciel — Simulation d'agents dans un graphe
 
-Application JavaFX permettant de visualiser le déplacement d'agents dans un graphe pondéré. Les agents se déplacent de nœud en nœud en suivant un chemin calculé par un algorithme de plus court chemin (Dijkstra ou A*).
+Application JavaFX permettant de visualiser le déplacement d'ambulances dans un graphe pondéré. Elles se déplacent de nœud en nœud en suivant un chemin calculé par un algorithme de plus court chemin (Dijkstra ou A*).
 
 ---
 
