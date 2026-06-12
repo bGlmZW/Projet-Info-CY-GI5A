@@ -3,14 +3,14 @@ package io;
 import java.io.*;
 import java.util.List;
 
-import model.Agent;
-import model.Graph;
+import model.agent.Agent;
+import model.graph.Graph;
 
 /**
  * Utility class responsible for saving and loading the simulation state 
  * using binary serialization.
  */
-public class SaveManager {
+public class GraphStorageManager {
 
     /**
      * Saves the graph and the agents into a binary file.
