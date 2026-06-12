@@ -28,6 +28,11 @@ Replace `/path/to/javafx-sdk-21` with the actual JavaFX SDK path on your machine
 
 **Linux / macOS**
 
+Clone the repository:
+```bash
+   git clone https://github.com/bGlmZW/Projet-Info-CY-GI5A ProjetGenieLogiciel
+```
+
 ```bash
 # Compile
 javac --module-path /path/to/javafx-sdk-21/lib \
