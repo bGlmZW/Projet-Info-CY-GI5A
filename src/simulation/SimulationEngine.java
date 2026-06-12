@@ -29,11 +29,13 @@ public class SimulationEngine {
     /** Current simulation tick */
     private long currentTick;
     
-    /** */
+    /** Behavior applied when an agent reaches its destination */
     private ArrivalBehavior arrivalBehavior = ArrivalBehavior.RANDOM_DESTINATION;
+    
+    /** Random number generator used to pick new destinations */
     private final Random random = new Random();
     
-    /**  */
+    /** Default pathfinder used by agents that do not have their own algorithm */
     private IPathFinder pathFinder;
 
     /**

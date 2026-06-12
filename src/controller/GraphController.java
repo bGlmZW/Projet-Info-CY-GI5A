@@ -502,6 +502,13 @@ public class GraphController {
         }
     }
     
+    /**
+     * Handles a click on an agent in the graph view.
+     * Selects the agent and updates the stats panel accordingly.
+     * If the same agent is clicked again, deselects it.
+     *
+     * @param agent the agent that was clicked
+     */
     public void handleAgentClicked(Agent agent) {
     	// Clicking on agent cancels edge creation mode.
         if (edgeCreationMode) {
@@ -560,7 +567,7 @@ public class GraphController {
     /**
      * Handles a click on the empty drawing area and creates a new node.
      *
-     * @param
+     * @param point the coordinates of the click on the canvas
      */
     public void handleBackgroundClick(Point2D point) {
         if (!nodeCreationMode) {

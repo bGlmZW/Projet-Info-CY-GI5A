@@ -25,9 +25,23 @@ import controller.PathFinderFactory;
 import controller.SimulationController;
 import io.SaveManager;
 
+
+/**
+ * Main JavaFX application entry point for the LifeLine GPS Emergency Simulation.
+ * Initializes the graph, simulation engine, UI components, and event handlers.
+ * Manages the simulation timeline and user interactions.
+ */
 public class MainApp extends Application {
 
     @Override
+    
+    /**
+     * Initializes and displays the main application window.
+     * Sets up the graph, simulation engine, all UI panels, event bindings,
+     * and the animation timeline.
+     *
+     * @param stage the primary JavaFX stage provided by the platform
+     */
     public void start(Stage stage) {
 
         // =========================
@@ -361,7 +375,13 @@ public class MainApp extends Application {
         stage.setScene(scene);
         stage.show();
     }
-
+    
+    
+    /**
+     * Application entry point. Launches the JavaFX runtime.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         launch(args);
     }

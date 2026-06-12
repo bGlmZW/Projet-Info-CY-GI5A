@@ -1,8 +1,5 @@
 /**
- * 
- */
-/**
- * 
+ * LifeLine GPS Emergency Simulation module.
  */
 module ProjetGenieLogicel3 {
     requires transitive javafx.controls;

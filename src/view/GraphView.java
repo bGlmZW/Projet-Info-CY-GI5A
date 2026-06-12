@@ -395,10 +395,22 @@ public class GraphView extends Pane {
         refreshSelection();
     }
     
+    
+    /**
+     * Sets the callback invoked when an agent is clicked on the graph.
+     *
+     * @param handler consumer receiving the clicked agent
+     */
     public void setAgentClickHandler(Consumer<Agent> handler) {
         this.agentClickHandler = (handler != null) ? handler : agent -> {};
     }
 
+    /**
+     * Highlights the selected agent with a red stroke.
+     * Clears any previously selected agent highlight.
+     *
+     * @param agent the agent to highlight, or null to clear selection
+     */
     public void setSelectedAgent(Agent agent) {
         this.selectedAgent = agent;
         this.selectedNode = null;

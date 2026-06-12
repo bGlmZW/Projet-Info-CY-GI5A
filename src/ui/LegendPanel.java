@@ -172,7 +172,7 @@ public class LegendPanel extends VBox {
      *
      * @param text label displayed next to the icon
      * @param width thickness of the line
-     * @param true if the line should be dashed
+     * @param dashed true if the line should be dashed
      * @return row containing the edge type icon and its label
      */
     private HBox edgeTypeRow(String text, double width, boolean dashed) {

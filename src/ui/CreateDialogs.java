@@ -29,16 +29,42 @@ import java.util.Optional;
  */
 public class CreateDialogs {
 
-    /**
-     * Data returned by the node creation dialog.
-     */
+	/**
+	 * Data returned by the node creation dialog.
+	 * @param name optional node name
+	 * @param type node type
+	 * @param accident accident details, or null if not an accident node
+	 */
     public record NodeData(String name, NodeType type, Accident accident) {}
     
+    /**
+     * Data returned by the node edit dialog.
+     * @param name optional node name
+     * @param type node type
+     * @param accident accident details, or null if not an accident node
+     * @param maxCapacity maximum number of agents allowed on the node
+     * @param blocked whether the node is blocked
+     */
     public record EditNodeData(String name, NodeType type, Accident accident, int maxCapacity, boolean blocked) {}
     
+    /**
+     * Data returned by the agent creation dialog.
+     * @param destinationId ID of the destination node
+     * @param type agent type
+     * @param speed maximum movement speed
+     * @param algo pathfinding algorithm to use
+     */
     public record AgentData(int destinationId, AgentType type, double speed, PathFinderType algo) {}
-
-public record EdgeData(double weight, EdgeType type, boolean oriented, int capacity) {}
+    
+    /**
+     * Data returned by the edge creation dialog.
+     * @param weight edge weight/distance
+     * @param type edge type
+     * @param oriented whether the edge is directed
+     * @param capacity maximum number of agents allowed on the edge
+     */
+    public record EdgeData(double weight, EdgeType type, boolean oriented, int capacity) {}
+    
 
     /**
      * Shows the node creation dialog.
@@ -187,6 +213,12 @@ public record EdgeData(double weight, EdgeType type, boolean oriented, int capac
         return dialog.showAndWait();
     }
     
+    
+    /**
+     * Displays a dialog to edit an existing node.
+     * @param node the node to edit
+     * @return an Optional containing the updated node data, or empty if cancelled
+     */
     public static Optional<EditNodeData> showEditNodeDialog(Node node) {
         Dialog<EditNodeData> dialog = new Dialog<>();
         dialog.setTitle("Edit Node");
@@ -329,6 +361,11 @@ public record EdgeData(double weight, EdgeType type, boolean oriented, int capac
         return dialog.showAndWait();
     }
     
+    /**
+     * Displays a dialog to create a new agent.
+     * @param availableNodeIds set of valid destination node IDs
+     * @return an Optional containing the agent data, or empty if cancelled
+     */
     public static Optional<AgentData> showAgentDialog(java.util.Set<Integer> availableNodeIds) {
         Dialog<AgentData> dialog = new Dialog<>();
         dialog.setTitle("Create Agent");
@@ -377,6 +414,10 @@ public record EdgeData(double weight, EdgeType type, boolean oriented, int capac
         return dialog.showAndWait();
     }
     
+    /**
+     * Displays a dialog to create a new edge.
+     * @return an Optional containing the edge data, or empty if cancelled
+     */
     public static Optional<EdgeData> showEdgeDialog() {
         Dialog<EdgeData> dialog = new Dialog<>();
         dialog.setTitle("Create Edge");
