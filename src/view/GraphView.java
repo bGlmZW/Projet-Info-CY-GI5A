@@ -10,6 +10,7 @@ import javafx.scene.shape.Polygon;
 
 import javafx.scene.text.Text;
 import model.agent.Agent;
+import model.agent.AgentType;
 import model.graph.Edge;
 import model.graph.Graph;
 import model.graph.Node;
@@ -595,13 +596,29 @@ public class GraphView extends Pane {
     }
 
     /**
-     * Returns a stable color for an agent based on its id.
+     * Returns the display color associated with an agent type.
      *
-     * @param agent agent to color
-     * @return display color
+     * @param agent agent to display
+     * @return color used to draw the agent
      */
     private Color getAgentColor(Agent agent) {
-        return Color.hsb((agent.getId() * 47) % 360, 0.85, 0.95);
+        if (agent.getAgentType() == AgentType.FAST) {
+            return Color.ORANGE;
+        }
+
+        if (agent.getAgentType() == AgentType.SLOW) {
+            return Color.DARKBLUE;
+        }
+
+        if (agent.getAgentType() == AgentType.CARGO) {
+            return Color.PURPLE;
+        }
+
+        if (agent.getAgentType() == AgentType.PRIORITY) {
+            return Color.RED;
+        }
+
+        return Color.DARKRED;
     }
 
     /**

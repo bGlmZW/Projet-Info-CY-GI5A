@@ -30,7 +30,11 @@ public class LegendPanel extends VBox {
                 title,
 
                 categoryTitle("Agents"),
-                agentRow("Ambulance"),
+                agentRow("Normal ambulance", Color.DARKRED),
+                agentRow("Fast ambulance", Color.ORANGE),
+                agentRow("Slow ambulance", Color.DARKBLUE),
+                agentRow("Cargo ambulance", Color.PURPLE),
+                agentRow("Priority ambulance", Color.RED),
 
                 categoryTitle("Nodes"),
                 nodeRow("Point of interest", Color.LIGHTGRAY),
@@ -216,11 +220,12 @@ public class LegendPanel extends VBox {
      * Builds one legend row for an ambulance agent.
      *
      * @param text label displayed next to the icon
+     * @param color color of the agent icon
      * @return row containing the ambulance icon and its label
      */
-    private HBox agentRow(String text) {
-        Circle circle = new Circle(4);
-        circle.setFill(Color.DARKRED);
+    private HBox agentRow(String text, Color color) {
+        Circle circle = new Circle(5);
+        circle.setFill(color);
         circle.setStroke(Color.BLACK);
 
         Label label = new Label(text);
