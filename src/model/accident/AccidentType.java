@@ -1,4 +1,4 @@
-package model;
+package model.accident;
 
 /**
  * List of medical accident so that the ambulance driver is aware of the purpose of the intervention.

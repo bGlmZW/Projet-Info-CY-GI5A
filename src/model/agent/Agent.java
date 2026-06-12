@@ -1,7 +1,8 @@
-package model;
+package model.agent;
 
 import java.io.Serializable;
 
+import model.graph.Node;
 import pathfinding.IPathFinder;
 
 /**

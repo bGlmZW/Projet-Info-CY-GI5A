@@ -1,6 +1,8 @@
-package model;
+package model.agent;
 
 import java.io.Serializable;
+
+import model.graph.Node;
 
 /**
  * Agent that moves at half the normal speed (0.5).

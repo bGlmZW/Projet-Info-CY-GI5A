@@ -1,4 +1,4 @@
-package model;
+package model.graph;
 
 public enum EdgeType {
     ROAD,

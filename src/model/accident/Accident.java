@@ -1,5 +1,9 @@
-package model;
+package model.accident;
 import java.io.Serializable;
+
+import model.agent.Patient;
+
+
 
 /**
  * Represents a medical accident associated with a patient.

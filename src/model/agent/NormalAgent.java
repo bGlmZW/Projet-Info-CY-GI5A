@@ -1,6 +1,8 @@
-package model;
+package model.agent;
 
 import java.io.Serializable;
+
+import model.graph.Node;
 
 /**
  * Standard agent moving at default speed (1.0).

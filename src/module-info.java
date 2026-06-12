@@ -6,7 +6,9 @@ module ProjetGenieLogicel3 {
     requires transitive javafx.graphics;
 
     exports main;
-    exports model;
+    exports model.accident;
+    exports model.agent;
+    exports model.graph;
     exports pathfinding;
     exports simulation;
     exports ui;

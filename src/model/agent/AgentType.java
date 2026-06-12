@@ -1,4 +1,4 @@
-package model;
+package model.agent;
 
 /**
  * Defines the available types of agents in the simulation.

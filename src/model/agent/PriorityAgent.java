@@ -1,6 +1,8 @@
-package model;
+package model.agent;
 
 import java.io.Serializable;
+
+import model.graph.Node;
 
 /**
  * High-priority agent whose movement speed scales with its priority level.

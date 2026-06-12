@@ -1,6 +1,8 @@
-package model;
+package model.agent;
 
 import java.io.Serializable;
+
+import model.graph.Node;
 
 /**
  * A faster variant of the standard Agent.

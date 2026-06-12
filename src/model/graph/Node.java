@@ -1,7 +1,12 @@
-package model;
+package model.graph;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import model.accident.Accident;
+import model.agent.Agent;
+import model.agent.AgentType;
+
 import java.io.Serializable;
 
 /**

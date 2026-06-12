@@ -1,6 +1,8 @@
-package model;
+package model.agent;
 
 import java.io.Serializable;
+
+import model.graph.Node;
 
 /**
  * Agent carrying cargo whose weight reduces its movement speed.

@@ -1,4 +1,4 @@
-package model;
+package model.agent;
 
 /**
  * Represents the possible states of an agent.
