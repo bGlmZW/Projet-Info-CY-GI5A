@@ -1,30 +1,22 @@
 package controller;
 
 import javafx.geometry.Point2D;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
-import model.accident.Accident;
-import model.accident.AccidentType;
-import model.agent.Agent;
-import model.agent.AgentType;
-import model.agent.Patient;
-import model.agent.State;
-import model.graph.Edge;
-import model.graph.EdgeType;
-import model.graph.Graph;
-import model.graph.Node;
-import model.graph.NodeType;
-import pathfinding.PathFinderType;
-import simulation.SimulationEngine;
-import view.CreateDialogs;
-import view.GraphView;
 
 import java.util.Optional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import model.accident.*;
+import model.agent.*;
+import model.graph.*;
+import pathfinding.PathFinderType;
+import simulation.SimulationEngine;
+import view.CreateDialogs;
+import view.GraphView;
 
 /**
  * Controller responsible for building and configuring the graph.

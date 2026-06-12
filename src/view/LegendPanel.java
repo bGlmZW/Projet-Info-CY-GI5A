@@ -13,7 +13,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 /**
- * Small legend panel displayed under the stats dashboard.
+ * Small legend panel displayed under the stats dashboard to help the user understand the interface.
  */
 public class LegendPanel extends VBox {
 
@@ -28,18 +28,38 @@ public class LegendPanel extends VBox {
 
         getChildren().addAll(
                 title,
+
+                categoryTitle("Agents"),
                 agentRow("Ambulance"),
+
+                categoryTitle("Nodes"),
                 nodeRow("Point of interest", Color.LIGHTGRAY),
                 nodeRow("Hospital", Color.DODGERBLUE),
                 nodeRow("Accident", Color.CRIMSON),
                 nodeRow("Selected node", Color.GOLD),
                 blockedNodeRow("Blocked node"),
+
+                categoryTitle("Edges"),
                 orientedEdgeRow("Oriented edge"),
                 nonOrientedEdgeRow("Non oriented edge"),
+
+                categoryTitle("Road types"),
                 edgeTypeRow("Road", 2, false),
                 edgeTypeRow("Highway", 5, false),
                 edgeTypeRow("Dirt road", 3, true)
         );
+    }
+    
+    /**
+     * Builds a small title used to separate legend categories.
+     *
+     * @param text category title
+     * @return styled category label
+     */
+    private Label categoryTitle(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-weight: bold; -fx-text-fill: #555555; -fx-padding: 8 0 2 0;");
+        return label;
     }
 
     /**
@@ -199,7 +219,7 @@ public class LegendPanel extends VBox {
      * @return row containing the ambulance icon and its label
      */
     private HBox agentRow(String text) {
-        Circle circle = new Circle(5);
+        Circle circle = new Circle(4);
         circle.setFill(Color.DARKRED);
         circle.setStroke(Color.BLACK);
 
