@@ -24,14 +24,14 @@ JavaFX application used to visualize ambulance movement in a weighted graph. Amb
 
 ### Command Line
 
-**Linux / macOS**
-
 1. Clone the repository:
 ```bash
    git clone https://github.com/bGlmZW/Projet-Info-CY-GI5A ProjetGenieLogiciel
 ```
 
 2. Next, type these commands to compile and run the application
+
+**Linux / macOS**
 
 ```bash
 # Compile
