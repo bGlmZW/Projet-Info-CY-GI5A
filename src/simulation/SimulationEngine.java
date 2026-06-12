@@ -7,6 +7,14 @@ import java.util.Set;
 import java.util.Iterator;
 
 import model.*;
+import model.agent.Agent;
+import model.agent.AgentType;
+import model.agent.Patient;
+import model.agent.State;
+import model.graph.Edge;
+import model.graph.EdgeType;
+import model.graph.Graph;
+import model.graph.Node;
 import pathfinding.*;
 
 import java.util.HashSet;

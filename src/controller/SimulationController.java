@@ -1,6 +1,8 @@
 package controller;
 
 import model.*;
+import model.graph.Graph;
+import model.graph.Node;
 import pathfinding.*;
 import simulation.SimulationEngine;
 

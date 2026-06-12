@@ -1,6 +1,11 @@
 package main;
 
 import model.*;
+import model.agent.Agent;
+import model.graph.Edge;
+import model.graph.EdgeType;
+import model.graph.Graph;
+import model.graph.Node;
 import pathfinding.*;
 import simulation.SimulationEngine;
 
@@ -116,10 +121,10 @@ public class Main {
         String fichierTest = "simulation_save.dat";
 
         System.out.println("[Action] Sauvegarde des donnees...");
-        SaveManager.saveSimulation(movementGraph, engine.getAgents(), fichierTest);
+        GraphStorageManager.saveSimulation(movementGraph, engine.getAgents(), fichierTest);
 
         System.out.println("\n[Action] Lecture et rechargement du fichier...");
-        Object[] donneesChargees = SaveManager.restoreSimulation(fichierTest);
+        Object[] donneesChargees = GraphStorageManager.restoreSimulation(fichierTest);
 
         if (donneesChargees != null) {
             Graph grapheLu = (Graph) donneesChargees[0];

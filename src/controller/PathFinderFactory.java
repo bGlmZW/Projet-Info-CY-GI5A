@@ -1,6 +1,6 @@
 package controller;
 
-import model.Graph;
+import model.graph.Graph;
 import pathfinding.AStarPathFinder;
 import pathfinding.CongestionAwarePathFinder;
 import pathfinding.DijkstraPathFinder;

@@ -3,6 +3,10 @@ package pathfinding;
 import java.util.*;
 
 import model.*;
+import model.graph.Edge;
+import model.graph.EdgeType;
+import model.graph.Graph;
+import model.graph.Node;
 
 /**
  * Pathfinder qui tient compte de la congestion des arêtes.

@@ -3,6 +3,9 @@ package pathfinding;
 import java.util.*;
 
 import model.*;
+import model.graph.Edge;
+import model.graph.Graph;
+import model.graph.Node;
 
 /**
  * Implementation of the A* pathfinding algorithm.

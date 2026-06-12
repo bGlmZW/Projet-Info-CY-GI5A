@@ -1,13 +1,13 @@
 package controller;
 
-import model.Agent;
-import model.AgentType;
-import model.CargoAgent;
-import model.FastAgent;
-import model.Node;
-import model.NormalAgent;
-import model.PriorityAgent;
-import model.SlowAgent;
+import model.agent.Agent;
+import model.agent.AgentType;
+import model.agent.CargoAgent;
+import model.agent.FastAgent;
+import model.agent.NormalAgent;
+import model.agent.PriorityAgent;
+import model.agent.SlowAgent;
+import model.graph.Node;
 
 /**
  * Factory for creating agents by type.

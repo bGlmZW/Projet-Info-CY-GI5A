@@ -2,7 +2,7 @@ package pathfinding;
 
 import java.util.List;
 
-import model.Node;
+import model.graph.Node;
 
 /**
  * Defines a pathfinding strategy capable of computing
