@@ -52,7 +52,7 @@ public class CreateDialogs {
     /**
      * Data returned by the random agents dialog.
      */
-    public record RandomAgentsData(int count, AgentType type) {}
+    public record RandomAgentsData(int count, AgentType type, boolean useDefaultSpeed, double speedMin, double speedMax) {}
 
     /**
      * Shows the node creation dialog.
@@ -371,13 +371,21 @@ public class CreateDialogs {
         typeBox.setValue(AgentType.NORMAL);
 
         // Speed
+     // Speed
+        CheckBox defaultSpeedBox = new CheckBox("Default speed (based on type)");
+        defaultSpeedBox.setSelected(true);
+
         Spinner<Double> speedSpinner = new Spinner<>();
         speedSpinner.setValueFactory(
             new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.1)
         );
         speedSpinner.setEditable(true);
         speedSpinner.setPrefWidth(100);
+        speedSpinner.setDisable(true);
 
+        defaultSpeedBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            speedSpinner.setDisable(newVal);
+        });
         // Algorithm
         ComboBox<PathFinderType> algoBox = new ComboBox<>();
         algoBox.getItems().addAll(PathFinderType.values());
@@ -386,8 +394,9 @@ public class CreateDialogs {
         GridPane grid = createGrid();
         grid.addRow(0, fieldLabel("Destination node ID:"), destinationField);
         grid.addRow(1, fieldLabel("Agent type:"),          typeBox);
-        grid.addRow(2, fieldLabel("Speed:"),               speedSpinner);
-        grid.addRow(3, fieldLabel("Algorithm:"),           algoBox);
+        grid.addRow(2, fieldLabel("Speed:"),               defaultSpeedBox);
+        grid.addRow(3, fieldLabel(""),                     speedSpinner);
+        grid.addRow(4, fieldLabel("Algorithm:"),           algoBox);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(400);
@@ -397,8 +406,8 @@ public class CreateDialogs {
             if (button != ButtonType.OK) return null;
             int destId = parseInt(destinationField.getText(), -1);
             if (destId < 0) return null;
-            return new AgentData(destId, typeBox.getValue(),
-                    speedSpinner.getValue(), algoBox.getValue());
+            double speed = defaultSpeedBox.isSelected() ? -1.0 : speedSpinner.getValue();
+            return new AgentData(destId, typeBox.getValue(), speed, algoBox.getValue());
         });
 
         return dialog.showAndWait();
@@ -484,9 +493,37 @@ public class CreateDialogs {
 
         typeBox.setValue("RANDOM");
 
+     // Speed
+        CheckBox defaultSpeedBox = new CheckBox("Default speed (based on type)");
+        defaultSpeedBox.setSelected(true);
+
+        Spinner<Double> speedMinSpinner = new Spinner<>();
+        speedMinSpinner.setValueFactory(
+            new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 0.5, 0.1)
+        );
+        speedMinSpinner.setEditable(true);
+        speedMinSpinner.setPrefWidth(100);
+        speedMinSpinner.setDisable(true);
+
+        Spinner<Double> speedMaxSpinner = new Spinner<>();
+        speedMaxSpinner.setValueFactory(
+            new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 2.0, 0.1)
+        );
+        speedMaxSpinner.setEditable(true);
+        speedMaxSpinner.setPrefWidth(100);
+        speedMaxSpinner.setDisable(true);
+
+        defaultSpeedBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            speedMinSpinner.setDisable(newVal);
+            speedMaxSpinner.setDisable(newVal);
+        });
+
         GridPane grid = createGrid();
         grid.addRow(0, fieldLabel("Number of agents:"), countSpinner);
-        grid.addRow(1, fieldLabel("Agent type:"), typeBox);
+        grid.addRow(1, fieldLabel("Agent type:"),       typeBox);
+        grid.addRow(2, fieldLabel("Speed:"),            defaultSpeedBox);
+        grid.addRow(3, fieldLabel("Min speed:"),        speedMinSpinner);
+        grid.addRow(4, fieldLabel("Max speed:"),        speedMaxSpinner);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(400);
@@ -505,7 +542,10 @@ public class CreateDialogs {
 
             return new RandomAgentsData(
                     countSpinner.getValue(),
-                    selectedType
+                    selectedType,
+                    defaultSpeedBox.isSelected(),
+                    speedMinSpinner.getValue(),
+                    speedMaxSpinner.getValue()
             );
         });
 

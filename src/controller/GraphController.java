@@ -253,6 +253,13 @@ public class GraphController {
 
 	        Agent agent = AgentFactory.create(agentType, newId, source, destination);
 
+	        if (!result.get().useDefaultSpeed()) {
+	            double speedMin = result.get().speedMin();
+	            double speedMax = result.get().speedMax();
+	            double randomSpeed = speedMin + (speedMax - speedMin) * random.nextDouble();
+	            agent.setSpeed(randomSpeed);
+	        }
+
 	        engine.addAgent(agent);
 	    }
 
@@ -560,7 +567,9 @@ public class GraphController {
                 .orElse(0) + 1;
 
         Agent agent = AgentFactory.create(data.type(), newId, selectedNode, destination);
-        agent.setSpeed(data.speed());
+        if (data.speed() > 0) {
+            agent.setSpeed(data.speed());
+        }
         agent.setPathFinder(PathFinderFactory.create(data.algo(), graph));
 
         engine.addAgent(agent);
