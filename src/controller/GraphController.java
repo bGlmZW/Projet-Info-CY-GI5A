@@ -227,7 +227,21 @@ public class GraphController {
 	    AgentType selectedType = result.get().type();
 
 	    Random random = new Random();
-	    List<Node> nodes = new ArrayList<>(graph.getAllNodes());
+	    List<Node> nodes = new ArrayList<>();
+	    for (Node n : graph.getAllNodes()) {
+	        if (!n.isBlocked()) {
+	            nodes.add(n);
+	        }
+	    }
+
+	    if (nodes.size() < 2) {
+	        Alert alert = new Alert(Alert.AlertType.WARNING);
+	        alert.setTitle("Random Agents");
+	        alert.setHeaderText("Not enough unblocked nodes");
+	        alert.setContentText("At least 2 unblocked nodes are required to generate agents.");
+	        alert.showAndWait();
+	        return;
+	    }
 
 	    for (int i = 0; i < count; i++) {
 	        Node source = nodes.get(random.nextInt(nodes.size()));
@@ -529,11 +543,11 @@ public class GraphController {
     public void createAgentAtSelectedNode(SimulationEngine engine) {
         if (engine == null) return;
 
-        if (selectedNode == null) {
+        if (selectedNode.isBlocked()) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Create Agent");
-            alert.setHeaderText("No node selected");
-            alert.setContentText("Please select a node before creating an agent.");
+            alert.setHeaderText("Blocked node");
+            alert.setContentText("The selected node is blocked. Please select an unblocked node.");
             alert.showAndWait();
             return;
         }
@@ -557,6 +571,15 @@ public class GraphController {
             alert.setTitle("Create Agent");
             alert.setHeaderText("Invalid destination");
             alert.setContentText("Please enter a valid destination node ID.");
+            alert.showAndWait();
+            return;
+        }
+
+        if (destination.isBlocked()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Create Agent");
+            alert.setHeaderText("Blocked destination");
+            alert.setContentText("The destination node is blocked. Please choose an unblocked node.");
             alert.showAndWait();
             return;
         }
@@ -950,6 +973,42 @@ public class GraphController {
             selectedNode.setAccident(data.accident());
             selectedNode.setMaxCapacity(data.maxCapacity());
             selectedNode.setBlocked(data.blocked());
+
+            if (data.blocked() && engine != null) {
+                List<Node> neighbors = graph.getNeighbors(selectedNode).stream()
+                        .filter(n -> !n.isBlocked())
+                        .collect(java.util.stream.Collectors.toList());
+
+                List<Node> unblocked = graph.getAllNodes().stream()
+                        .filter(n -> !n.isBlocked() && !n.equals(selectedNode))
+                        .collect(java.util.stream.Collectors.toList());
+
+                for (Agent agent : new ArrayList<>(engine.getAgents())) {
+
+                    // Relocate agents to the blocked node
+                    if (agent.getCurrentPosition().equals(selectedNode)) {
+                        if (!neighbors.isEmpty()) {
+                            selectedNode.removeAgent(agent);
+                            agent.setCurrentPosition(neighbors.get(0));
+                            neighbors.get(0).addAgent(agent);
+                            agent.setProgressOnEdge(0.0);
+                            agent.setNextNode(null);
+                            agent.setState(State.WAITING);
+                        } else {
+                            engine.removeAgent(agent);
+                        }
+                    }
+
+                    // Reassign the destination if it becomes blocked
+                    if (agent.getDestination().equals(selectedNode)) {
+                        if (!unblocked.isEmpty()) {
+                            agent.setDestination(unblocked.get(new Random().nextInt(unblocked.size())));
+                        } else {
+                            engine.removeAgent(agent);
+                        }
+                    }
+                }
+            }
 
             if (view != null) {
                 view.renderGraph(graph);
