@@ -3,6 +3,7 @@
 JavaFX application used to visualize ambulance movement in a weighted graph. Ambulances move from node to node by following a path computed by a shortest path algorithm (Dijkstra, A*, or Congestion-Aware).
 
 **Projet Génie Logiciel**
+
 **Developed by GI-5 group A**
 
 ## Contributors
